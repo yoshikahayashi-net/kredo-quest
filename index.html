@@ -210,6 +210,43 @@ body{display:flex;justify-content:center}
 /* v17 account + ranking */
 .account-wrap{padding:18px 16px 110px}.account-hero{background:linear-gradient(135deg,#fff,#EAF9FE);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}.account-title{font-size:22px;font-weight:900;margin:5px 0 3px}.account-sub{font-size:11px;color:var(--muted);line-height:1.6}.account-tabs{display:flex;gap:8px;margin:12px 0}.account-tab{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-weight:900;cursor:pointer;color:var(--muted)}.account-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}.account-form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}.account-field{margin-bottom:10px}.account-field label{display:block;font-size:11px;font-weight:900;color:#587080;margin-bottom:5px}.account-field input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit}.account-primary{width:100%;border:0;border-radius:12px;background:var(--yellow);padding:12px;font-weight:900;color:#294454;cursor:pointer}.account-secondary{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;font-weight:900;color:#176D9F;cursor:pointer;margin-top:8px}.account-status{margin-top:10px;font-size:11px;line-height:1.5;padding:10px;border-radius:12px;background:#F4FBFD;color:#5A6E7C;display:none}.account-status.show{display:block}.ranking-wrap{padding:18px 16px 110px}.ranking-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.ranking-head{padding:14px 16px;background:linear-gradient(135deg,#EAF9FE,#fff)}.ranking-title{font-size:20px;font-weight:900}.ranking-sub{font-size:11px;color:var(--muted);margin-top:3px}.rank-row{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:12px 15px;border-top:1px solid #EDF3F6}.rank-row.me{background:#FFF9DB}.rank-no{font-weight:900;color:#6A7E8B}.rank-name{font-weight:900;font-size:13px}.rank-meta{font-size:10px;color:var(--muted);margin-top:2px}.rank-points{font-weight:900;color:#176D9F}.ranking-empty{padding:25px;text-align:center;color:var(--muted);font-size:12px}.mini-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.mini-btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-weight:900;color:#176D9F;cursor:pointer}
 
+
+/* Hamburger menu */
+.menu{cursor:pointer;background:transparent;border:0;color:inherit;padding:4px 2px;line-height:1}
+.main-menu-panel{
+  position:fixed;inset:0;background:rgba(8,53,75,.30);z-index:150;
+  display:none;
+}
+.main-menu-panel.open{display:block}
+.main-menu-sheet{
+  position:absolute;top:62px;right:max(12px,calc(50% - 218px));
+  width:min(300px,calc(100vw - 24px));
+  background:#fff;border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 16px 38px rgba(8,53,75,.22);overflow:hidden;
+  animation:menuIn .18s ease;
+}
+.main-menu-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 15px;border-bottom:1px solid #EDF3F6;
+}
+.main-menu-head strong{font-size:15px}
+.main-menu-close{
+  width:32px;height:32px;border:1px solid var(--line);border-radius:10px;
+  background:#F7FBFD;color:#5D7481;font-size:18px;cursor:pointer;
+}
+.main-menu-list{padding:8px}
+.main-menu-item{
+  width:100%;display:flex;align-items:center;gap:10px;
+  border:0;background:#fff;border-radius:12px;padding:11px 12px;
+  color:#234B60;font-weight:900;text-align:left;cursor:pointer;
+}
+.main-menu-item:hover{background:#EFF9FD}
+.main-menu-icon{width:28px;text-align:center;font-size:18px}
+.main-menu-note{
+  padding:0 14px 13px;color:var(--muted);font-size:10px;line-height:1.5;
+}
+@keyframes menuIn{from{transform:translateY(-7px);opacity:0}to{transform:translateY(0);opacity:1}}
+
 </style>
 </head>
 <body>
@@ -390,6 +427,25 @@ body{display:flex;justify-content:center}
     <div class="quest-sheet" onclick="event.stopPropagation()"><div class="handle"></div><div class="sheet-title">⚔ クエストマップ</div><div class="map-mini"><div class="map-row"><div class="map-node active">01</div><div class="map-node">02</div><div class="map-node">03</div><div class="map-node">04</div><div class="map-node">👑</div></div><div style="font-size:11px;color:#6B8090;margin-top:10px;line-height:1.5">まずはSTAGE 01。クリアが次のクエストへの扉を開きます。</div></div><button class="sheet-close" onclick="closeQuestMap()">閉じる</button></div>
   </div>
 
+
+  <div id="mainMenuPanel" class="main-menu-panel" onclick="closeMainMenu(event)">
+    <div class="main-menu-sheet" onclick="event.stopPropagation()">
+      <div class="main-menu-head">
+        <strong>☰ メニュー</strong>
+        <button class="main-menu-close" onclick="closeMainMenu()">×</button>
+      </div>
+      <div class="main-menu-list">
+        <button class="main-menu-item" onclick="goHome();closeMainMenu()"><span class="main-menu-icon">⌂</span><span>ホーム</span></button>
+        <button class="main-menu-item" onclick="startQuest();closeMainMenu()"><span class="main-menu-icon">♣</span><span>今日のクエスト</span></button>
+        <button class="main-menu-item" onclick="openQuestMap();closeMainMenu()"><span class="main-menu-icon">⚔</span><span>クエストマップ</span></button>
+        <button class="main-menu-item" onclick="openMyPage();closeMainMenu()"><span class="main-menu-icon">●</span><span>マイページ</span></button>
+        <button class="main-menu-item" onclick="openRanking();closeMainMenu()"><span class="main-menu-icon">🏆</span><span>ランキング</span></button>
+        <button class="main-menu-item" onclick="openAccount();closeMainMenu()"><span class="main-menu-icon">👤</span><span>アカウント</span></button>
+      </div>
+      <div class="main-menu-note">クレドクエストの各画面へ、ここからいつでも移動できます。</div>
+    </div>
+  </div>
+
   <div id="importPanel" class="import-panel" onclick="closeImport(event)">
     <div class="import-sheet" onclick="event.stopPropagation()">
       <div class="import-head"><strong>📥 クイズ取り込み</strong><button class="import-close" onclick="closeImport()">閉じる</button></div>
@@ -444,6 +500,19 @@ let questions=[
 let current=0,correct=0,combo=0,maxCombo=0,points=0,bossDone=false;
 let questQuestions=[];
 let dailyQuestKey='';
+
+
+function openMainMenu(){
+  const panel=document.getElementById('mainMenuPanel');
+  if(panel)panel.classList.add('open');
+}
+function closeMainMenu(e){
+  if(!e || e.target.id==='mainMenuPanel'){
+    const panel=document.getElementById('mainMenuPanel');
+    if(panel)panel.classList.remove('open');
+  }
+}
+document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openMainMenu));
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='mypage')updateProfile();if(id==='ranking')renderRanking();if(id==='account')syncAccountUI()}
 function goHome(){show('home')}
