@@ -515,6 +515,9 @@ function closeMainMenu(e){
 document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openMainMenu));
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='mypage')updateProfile();if(id==='ranking')renderRanking();if(id==='account')syncAccountUI()}
+function openRanking(){show('ranking');}
+function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;}
+
 function goHome(){show('home')}
 
 // 日替わりクエスト：日付を種にするので、同じ日は同じ問題セットになり、翌日に自動で入れ替わる。
