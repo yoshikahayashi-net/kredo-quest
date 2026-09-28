@@ -573,7 +573,47 @@ function answer(i){
 }
 function nextQuestion(){if(current<questQuestions.length-1){current++;renderQuestion()}else{show('boss');document.getElementById('bossMeter').style.width='100%';document.getElementById('bossHpText').textContent='100%'}}
 function bossAnswer(btn,good){document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;points+=50;document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
-async function showResult(){const total=questQuestions.length+1;const score=correct+(bossDone?1:0);state.totalPoints+=points;state.bestCombo=Math.max(state.bestCombo,maxCombo);state.plays+=1;saveState();const local=getLocalAccount();if(local){const demo=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');const existing=demo.find(x=>x.id===local.id);if(existing)existing.points=state.totalPoints;else demo.push({id:local.id,name:local.displayName||'プレイヤー',points:state.totalPoints});demo.sort((a,b)=>b.points-a.points);localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));}if(supabaseClient&&currentUser){await ensureProfileAfterLogin();try{await supabaseClient.from('profiles').update({display_name:currentUser.user_metadata?.display_name||'プレイヤー',total_points:state.totalPoints}).eq('id',currentUser.id)}catch(e){}}document.getElementById('resultPointsTop').textContent=points+' pt';document.getElementById('resultCorrect').textContent=`${score} / ${total}`;document.getElementById('resultCombo').textContent=maxCombo;show('result')}
+async function showResult(){
+  const total=questQuestions.length+1;
+  const score=correct+(bossDone?1:0);
+  state.totalPoints+=points;
+  state.bestCombo=Math.max(state.bestCombo,maxCombo);
+  state.plays+=1;
+  saveState();
+
+  const local=getLocalAccount();
+  if(local){
+    const demo=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
+    const existing=demo.find(x=>x.id===local.id);
+    if(existing)existing.points=state.totalPoints;
+    else demo.push({id:local.id,name:local.displayName||'プレイヤー',points:state.totalPoints});
+    demo.sort((a,b)=>b.points-a.points);
+    localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
+  }
+
+  if(supabaseClient&&currentUser){
+    try{
+      await ensureProfileAfterLogin();
+      const {error}=await supabaseClient
+        .from('profiles')
+        .update({
+          display_name:currentUser.user_metadata?.display_name||'プレイヤー',
+          total_points:state.totalPoints,
+          updated_at:new Date().toISOString()
+        })
+        .eq('id',currentUser.id);
+      if(error)throw error;
+    }catch(e){
+      console.error('Profile points update error:',e);
+      showToast('⚠ ポイント保存に失敗しました');
+    }
+  }
+
+  document.getElementById('resultPointsTop').textContent=points+' pt';
+  document.getElementById('resultCorrect').textContent=`${score} / ${total}`;
+  document.getElementById('resultCombo').textContent=maxCombo;
+  show('result');
+}
 
 const DEMO_QUESTIONS = JSON.parse(JSON.stringify(questions));
 let state={totalPoints:Number(localStorage.getItem('kredoTotalPoints')||0),plays:Number(localStorage.getItem('kredoPlays')||0),bestCombo:Number(localStorage.getItem('kredoBestCombo')||0),lastBonus:localStorage.getItem('kredoLastBonus')||''};
@@ -674,7 +714,52 @@ async function getRankingData(){
 }
 async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name">${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</div><div class="rank-meta">参加ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-async function ensureProfileAfterLogin(){if(!supabaseClient||!currentUser)return;try{const display=currentUser.user_metadata?.display_name||'プレイヤー';await supabaseClient.from('profiles').upsert({id:currentUser.id,display_name:display,total_points:0},{onConflict:'id'});}catch(e){}}
+async function ensureProfileAfterLogin(){
+  if(!supabaseClient||!currentUser)return null;
+  try{
+    const display=currentUser.user_metadata?.display_name||'プレイヤー';
+    const {data:existing,error:readError}=await supabaseClient
+      .from('profiles')
+      .select('id,display_name,total_points,updated_at')
+      .eq('id',currentUser.id)
+      .maybeSingle();
+    if(readError)throw readError;
+
+    if(!existing){
+      const {data:created,error:createError}=await supabaseClient
+        .from('profiles')
+        .insert({id:currentUser.id,display_name:display})
+        .select('id,display_name,total_points,updated_at')
+        .single();
+      if(createError)throw createError;
+      if(created?.total_points!=null){
+        state.totalPoints=Number(created.total_points)||0;
+        saveState();
+      }
+      return created;
+    }
+
+    if(existing.display_name!==display){
+      const {data:updated,error:updateError}=await supabaseClient
+        .from('profiles')
+        .update({display_name:display})
+        .eq('id',currentUser.id)
+        .select('id,display_name,total_points,updated_at')
+        .single();
+      if(updateError)throw updateError;
+      state.totalPoints=Number(updated?.total_points||0);
+      saveState();
+      return updated;
+    }
+
+    state.totalPoints=Number(existing.total_points||0);
+    saveState();
+    return existing;
+  }catch(e){
+    console.error('Profile sync error:',e);
+    return null;
+  }
+}
 
 (async function restoreAuth(){if(supabaseClient){try{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;if(currentUser)await ensureProfileAfterLogin()}catch(e){}}else{currentUser=getLocalAccount()}})();
 (function restoreQuizData(){try{const saved=localStorage.getItem('kredoQuestions');if(saved){const parsed=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length)questions=parsed}}catch(e){localStorage.removeItem('kredoQuestions')}})();
