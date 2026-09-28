@@ -595,6 +595,8 @@ function bossAnswer(btn,good){document.querySelectorAll('.boss-option').forEach(
 async function showResult(){
   const total=questQuestions.length+1;
   const score=correct+(bossDone?1:0);
+
+  // 今回の獲得ポイントを累計へ加算
   state.totalPoints+=points;
   state.bestCombo=Math.max(state.bestCombo,maxCombo);
   state.plays+=1;
@@ -610,9 +612,10 @@ async function showResult(){
     localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
   }
 
+  // ここではプロフィールから古いポイントを再読込しない。
+  // 今回加算したstate.totalPointsをそのままSupabaseへ保存する。
   if(supabaseClient&&currentUser){
     try{
-      await ensureProfileAfterLogin();
       const {error}=await supabaseClient
         .from('profiles')
         .update({
@@ -629,7 +632,7 @@ async function showResult(){
   }
 
   document.getElementById('resultPointsTop').textContent=points+' pt';
-  document.getElementById('resultCorrect').textContent=`${score} / ${total}`;
+  document.getElementById('resultCorrect').textContent=score+' / '+total;
   document.getElementById('resultCombo').textContent=maxCombo;
   show('result');
 }
