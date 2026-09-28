@@ -645,9 +645,9 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
     if(authMode==='signup'){
       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName}}});
       if(error) throw error;
-      currentUser=data.user;showAccountStatus('登録を受け付けました。メール確認が必要な設定の場合は、メール内のリンクから続けてください。');
+      currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('アカウントを登録しました。');
     }else{
-      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');
     }
   }catch(err){
     console.error('Supabase Auth error:', err);
