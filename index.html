@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v17</title>
+<title>抱月クレドクエスト｜Prototype v18</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -356,7 +356,7 @@ body{display:flex;justify-content:center}
         <div class="account-status" id="accountStatus"></div>
       </div>
       <div class="mini-actions">
-        <button class="mini-btn" onclick="openRanking()">🏆 ランキングを見る</button>
+        <button class="mini-btn" onclick="show('ranking')">🏆 ランキングを見る</button>
         <button class="mini-btn" onclick="goHome()">⌂ ホームへ戻る</button>
       </div>
     </div>
@@ -391,7 +391,7 @@ body{display:flex;justify-content:center}
         <div class="profile-stat"><small>最高COMBO</small><strong id="profileCombo">0</strong></div>
         <div class="profile-stat"><small>登録クイズ</small><strong id="profileQuestions">5 問</strong></div>
       </div>
-      <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="openRanking()">🏆 ランキング</button></div>
+      <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
       <div class="import-actions">
         <div class="import-card"><h3>📥 クイズを取り込む</h3><p>JSON / CSVを読み込み、クエストの問題を追加できます。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="openImport()">取り込み画面を開く</button></div>
         <div class="import-card"><h3>🔄 デモ問題に戻す</h3><p>現在の問題を初期デモセット5問へ戻します。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="resetQuestions()">デモセットに戻す</button></div>
@@ -420,7 +420,7 @@ body{display:flex;justify-content:center}
     <button class="nav-item active" id="navHome" onclick="goHome()"><span class="nav-icon">⌂</span>ホーム</button>
     <button class="nav-item" id="navQuiz" onclick="startQuest()"><span class="nav-icon">♣</span>クイズ</button>
     <button class="nav-item" id="navMy" onclick="openMyPage()"><span class="nav-icon">●</span>マイページ</button>
-    <button class="nav-item" id="navRank" onclick="openRanking()"><span class="nav-icon">🏆</span>ランキング</button>
+    <button class="nav-item" id="navRank" onclick="show('ranking')"><span class="nav-icon">🏆</span>ランキング</button>
   </nav>
 
   <div id="questPanel" class="quest-panel" onclick="closeQuestMap(event)">
@@ -439,7 +439,7 @@ body{display:flex;justify-content:center}
         <button class="main-menu-item" onclick="startQuest();closeMainMenu()"><span class="main-menu-icon">♣</span><span>今日のクエスト</span></button>
         <button class="main-menu-item" onclick="openQuestMap();closeMainMenu()"><span class="main-menu-icon">⚔</span><span>クエストマップ</span></button>
         <button class="main-menu-item" onclick="openMyPage();closeMainMenu()"><span class="main-menu-icon">●</span><span>マイページ</span></button>
-        <button class="main-menu-item" onclick="openRanking();closeMainMenu()"><span class="main-menu-icon">🏆</span><span>ランキング</span></button>
+        <button class="main-menu-item" onclick="show('ranking');closeMainMenu()"><span class="main-menu-icon">🏆</span><span>ランキング</span></button>
         <button class="main-menu-item" onclick="openAccount();closeMainMenu()"><span class="main-menu-icon">👤</span><span>アカウント</span></button>
       </div>
       <div class="main-menu-note">クレドクエストの各画面へ、ここからいつでも移動できます。</div>
@@ -688,9 +688,9 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
     if(authMode==='signup'){
       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName}}});
       if(error) throw error;
-      currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('アカウントを登録しました。');
+      currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('アカウントを登録しました。');show('ranking');
     }else{
-      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');show('ranking');
     }
   }catch(err){
     console.error('Supabase Auth error:', err);
