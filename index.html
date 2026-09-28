@@ -649,7 +649,12 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
     }else{
       const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');
     }
-  }catch(err){showAccountStatus('認証に失敗しました：'+(err?.message||'不明なエラー'),true)}
+  }catch(err){
+    console.error('Supabase Auth error:', err);
+    const code=err?.code ? ' [' + err.code + ']' : '';
+    const status=err?.status ? ' (HTTP ' + err.status + ')' : '';
+    showAccountStatus('認証に失敗しました：'+(err?.message||'不明なエラー')+code+status,true);
+  }
 }
 async function getRankingData(){
   const month=monthlyKey();
