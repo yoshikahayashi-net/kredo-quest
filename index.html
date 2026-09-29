@@ -369,7 +369,7 @@ body{display:flex;justify-content:center}
     <div class="ranking-wrap">
       <div style="font-size:11px;color:#0D73AC;font-weight:900;letter-spacing:.08em">RANKING</div>
       <div class="ranking-title">クレドクエスト 総合ランキング</div>
-      <div class="ranking-sub">正答率ではなく、参加・継続で貯めたポイントを表示</div>
+      <div class="ranking-sub">参加＋正解＋BOSSクリアで貯めたポイントを表示</div>
       <div class="ranking-card" style="margin-top:12px">
         <div class="ranking-head"><strong>🏆 MONTHLY RANKING</strong><div style="font-size:10px;color:var(--muted);margin-top:3px" id="rankingMonth"></div></div>
         <div id="rankingList"></div>
@@ -1043,6 +1043,12 @@ async function showResult(){
   resultShown=true;
   const total=questQuestions.length+1;
   const score=correct+(bossDone?1:0);
+
+  // 参加10pt＋正解2pt/問＋BOSSクリア5pt
+  // ランキングは「参加・継続」だけでなく、実際に学んだ成果も少し反映する。
+  const correctPoints=correct*2;
+  const bossPoints=bossDone?5:0;
+  const participationPoints=10;
   let earned=0;
 
   if(supabaseClient&&currentUser){
@@ -1055,17 +1061,17 @@ async function showResult(){
           correct_count:score,
           total_questions:total,
           boss_cleared:bossDone,
-          points:10
+          points:participationPoints+correctPoints+bossPoints
         });
       if(attemptError){
         if(attemptError.code==='23505' || /duplicate key|unique/i.test(attemptError.message||'')){
-          showToast('🎮 今日は参加済みです｜ポイント追加なし');
+          showToast('🎮 今日は参加済みです｜追加ポイントなし');
         }else{
           console.error('Quest attempt save error:',attemptError);
           showToast('⚠ 参加記録の保存に失敗しました');
         }
       }else{
-        earned=10;
+        earned=participationPoints+correctPoints+bossPoints;
         state.lastBonus=dailyQuestKey;
       }
     }catch(e){
@@ -1073,7 +1079,7 @@ async function showResult(){
       showToast('⚠ 参加記録の保存に失敗しました');
     }
   }else if(state.lastBonus!==dailyQuestKey){
-    earned=10;
+    earned=participationPoints+correctPoints+bossPoints;
     state.lastBonus=dailyQuestKey;
   }
 
