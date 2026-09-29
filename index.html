@@ -577,7 +577,6 @@ function buildDailyQuest(){
 function startQuest(){
   current=0;correct=0;combo=0;maxCombo=0;points=0;bossDone=false;
   buildDailyQuest();
-  state.plays++;
   const today=new Date().toISOString().slice(0,10);
   if(state.lastBonus!==today){state.totalPoints+=10;state.lastBonus=today;saveState();showToast(`🎁 今日の参加ボーナス +10 pt｜${questQuestions.length}問＋BOSS`)}else{saveState();showToast(`🎮 今日のクエスト：${questQuestions.length}問＋BOSS`)}
   show('quiz');renderQuestion();
