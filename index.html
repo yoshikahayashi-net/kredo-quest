@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v26</title>
+<title>抱月クレドクエスト｜Prototype v27</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -1051,30 +1051,52 @@ async function showResult(){
   const participationPoints=10;
   let earned=0;
   let participationRecorded=false;
+  let usedServerLedger=false;
 
   if(supabaseClient&&currentUser){
     try{
-      const {error:attemptError}=await supabaseClient
-        .from('quiz_attempts')
-        .insert({
-          user_id:currentUser.id,
-          quest_date:dailyQuestKey,
-          correct_count:score,
-          total_questions:total,
-          boss_cleared:bossDone,
-          points:participationPoints+correctPoints+bossPoints
-        });
-      if(attemptError){
-        if(attemptError.code==='23505' || /duplicate key|unique/i.test(attemptError.message||'')){
-          showToast('🎮 今日は参加済みです｜追加ポイントなし');
+      const {data:rpcData,error:attemptError}=await supabaseClient.rpc('record_quest_attempt',{
+        p_quest_date:dailyQuestKey,
+        p_correct_count:correct,
+        p_total_questions:total,
+        p_boss_cleared:bossDone
+      });
+
+      if(!attemptError){
+        usedServerLedger=true;
+        earned=Number(rpcData?.points||0);
+        participationRecorded=Boolean(rpcData?.recorded);
+        if(participationRecorded)state.lastBonus=dailyQuestKey;
+        else showToast('🎮 今日は参加済みです｜追加ポイントなし');
+      }else{
+        const missingRpc=/record_quest_attempt|function .* does not exist|PGRST202/i.test((attemptError.message||'')+' '+(attemptError.code||''));
+        if(missingRpc){
+          console.warn('Server point RPC is not installed yet; using temporary legacy fallback.',attemptError);
+          const {error:fallbackError}=await supabaseClient
+            .from('quiz_attempts')
+            .insert({
+              user_id:currentUser.id,
+              quest_date:dailyQuestKey,
+              correct_count:score,
+              total_questions:total,
+              boss_cleared:bossDone,
+              points:participationPoints+correctPoints+bossPoints
+            });
+          if(!fallbackError){
+            earned=participationPoints+correctPoints+bossPoints;
+            state.lastBonus=dailyQuestKey;
+            participationRecorded=true;
+            showToast('⚠ 本番用ポイント処理が未反映のため暫定動作中');
+          }else if(fallbackError.code==='23505' || /duplicate key|unique/i.test(fallbackError.message||'')){
+            showToast('🎮 今日は参加済みです｜追加ポイントなし');
+          }else{
+            console.error('Quest attempt fallback error:',fallbackError);
+            showToast('⚠ 参加記録の保存に失敗しました');
+          }
         }else{
-          console.error('Quest attempt save error:',attemptError);
+          console.error('Quest RPC error:',attemptError);
           showToast('⚠ 参加記録の保存に失敗しました');
         }
-      }else{
-        earned=participationPoints+correctPoints+bossPoints;
-        state.lastBonus=dailyQuestKey;
-        participationRecorded=true;
       }
     }catch(e){
       console.error('Quest attempt save error:',e);
@@ -1102,7 +1124,9 @@ async function showResult(){
     localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
   }
 
-  if(supabaseClient&&currentUser&&earned>0){
+  // 本番RPCを利用した場合は、ポイント台帳とprofiles更新をサーバー側で完了している。
+  // 旧スキーマへの暫定フォールバック時だけ、従来のprofiles更新を許可する。
+  if(supabaseClient&&currentUser&&earned>0&&!usedServerLedger){
     try{
       const {error}=await supabaseClient
         .from('profiles')
@@ -1114,7 +1138,7 @@ async function showResult(){
         .eq('id',currentUser.id);
       if(error)throw error;
     }catch(e){
-      console.error('Profile points update error:',e);
+      console.error('Profile points fallback update error:',e);
       showToast('⚠ ポイント保存に失敗しました');
     }
   }
