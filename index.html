@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v31</title>
+<title>抱月クレドクエスト｜Prototype v32</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -186,6 +186,7 @@ body{display:flex;justify-content:center}
 .scene-row .scene-copy{flex:1}
 .data-pill{display:inline-flex;align-items:center;gap:5px;background:#eaf8ff;color:#126b9d;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800;margin-top:8px}
 @media(max-width:420px){.import-actions{grid-template-columns:1fr}.profile-card{grid-template-columns:1fr 1fr}}
+.production-note{margin-top:14px;padding:12px 13px;border-radius:12px;background:#f2fbff;border:1px dashed #a7d5e7;color:#496879;font-size:11px;line-height:1.6}
 .credo-wrap{padding:14px 12px 20px}
 .credo-intro{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 14px;box-shadow:0 4px 10px rgba(31,105,131,.07)}
 .credo-intro strong{display:block;font-size:15px;margin-bottom:4px}.credo-intro p{margin:0;color:#557281;font-size:11px;line-height:1.6}
@@ -430,19 +431,7 @@ body{display:flex;justify-content:center}
         <div class="profile-stat"><small>登録クイズ</small><strong id="profileQuestions">30 問</strong></div>
       </div>
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
-      <div class="import-actions">
-        <div class="import-card"><h3>📥 クイズを取り込む</h3><p>JSON / CSVを読み込み、クエストの問題を追加できます。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="openImport()">取り込み画面を開く</button></div>
-        <div class="import-card"><h3>🔄 初期問題バンクに戻す</h3><p>現在の問題を、このゲームに埋め込んだ初期問題バンクへ戻します。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="resetQuestions()">初期問題に戻す</button></div>
-      </div>
-
-      <div class="library-card">
-        <div class="library-head"><h3>🗂 クイズ管理</h3><span class="library-count" id="libraryCount">5問</span></div>
-        <div class="library-actions">
-          <button class="library-primary" onclick="openQuestionEditor()">＋ 1問追加</button>
-          <button class="library-secondary" onclick="exportQuestions()">⬇ JSON書き出し</button>
-        </div>
-        <div class="library-list" id="libraryList"></div>
-      </div>
+      <div class="production-note"><strong>📖 クレドを学ぶ</strong><br>毎日のクエストで出会ったクレドを、公式ページでも確認できます。ホームの「クレドを知る」から見られます。</div>
       <div class="import-help"><strong>10月リリース向けバックエンド構成</strong><br>GitHub Pages：ゲーム本体の公開／Supabase：アカウント認証・ランキングデータ。<br><br><strong>クイズ取り込み形式</strong><br>JSON：[{"level":"初級","chapter":"クレド①","question":"…","scene":"…","art":"💬","choices":["A","B","C","D"],"answer":1,"explain":"…","credo":"…"}]<br>CSV：level,chapter,question,scene,art,A,B,C,D,answer,explain,credo</div>
     </div>
   </section>
