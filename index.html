@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v23</title>
+<title>抱月クレドクエスト｜Prototype v24</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -40,7 +40,7 @@ body{display:flex;justify-content:center}
 .character-stage{position:relative;z-index:2;height:175px;margin-top:4px;display:flex;align-items:flex-end;justify-content:center}.char-placeholder{position:relative;width:110px;height:128px;border-radius:48% 48% 30% 30%;background:linear-gradient(180deg,#FFFFFF,#F1F7F9);border:4px solid #D7EEF7;box-shadow:0 10px 18px rgba(22,111,146,.13);display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px}.char-placeholder:before,.char-placeholder:after{content:"";position:absolute;top:-12px;width:36px;height:36px;background:#FFFFFF;border:4px solid #D7EEF7}.char-placeholder:before{left:2px;transform:rotate(25deg);clip-path:polygon(0 0,100% 35%,40% 100%)}.char-placeholder:after{right:2px;transform:rotate(-25deg);clip-path:polygon(0 35%,100% 0,60% 100%)}.char-face{font-size:34px;font-weight:900;color:#82A4B2}.char-note{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:-28px;white-space:nowrap;font-size:9px;color:#548197;font-weight:800;background:rgba(255,255,255,.82);padding:4px 8px;border-radius:999px;border:1px dashed #A6CFDE}
 .start-btn{position:relative;z-index:5;display:flex;align-items:center;justify-content:center;gap:10px;margin:0 18px;height:58px;background:var(--yellow);color:#254455;border:0;border-radius:18px;width:calc(100% - 36px);font-weight:900;font-size:17px;box-shadow:0 8px 16px rgba(230,184,31,.27);cursor:pointer;transition:.17s}.start-btn:hover{transform:translateY(-1px);filter:brightness(1.02)}.arrow{margin-left:auto;margin-right:12px;font-size:22px}
 .home-grid{position:relative;z-index:4;padding:10px 12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#EFFBFE}.menu-card{min-height:98px;background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 10px rgba(31,105,131,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#24506A;font-weight:900;cursor:pointer}.menu-icon{font-size:27px}.menu-label{font-size:12px}
-.bottom-nav{position:fixed;bottom:0;width:min(100%,460px);height:69px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);z-index:30}.nav-item{border:0;background:transparent;color:#8A9EAA;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}.nav-icon{font-size:20px;line-height:1}.nav-item.active{color:var(--blue-dark)}
+.bottom-nav{position:fixed;bottom:0;width:min(100%,460px);height:69px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:30}.nav-item{border:0;background:transparent;color:#8A9EAA;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}.nav-icon{font-size:20px;line-height:1}.nav-item.active{color:var(--blue-dark)}
 /* quest screen */
 .quiz-bg{background:linear-gradient(180deg,#E3F7FD,#F8FCFE)}
 .quiz-head{padding:14px 16px 8px}.crumb{display:flex;justify-content:space-between;align-items:center;color:#607E8F;font-size:11px;font-weight:900}.level{padding:6px 10px;border-radius:999px;background:var(--green);color:#fff;font-size:11px}.quiz-progress{height:7px;background:#D7EAF1;border-radius:999px;overflow:hidden;margin-top:10px}.quiz-progress>div{height:100%;width:20%;background:var(--blue);border-radius:999px;transition:.25s}
@@ -1015,7 +1015,7 @@ function renderQuestion(){
   const total=questQuestions.length+1;
   document.getElementById('qCount').textContent=`${current+1} / ${total}`;
   document.getElementById('levelTag').textContent=q.level;
-  document.getElementById('progress').style.width=((current)/total*100)+'%';
+  document.getElementById('progress').style.width=((current+1)/total*100)+'%';
   document.getElementById('chapter').textContent=q.chapter;
   document.getElementById('question').textContent=q.question;
   document.getElementById('sceneText').textContent=q.scene;
