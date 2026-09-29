@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v25</title>
+<title>抱月クレドクエスト｜Prototype v26</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -51,7 +51,7 @@ body{display:flex;justify-content:center}
 /* boss */
 .boss-banner{margin:16px;background:linear-gradient(135deg,#0D70A9,#1D8FCA);color:#fff;border-radius:20px;padding:18px;text-align:center;box-shadow:0 9px 18px rgba(12,107,158,.2)}.boss-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;opacity:.85}.boss-title{font-size:24px;font-weight:900;margin:6px 0}.boss-sub{font-size:11px;line-height:1.5;opacity:.9}.boss-icon{font-size:50px;margin:9px 0}.boss-body{padding:0 16px 16px}.boss-meter{height:10px;border-radius:999px;background:#DDEAF0;overflow:hidden}.boss-meter>div{height:100%;background:linear-gradient(90deg,#E76D61,#D34C43);width:100%;transition:.4s}.boss-hp{display:flex;justify-content:space-between;font-size:10px;font-weight:900;color:#718390;margin:7px 0}.boss-q{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}.boss-q h3{margin:9px 0 12px;font-size:16px;line-height:1.55}.boss-option{width:100%;text-align:left;border:1.5px solid #C9DDE7;border-radius:12px;background:#fff;padding:10px;margin-top:7px;font-size:11px;line-height:1.45;cursor:pointer}.boss-option.selected{border-color:#D95C52;background:#FFF3F0}.boss-result{display:none;margin-top:9px;border-radius:12px;padding:11px;background:#FFF8EC;border:1px solid #F0DF9B;font-size:11px;line-height:1.55}.boss-clear{width:100%;margin-top:10px;height:43px;border:0;border-radius:12px;background:var(--yellow);font-weight:900;color:#294454;display:none;cursor:pointer}
 /* result */
-.result-head{background:linear-gradient(180deg,#158ACB,#0A72AD);color:white;text-align:center;padding:24px 18px 20px}.result-coin{width:92px;height:92px;margin:0 auto 9px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;color:#A27600;font-size:29px;font-weight:900;border:5px solid rgba(255,255,255,.75);box-shadow:0 9px 17px rgba(0,0,0,.13)}.result-points{font-size:30px;font-weight:900}.result-label{font-size:11px;opacity:.85}.result-body{padding:15px 16px 20px}.thanks{background:var(--yellow-soft);border-radius:14px;padding:15px;text-align:center;font-size:13px;font-weight:900;line-height:1.55;color:#5F5622}.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.rstat{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;text-align:center}.rstat small{display:block;font-size:10px;color:#7C8E98}.rstat strong{font-size:18px}.home-return{width:100%;height:45px;margin-top:11px;border:0;border-radius:13px;background:var(--blue);color:#fff;font-weight:900;cursor:pointer}
+.result-head{background:linear-gradient(180deg,#158ACB,#0A72AD);color:white;text-align:center;padding:24px 18px 20px}.result-coin{width:92px;height:92px;margin:0 auto 9px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;color:#A27600;font-size:29px;font-weight:900;border:5px solid rgba(255,255,255,.75);box-shadow:0 9px 17px rgba(0,0,0,.13)}.result-points{font-size:30px;font-weight:900}.result-label{font-size:11px;opacity:.85}.result-body{padding:15px 16px 20px}.thanks{background:var(--yellow-soft);border-radius:14px;padding:15px;text-align:center;font-size:13px;font-weight:900;line-height:1.55;color:#5F5622}.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.rstat{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;text-align:center}.rstat small{display:block;font-size:10px;color:#7C8E98}.rstat strong{font-size:18px}.result-breakdown{margin-top:10px;padding:11px 12px;border:1px dashed #B7D5E2;border-radius:12px;background:#F8FCFE;color:#58717F;font-size:11px;line-height:1.5;text-align:center}.home-return{width:100%;height:45px;margin-top:11px;border:0;border-radius:13px;background:var(--blue);color:#fff;font-weight:900;cursor:pointer}
 /* quest board overlay */
 .quest-panel{display:none;position:fixed;inset:0;background:rgba(8,53,75,.32);z-index:100;align-items:flex-end}.quest-panel.open{display:flex}.quest-sheet{width:min(100%,460px);background:#fff;border-radius:24px 24px 0 0;padding:17px 16px 24px;animation:sheet .22s ease}.handle{width:42px;height:5px;border-radius:99px;background:#D8E6EB;margin:0 auto 14px}.sheet-title{font-weight:900;font-size:17px}.map-mini{margin-top:14px;padding:15px;background:#EDF9FD;border:1px solid var(--line);border-radius:15px}.map-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;align-items:center}.map-node{height:42px;border-radius:12px;background:#fff;border:1px solid #BFDCE7;display:grid;place-items:center;font-weight:900;color:#8EA4AE;font-size:12px}.map-node.active{background:var(--green-soft);border-color:#8BCB96;color:#348C48}.sheet-close{width:100%;height:42px;margin-top:12px;border:0;border-radius:12px;background:#F2F7F9;color:#58717F;font-weight:900;cursor:pointer}
 .toast{position:fixed;left:50%;top:85px;transform:translateX(-50%);z-index:200;background:#173244;color:white;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:900;box-shadow:0 10px 20px rgba(0,0,0,.18);display:none}
@@ -395,7 +395,7 @@ body{display:flex;justify-content:center}
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
       <div class="import-actions">
         <div class="import-card"><h3>📥 クイズを取り込む</h3><p>JSON / CSVを読み込み、クエストの問題を追加できます。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="openImport()">取り込み画面を開く</button></div>
-        <div class="import-card"><h3>🔄 デモ問題に戻す</h3><p>現在の問題を初期デモセット5問へ戻します。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="resetQuestions()">デモセットに戻す</button></div>
+        <div class="import-card"><h3>🔄 初期問題バンクに戻す</h3><p>現在の問題を、このゲームに埋め込んだ初期問題バンクへ戻します。</p><button class="secondary" style="margin-top:9px;width:100%" onclick="resetQuestions()">初期問題に戻す</button></div>
       </div>
 
       <div class="library-card">
@@ -414,7 +414,7 @@ body{display:flex;justify-content:center}
   <section id="result" class="screen" style="background:#F4FBFD">
     <div class="topbar"><div class="brand"><span class="brand-mark">◎</span>抱月クレドクイズ</div><div class="menu">☰</div></div>
     <div class="result-head"><div class="result-coin">P</div><div class="result-label">今回の獲得ポイント</div><div class="result-points" id="resultPointsTop">30 pt</div></div>
-    <div class="result-body"><div class="thanks">おつかれさまでした！<br>クレドをクイズで学んでくれてありがとうございます！</div><div class="result-stats"><div class="rstat"><small>正解数</small><strong id="resultCorrect">3 / 5</strong></div><div class="rstat"><small>最高COMBO</small><strong id="resultCombo">0</strong></div></div><button class="home-return" onclick="goHome()">⌂ ホームに戻る</button><button class="next-btn" style="background:#FFF; color:#176D9F;border:1px solid #CFE3ED" onclick="startQuest()">もう一度クエストへ</button></div>
+    <div class="result-body"><div class="thanks">おつかれさまでした！<br>クレドをクイズで学んでくれてありがとうございます！</div><div class="result-stats"><div class="rstat"><small>正解数</small><strong id="resultCorrect">3 / 5</strong></div><div class="rstat"><small>最高COMBO</small><strong id="resultCombo">0</strong></div></div><div class="result-breakdown" id="resultBreakdown">参加 10pt ＋ 正解ボーナス ＋ BOSSクリア</div><button class="home-return" onclick="goHome()">⌂ ホームに戻る</button><button class="next-btn" style="background:#FFF; color:#176D9F;border:1px solid #CFE3ED" onclick="startQuest()">もう一度クエストへ</button></div>
   </section>
 
   <nav class="bottom-nav">
@@ -1037,7 +1037,7 @@ function answer(i){
   if(good&&combo>=2)showToast(`🔥 ${combo} COMBO`)
 }
 function nextQuestion(){if(current<questQuestions.length-1){current++;renderQuestion()}else{show('boss');document.getElementById('bossMeter').style.width='100%';document.getElementById('bossHpText').textContent='100%'}}
-function bossAnswer(btn,good){document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
+function bossAnswer(btn,good){if(bossDone)return;document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;document.querySelectorAll('.boss-option').forEach(b=>{b.classList.add('disabled');b.disabled=true});document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
 async function showResult(){
   if(resultShown)return;
   resultShown=true;
@@ -1122,12 +1122,15 @@ async function showResult(){
   document.getElementById('resultPointsTop').textContent=earned+' pt';
   document.getElementById('resultCorrect').textContent=score+' / '+total;
   document.getElementById('resultCombo').textContent=maxCombo;
+  document.getElementById('resultBreakdown').textContent='参加 '+participationPoints+'pt ＋ 正解 '+correctPoints+'pt ＋ BOSS '+bossPoints+'pt';
   show('result');
 }
 
 const DEMO_QUESTIONS = JSON.parse(JSON.stringify(questions));
 let state={totalPoints:Number(localStorage.getItem('kredoTotalPoints')||0),plays:Number(localStorage.getItem('kredoPlays')||0),bestCombo:Number(localStorage.getItem('kredoBestCombo')||0),lastBonus:localStorage.getItem('kredoLastBonus')||''};
-function saveState(){localStorage.setItem('kredoTotalPoints',String(state.totalPoints));localStorage.setItem('kredoPlays',String(state.plays));localStorage.setItem('kredoBestCombo',String(state.bestCombo));localStorage.setItem('kredoLastBonus',state.lastBonus||'');}
+function stateStoragePrefix(){const id=currentUser?.id||getLocalAccount()?.id||'guest';return 'kredoState:'+id+':';}
+function loadState(){const p=stateStoragePrefix();state={totalPoints:Number(localStorage.getItem(p+'totalPoints')||0),plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||''};}
+function saveState(){const p=stateStoragePrefix();localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');}
 function updateProfile(){document.getElementById('profilePoints').textContent=state.totalPoints+' pt';document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';}
 
 let editingIndex=-1;
@@ -1178,7 +1181,7 @@ function importQuizData(){const txt=document.getElementById('quizImportText').va
 function applyImportedText(raw,name){try{let parsed;if(String(name).toLowerCase().endsWith('.csv')||raw.trim().startsWith('level,chapter,question'))parsed=parseCSV(raw);else parsed=JSON.parse(raw);if(!Array.isArray(parsed))throw new Error('配列形式のデータが必要です');const normalized=parsed.map(normalizeQuestion);const mode=document.getElementById('importMode')?.value||'append';questions=mode==='replace'?normalized:questions.concat(normalized);current=0;localStorage.setItem('kredoQuestions',JSON.stringify(questions));updateProfile();renderLibrary();setImportStatus(`${normalized.length}問を${mode==='replace'?'入れ替え':'追加'}しました。現在${questions.length}問です。`,false);showToast(`📥 ${normalized.length}問 取り込み完了`);setTimeout(()=>closeImport(),700)}catch(err){setImportStatus('取り込みに失敗：'+err.message,true)}}
 function setImportStatus(msg,isError){const el=document.getElementById('importStatus');el.textContent=msg;el.style.display='block';el.style.background=isError?'#fff0ed':'#eef8fd';el.style.color=isError?'#a94d3f':'#356276'}
 function loadImportExample(){document.getElementById('quizImportText').value=JSON.stringify([{level:'中級',chapter:'クレド⑥',question:'例題：忙しい中でも次の人が動けるようにするには？',scene:'一言添えるだけで、受け取る人の迷いが減る。',art:'🧭',choices:['急いで結果だけ渡す','背景と次の一歩を添えて渡す','自分の中だけで完結させる','相手が聞いてくるまで待つ'],answer:1,explain:'相手が次に動ける情報までつなぐことがポイントです。',credo:'【サンプル】支えてつなぐ'}],null,2)}
-function resetQuestions(){questions=JSON.parse(JSON.stringify(DEMO_QUESTIONS));localStorage.removeItem('kredoQuestions');updateProfile();renderLibrary();showToast('🔄 デモ問題に戻しました')}
+function resetQuestions(){questions=JSON.parse(JSON.stringify(DEMO_QUESTIONS));localStorage.setItem('kredoQuestions',JSON.stringify(questions));updateProfile();renderLibrary();showToast('🔄 初期問題バンクに戻しました')}
 
 function monthlyKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function getLocalAccount(){try{return JSON.parse(localStorage.getItem('kredoAccount')||'null')}catch(e){return null}}
@@ -1186,10 +1189,10 @@ function setLocalAccount(a){localStorage.setItem('kredoAccount',JSON.stringify(a
 function openAccount(){show('account')}
 function switchAuth(mode){authMode=mode;document.getElementById('tabSignup').classList.toggle('active',mode==='signup');document.getElementById('tabLogin').classList.toggle('active',mode==='login');document.getElementById('accountTitle').textContent=mode==='signup'?'アカウントをつくる':'ログイン';document.getElementById('accountSub').textContent=mode==='signup'?'ランキングに参加するにはアカウント登録が必要です。ゲーム内の表示名だけをランキングに表示します。':'登録したメールアドレスとパスワードでログインします。';document.getElementById('displayNameField').style.display=mode==='signup'?'block':'none';document.getElementById('authPassword').setAttribute('autocomplete',mode==='signup'?'new-password':'current-password');document.getElementById('authSubmit').textContent=mode==='signup'?'アカウントを登録する':'ログイン';showAccountStatus('')}
 function showAccountStatus(msg,error=false){const el=document.getElementById('accountStatus');el.textContent=msg;el.className='account-status'+(msg?' show':'');if(msg)el.style.background=error?'#FFF3F0':'#F4FBFD';if(msg)el.style.color=error?'#A64D44':'#5A6E7C'}
-function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;showAccountStatus('デモモードでプレイできます。ランキングはこの端末内で確認します。');showToast('👤 デモアカウントを設定しました')}
+function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;loadState();saveState();updateProfile();showAccountStatus('デモモードでプレイできます。ランキングはこの端末内で確認します。');showToast('👤 デモアカウントを設定しました')}
 async function submitAuth(){const displayName=document.getElementById('authDisplayName').value.trim();const email=document.getElementById('authEmail').value.trim();const password=document.getElementById('authPassword').value;if(!email||!password||(authMode==='signup'&&!displayName)){showAccountStatus('入力内容を確認してください。',true);return}
   if(!supabaseClient){
-    const account={id:'local-'+Date.now(),displayName:authMode==='signup'?displayName:(getLocalAccount()?.displayName||displayName||'プレイヤー'),email,demo:true};setLocalAccount(account);currentUser=account;showAccountStatus('現在はデモモードです。実運用のアカウント登録はSupabase接続後に有効になります。');showToast('👤 アカウント情報を保存しました');return;
+    const account={id:'local-'+Date.now(),displayName:authMode==='signup'?displayName:(getLocalAccount()?.displayName||displayName||'プレイヤー'),email,demo:true};setLocalAccount(account);currentUser=account;loadState();saveState();updateProfile();showAccountStatus('現在はデモモードです。実運用のアカウント登録はSupabase接続後に有効になります。');showToast('👤 アカウント情報を保存しました');return;
   }
   try{
     if(authMode==='signup'){
@@ -1226,6 +1229,7 @@ async function renderRanking(){document.getElementById('rankingMonth').textConte
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 async function ensureProfileAfterLogin(){
   if(!supabaseClient||!currentUser)return null;
+  loadState();
   try{
     const display=currentUser.user_metadata?.display_name||'プレイヤー';
     const {data:existing,error:readError}=await supabaseClient
@@ -1271,7 +1275,7 @@ async function ensureProfileAfterLogin(){
   }
 }
 
-(async function restoreAuth(){if(supabaseClient){try{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;if(currentUser)await ensureProfileAfterLogin()}catch(e){}}else{currentUser=getLocalAccount()}})();
+(async function restoreAuth(){if(supabaseClient){try{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;if(currentUser)await ensureProfileAfterLogin()}catch(e){}}else{currentUser=getLocalAccount();if(currentUser){loadState();updateProfile()}}})();
 (function restoreQuizData(){
   try{
     const saved=localStorage.getItem('kredoQuestions');
