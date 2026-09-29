@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v18</title>
+<title>抱月クレドクエスト｜Prototype v21</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -546,13 +546,31 @@ function buildDailyQuest(){
   const seed=dateSeed(key);
   const pool=questions.slice();
   if(!pool.length)return [];
-  const shuffled=seededShuffle(pool,seed);
-  const normalCount=Math.min(pool.length,4+(seed%2)); // 通常4〜5問＋固定BOSS＝5〜6問
+
+  // 日付ごとに別の並びを作る。同じ日は同じセット、翌日は自動的に別セット。
+  let shuffled=seededShuffle(pool,seed);
+  let normalCount=Math.min(pool.length,4+(seed%2)); // 通常4〜5問＋固定BOSS＝5〜6問
+
+  // 問題数に余裕がある場合は、前日と同じセットにならないようにする。
+  if(pool.length>normalCount){
+    const prevKey=new Date(today.getFullYear(),today.getMonth(),today.getDate()-1);
+    const prevDate=prevKey.getFullYear()+'-'+String(prevKey.getMonth()+1).padStart(2,'0')+'-'+String(prevKey.getDate()).padStart(2,'0');
+    const prevSeed=dateSeed(prevDate);
+    const prevCount=Math.min(pool.length,4+(prevSeed%2));
+    const prevSet=seededShuffle(pool,prevSeed).slice(0,prevCount).map(q=>q.question).sort().join('|');
+    let todaySet=shuffled.slice(0,normalCount).map(q=>q.question).sort().join('|');
+
+    if(todaySet===prevSet){
+      shuffled=seededShuffle(pool,seed+1);
+      todaySet=shuffled.slice(0,normalCount).map(q=>q.question).sort().join('|');
+    }
+  }
+
   questQuestions=shuffled.slice(0,normalCount);
   dailyQuestKey=key;
   const total=questQuestions.length+1;
   const meta=document.getElementById('dailyQuestMeta');
-  if(meta)meta.textContent=`TODAY'S QUEST｜全${total}問（通常${normalCount}問＋BOSS）`;
+  if(meta)meta.textContent=`TODAY'S QUEST｜全${total}問（通常${normalCount}問＋BOSS）｜${key}`;
   return questQuestions;
 }
 
