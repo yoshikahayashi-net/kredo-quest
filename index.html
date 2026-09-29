@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v30</title>
+<title>抱月クレドクエスト｜Prototype v31</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -186,6 +186,14 @@ body{display:flex;justify-content:center}
 .scene-row .scene-copy{flex:1}
 .data-pill{display:inline-flex;align-items:center;gap:5px;background:#eaf8ff;color:#126b9d;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800;margin-top:8px}
 @media(max-width:420px){.import-actions{grid-template-columns:1fr}.profile-card{grid-template-columns:1fr 1fr}}
+.credo-wrap{padding:14px 12px 20px}
+.credo-intro{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 14px;box-shadow:0 4px 10px rgba(31,105,131,.07)}
+.credo-intro strong{display:block;font-size:15px;margin-bottom:4px}.credo-intro p{margin:0;color:#557281;font-size:11px;line-height:1.6}
+.credo-frame{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.credo-frame iframe{display:block;width:100%;height:calc(100vh - 230px);min-height:560px;border:0;background:#fff}
+.credo-actions{display:flex;gap:8px;margin-top:10px}.credo-actions button{flex:1;height:42px;border:0;border-radius:12px;font-weight:900;cursor:pointer}
+.credo-external{background:var(--blue);color:#fff}.credo-back{background:#fff;border:1px solid var(--line)!important;color:var(--ink)}
+
 
 
 /* v15: in-browser quiz library management */
@@ -269,7 +277,7 @@ body{display:flex;justify-content:center}
       <button class="start-btn" onclick="startQuest()"><span>▶</span> はじめる <span class="arrow">›</span></button>
     </div>
     <div class="home-grid">
-      <button class="menu-card" onclick="toast('クレド一覧は今後実装予定')"><span class="menu-icon">📖</span><span class="menu-label">クレドを知る</span></button>
+      <button class="menu-card" onclick="openCredo()"><span class="menu-icon">📖</span><span class="menu-label">クレドを知る</span></button>
       <button class="menu-card" onclick="show('ranking')"><span class="menu-icon">♛</span><span class="menu-label">ランキング</span></button>
       <button class="menu-card" onclick="toast('参加ポイントの履歴を表示します')"><span class="menu-icon">🎁</span><span class="menu-label">ポイント履歴</span></button>
       <button class="menu-card" onclick="toast('よくある質問は今後追加予定')"><span class="menu-icon">?</span><span class="menu-label">よくある質問</span></button>
@@ -333,6 +341,28 @@ body{display:flex;justify-content:center}
     <div class="boss-body"><div class="boss-q"><span class="level" style="background:#1A89C8">超上級</span><h3>納期直前、前工程から届いたデータに不備が見つかった。修正すると納期に影響する可能性もある。あなたなら、まずどう動く？</h3><button class="boss-option" onclick="bossAnswer(this,false)">A. 自分の判断で修正して、そのまま進める</button><button class="boss-option" onclick="bossAnswer(this,true)">B. 影響範囲を整理し、関係者と確認して次の判断につなげる</button><button class="boss-option" onclick="bossAnswer(this,false)">C. 問題が大きくなるまで保留する</button><button class="boss-option" onclick="bossAnswer(this,false)">D. すべて前工程に戻して任せる</button><div class="boss-result" id="bossResult"></div><button id="bossClear" class="boss-clear" onclick="showResult()">討伐結果を見る</button></div></div>
   </section>
 
+
+  <!-- CREDO -->
+  <section id="credo" class="screen" style="background:#F4FBFD">
+    <div class="topbar">
+      <div class="brand"><span class="brand-mark">◎</span>抱月クレドクエスト</div>
+      <div class="menu" onclick="goHome()" style="cursor:pointer">✕</div>
+    </div>
+    <div class="credo-wrap">
+      <div class="credo-intro">
+        <div style="font-size:11px;color:#0D73AC;font-weight:900;letter-spacing:.08em">LEARN THE CREDO</div>
+        <strong>抱月クレドを知る</strong>
+        <p>ゲームで出てきたクレドを、公式サイトの全文・全体像で確認できます。</p>
+      </div>
+      <div class="credo-frame">
+        <iframe src="https://www.hougetu.co.jp/recruit/credo/" title="抱月クレド公式ページ" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+      <div class="credo-actions">
+        <button class="credo-external" onclick="window.open('https://www.hougetu.co.jp/recruit/credo/','_blank','noopener,noreferrer')">公式サイトを別タブで開く ↗</button>
+        <button class="credo-back" onclick="goHome()">ホームへ戻る</button>
+      </div>
+    </div>
+  </section>
 
   <!-- ACCOUNT -->
   <section id="account" class="screen" style="background:#F4FBFD">
@@ -1323,6 +1353,7 @@ buildDailyQuest();
 saveState();
 renderLibrary();
 
+function openCredo(){show('credo')}
 function openQuestMap(){document.getElementById('questPanel').classList.add('open')}
 function closeQuestMap(e){if(!e||e.target.id==='questPanel')document.getElementById('questPanel').classList.remove('open')}
 function showToast(t){const x=document.getElementById('toast');x.textContent=t;x.style.display='block';clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.style.display='none',1200)}
