@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v21</title>
+<title>抱月クレドクエスト｜Prototype v22</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -359,7 +359,7 @@ body{display:flex;justify-content:center}
         <button class="mini-btn" onclick="show('ranking')">🏆 ランキングを見る</button>
         <button class="mini-btn" onclick="goHome()">⌂ ホームへ戻る</button>
       </div>
-      <button class="mini-btn" style="width:100%;margin-top:10px;border-color:#E7B9B2;color:#A64D44" onclick="resetMyPoints()">🧹 自分のポイントを0にリセット（テスト用）</button>
+
     </div>
   </section>
 
@@ -518,21 +518,7 @@ document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openM
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='mypage')updateProfile();if(id==='ranking')renderRanking();if(id==='account')syncAccountUI()}
 function openRanking(){show('ranking');}
 function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;}
-async function resetMyPoints(){
-  if(!supabaseClient||!currentUser){showAccountStatus('ログインしてください。',true);return;}
-  if(!confirm('自分の累計ポイントを0にリセットしますか？'))return;
-  try{
-    const {error}=await supabaseClient.from('profiles').update({total_points:0,updated_at:new Date().toISOString()}).eq('id',currentUser.id);
-    if(error)throw error;
-    state.totalPoints=0;
-    saveState();
-    updateProfile();
-    showToast('🧹 ポイントを0にリセットしました');
-  }catch(e){
-    console.error('Reset points error:',e);
-    showAccountStatus('ポイントのリセットに失敗しました：'+(e?.message||'不明なエラー'),true);
-  }
-}
+
 
 function goHome(){show('home')}
 
@@ -577,8 +563,8 @@ function buildDailyQuest(){
 function startQuest(){
   current=0;correct=0;combo=0;maxCombo=0;points=0;bossDone=false;resultShown=false;
   buildDailyQuest();
-  const today=new Date().toISOString().slice(0,10);
-  if(state.lastBonus!==today){state.totalPoints+=10;state.lastBonus=today;saveState();showToast(`🎁 今日の参加ボーナス +10 pt｜${questQuestions.length}問＋BOSS`)}else{saveState();showToast(`🎮 今日のクエスト：${questQuestions.length}問＋BOSS`)}
+  saveState();
+  showToast(`🎮 今日のクエスト：${questQuestions.length}問＋BOSS`);
   show('quiz');renderQuestion();
 }
 function renderQuestion(){
@@ -600,7 +586,7 @@ function answer(i){
   const q=questQuestions[current],btns=[...document.querySelectorAll('.choice')];
   btns.forEach((b,j)=>{b.classList.add('disabled');b.onclick=null;if(j===q.answer)b.classList.add('correct');if(j===i&&j!==q.answer)b.classList.add('wrong')});
   const good=i===q.answer;const fb=document.getElementById('feedback');
-  if(good){correct++;combo++;maxCombo=Math.max(maxCombo,combo);points+=10+(combo>=2?5:0);fb.className='feedback show good';document.getElementById('feedbackTitle').textContent=combo>=3?'🔥 COMBO! 正解！':'✅ 正解！'}
+  if(good){correct++;combo++;maxCombo=Math.max(maxCombo,combo);fb.className='feedback show good';document.getElementById('feedbackTitle').textContent=combo>=3?'🔥 COMBO! 正解！':'✅ 正解！'}
   else{combo=0;fb.className='feedback show bad';document.getElementById('feedbackTitle').textContent='🤔 ここがポイント'}
   document.getElementById('feedbackText').textContent=q.explain;document.getElementById('credoText').textContent=q.credo;
   document.getElementById('nextBtn').style.display='block';document.getElementById('nextBtn').textContent=current===questQuestions.length-1?'BOSSへ進む':'次へ　›';
@@ -608,15 +594,48 @@ function answer(i){
   if(good&&combo>=2)showToast(`🔥 ${combo} COMBO`)
 }
 function nextQuestion(){if(current<questQuestions.length-1){current++;renderQuestion()}else{show('boss');document.getElementById('bossMeter').style.width='100%';document.getElementById('bossHpText').textContent='100%'}}
-function bossAnswer(btn,good){document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;points+=50;document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
+function bossAnswer(btn,good){document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
 async function showResult(){
   if(resultShown)return;
   resultShown=true;
   const total=questQuestions.length+1;
   const score=correct+(bossDone?1:0);
+  let earned=0;
 
-  // 今回の獲得ポイントを累計へ加算
-  state.totalPoints+=points;
+  if(supabaseClient&&currentUser){
+    try{
+      const {error:attemptError}=await supabaseClient
+        .from('quiz_attempts')
+        .insert({
+          user_id:currentUser.id,
+          quest_date:dailyQuestKey,
+          correct_count:score,
+          total_questions:total,
+          boss_cleared:bossDone,
+          points:10
+        });
+      if(attemptError){
+        if(attemptError.code==='23505' || /duplicate key|unique/i.test(attemptError.message||'')){
+          showToast('🎮 今日は参加済みです｜ポイント追加なし');
+        }else{
+          console.error('Quest attempt save error:',attemptError);
+          showToast('⚠ 参加記録の保存に失敗しました');
+        }
+      }else{
+        earned=10;
+        state.lastBonus=dailyQuestKey;
+      }
+    }catch(e){
+      console.error('Quest attempt save error:',e);
+      showToast('⚠ 参加記録の保存に失敗しました');
+    }
+  }else if(state.lastBonus!==dailyQuestKey){
+    earned=10;
+    state.lastBonus=dailyQuestKey;
+  }
+
+  points=earned;
+  state.totalPoints+=earned;
   state.bestCombo=Math.max(state.bestCombo,maxCombo);
   state.plays+=1;
   saveState();
@@ -631,9 +650,7 @@ async function showResult(){
     localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
   }
 
-  // ここではプロフィールから古いポイントを再読込しない。
-  // 今回加算したstate.totalPointsをそのままSupabaseへ保存する。
-  if(supabaseClient&&currentUser){
+  if(supabaseClient&&currentUser&&earned>0){
     try{
       const {error}=await supabaseClient
         .from('profiles')
@@ -650,7 +667,7 @@ async function showResult(){
     }
   }
 
-  document.getElementById('resultPointsTop').textContent=points+' pt';
+  document.getElementById('resultPointsTop').textContent=earned+' pt';
   document.getElementById('resultCorrect').textContent=score+' / '+total;
   document.getElementById('resultCombo').textContent=maxCombo;
   show('result');
