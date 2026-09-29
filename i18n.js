@@ -184,7 +184,7 @@ function applyStaticUI(){
   const current=document.getElementById('languageMenuCurrent');if(current)current.textContent=l==='en'?'English':l==='vi'?'Tiếng Việt':'日本語';
   const nav=document.querySelectorAll('.nav-item');const navText=l==='en'?['Home','Quiz','My Page','Ranking']:l==='vi'?['Trang chủ','Câu đố','Trang cá nhân','Xếp hạng']:['ホーム','クイズ','マイページ','ランキング'];
   nav.forEach((b,i)=>{const icon=b.querySelector('.nav-icon');if(icon){[...b.childNodes].filter(x=>x.nodeType===3).forEach(x=>x.remove());b.appendChild(document.createTextNode(navText[i]))}});
-  const next=document.getElementById('nextBtn');if(next&&!next.style.display.includes('none'))next.textContent=document.getElementById('qCount')&&document.getElementById('qCount').textContent?.startsWith('')?'':next.textContent;
+  const next=document.getElementById('nextBtn');if(next&&next.style.display!=='none'){const last=typeof current!=='undefined'&&typeof questQuestions!=='undefined'&&current===questQuestions.length-1;next.textContent=l==='en'?(last?'Go to BOSS ›':'Next ›'):l==='vi'?(last?'Đến BOSS ›':'Tiếp theo ›'):(last?'BOSSへ進む':'次へ　›')}
 }
 function applyQuizTranslation(){
   const l=lang();if(l==='ja')return;
@@ -205,9 +205,15 @@ function applyBossTranslation(){
   const l=lang();if(l==='ja')return;
   const m=UI[l]||{};
   const banner=document.querySelector('.boss-banner');if(!banner)return;
-  const h=document.querySelector('.boss-title'),sub=document.querySelector('.boss-sub');if(h)h.textContent='👑 '+(l==='en'?'BOSS BATTLE':'TRẬN CHIẾN BOSS');if(sub)sub.textContent=m['ここまでのクレドを組み合わせて、最後の判断を突破しよう。'];
+  const h=document.querySelector('.boss-title'),sub=document.querySelector('.boss-sub');
+  if(h)h.textContent='👑 '+(l==='en'?'BOSS BATTLE':'TRẬN CHIẾN BOSS');
+  if(sub)sub.textContent=m['ここまでのクレドを組み合わせて、最後の判断を突破しよう。'];
+  const note=document.querySelectorAll('.boss-equipment-note');if(note[0])note[0].textContent=m['剣と盾を持ったBOSS'];if(note[1])note[1].textContent=m['BOSS EQUIPMENT'];
   document.querySelectorAll('.boss-option').forEach(b=>{const txt=b.textContent.trim();if(m[txt])b.textContent=m[txt]});
   const q=document.querySelector('.boss-q h3');if(q)q.textContent=m['納期直前、前工程から届いたデータに不備が見つかった。修正すると納期に影響する可能性もある。あなたなら、まずどう動く？'];
+  const clear=document.getElementById('bossClear');if(clear)clear.textContent=m['討伐結果を見る']|| (l==='en'?'See Quest Result':'Xem kết quả nhiệm vụ');
+  const result=document.getElementById('bossResult');
+  if(result&&result.style.display!=='none'){result.innerHTML=bossDone?(l==='en'?'<strong>⚔ PERFECT!</strong><br>Assess the situation, impact, and people involved, then connect them to the next decision. This combines several Credo ideas.':'<strong>⚔ HOÀN HẢO!</strong><br>Xác định tình huống, ảnh hưởng và người liên quan để kết nối với quyết định tiếp theo. Đây là cách kết hợp nhiều Credo.'):(l==='en'?'<strong>Think about it once more.</strong><br>The key is to avoid carrying the issue alone and connect it to the next decision.':'<strong>Hãy suy nghĩ thêm một lần nữa.</strong><br>Điểm chính là không ôm vấn đề một mình mà kết nối với quyết định tiếp theo.')}
 }
 function saveLanguageMeta(){document.documentElement.lang=lang()==='ja'?'ja':lang()==='en'?'en':'vi'}
 function setLanguageReal(l){
@@ -216,6 +222,12 @@ function setLanguageReal(l){
   applyStaticUI();applyQuizTranslation();applyBossTranslation();applyResultTranslation();
   if(window.closeLanguageSettings)window.closeLanguageSettings();
   showToast('🌐 '+(l==='en'?'English':l==='vi'?'Tiếng Việt':'日本語')+' selected');
+}
+function translateDynamic(){
+  applyStaticUI();
+  if(document.getElementById('quiz')?.classList.contains('active'))applyQuizTranslation();
+  if(document.getElementById('boss')?.classList.contains('active'))applyBossTranslation();
+  if(document.getElementById('result')?.classList.contains('active'))applyResultTranslation();
 }
 function applyResultTranslation(){
   const l=lang();if(l==='ja')return;const m=UI[l]||{};
