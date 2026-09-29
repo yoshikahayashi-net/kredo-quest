@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v28</title>
+<title>抱月クレドクエスト｜Prototype v29</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -355,6 +355,11 @@ body{display:flex;justify-content:center}
         <button class="account-secondary" onclick="continueDemoAccount()">今はデモモードで試す</button>
         <button class="account-secondary" onclick="sendPasswordReset()" id="resetPasswordBtn" style="display:none">パスワードを再設定する</button>
         <button class="account-secondary" onclick="logoutAccount()" id="logoutBtn" style="display:none">ログアウト</button>
+        <div id="recoveryPanel" style="display:none;margin-top:10px;padding:12px;border:1px solid #E6D695;border-radius:12px;background:#FFFBE9">
+          <div style="font-size:12px;font-weight:900;margin-bottom:6px">🔐 新しいパスワード</div>
+          <input id="recoveryPassword" type="password" autocomplete="new-password" placeholder="8文字以上" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit">
+          <button class="account-primary" style="margin-top:8px" onclick="updateRecoveryPassword()">新しいパスワードを保存</button>
+        </div>
         <div class="account-status" id="accountStatus"></div>
       </div>
       <div class="mini-actions">
@@ -1176,6 +1181,24 @@ function switchAuth(mode){authMode=mode;document.getElementById('tabSignup').cla
 function showAccountStatus(msg,error=false){const el=document.getElementById('accountStatus');el.textContent=msg;el.className='account-status'+(msg?' show':'');if(msg)el.style.background=error?'#FFF3F0':'#F4FBFD';if(msg)el.style.color=error?'#A64D44':'#5A6E7C'}
 function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;loadState();saveState();updateProfile();showAccountStatus('デモモードでプレイできます。ランキングはこの端末内で確認します。');showToast('👤 デモアカウントを設定しました')}
 async function sendPasswordReset(){const email=document.getElementById('authEmail').value.trim();if(!supabaseClient){showAccountStatus('デモモードではパスワード再設定は利用できません。',true);return}if(!email){showAccountStatus('先にメールアドレスを入力してください。',true);return}try{const redirectTo=location.href.split('#')[0];const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showAccountStatus('パスワード再設定メールを送信しました。メールの案内に沿って変更してください。')}catch(err){console.error('Password reset error:',err);showAccountStatus('再設定メールの送信に失敗しました：'+(err?.message||'不明なエラー'),true)}}
+async function updateRecoveryPassword(){
+  const password=document.getElementById('recoveryPassword').value;
+  if(!supabaseClient){showAccountStatus('パスワード再設定は利用できません。',true);return}
+  if(!password||password.length<8){showAccountStatus('パスワードは8文字以上で入力してください。',true);return}
+  try{
+    const {error}=await supabaseClient.auth.updateUser({password});
+    if(error)throw error;
+    document.getElementById('recoveryPanel').style.display='none';
+    document.getElementById('recoveryPassword').value='';
+    showAccountStatus('パスワードを変更しました。通常どおりログインできます。');
+    history.replaceState(null,'',location.pathname+location.search);
+  }catch(err){
+    console.error('Recovery password update error:',err);
+    showAccountStatus('パスワード変更に失敗しました：'+(err?.message||'不明なエラー'),true);
+  }
+}
+function showRecoveryPanel(){const panel=document.getElementById('recoveryPanel');if(panel)panel.style.display='block';}
+
 async function logoutAccount(){try{if(supabaseClient)await supabaseClient.auth.signOut()}catch(err){console.error('Logout error:',err)}currentUser=null;setLocalAccount(null);loadState();syncAccountUI();showAccountStatus('ログアウトしました。');showToast('👋 またね！')}
 
 async function submitAuth(){const displayName=document.getElementById('authDisplayName').value.trim();const email=document.getElementById('authEmail').value.trim();const password=document.getElementById('authPassword').value;if(!email||!password||(authMode==='signup'&&!displayName)){showAccountStatus('入力内容を確認してください。',true);return}
@@ -1260,7 +1283,22 @@ async function ensureProfileAfterLogin(){
   }
 }
 
-(async function restoreAuth(){if(supabaseClient){try{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;if(currentUser)await ensureProfileAfterLogin()}catch(e){}}else{currentUser=getLocalAccount();if(currentUser){loadState();updateProfile()}}})();
+(async function restoreAuth(){
+  if(supabaseClient){
+    try{
+      const {data}=await supabaseClient.auth.getSession();
+      currentUser=data.session?.user||null;
+      if(currentUser)await ensureProfileAfterLogin();
+      if(location.hash.includes('type=recovery')){show('account');showRecoveryPanel();}
+      supabaseClient.auth.onAuthStateChange((event)=>{
+        if(event==='PASSWORD_RECOVERY'){currentUser=true;show('account');showRecoveryPanel();}
+      });
+    }catch(e){}
+  }else{
+    currentUser=getLocalAccount();
+    if(currentUser){loadState();updateProfile()}
+  }
+})();
 (function restoreQuizData(){
   try{
     const saved=localStorage.getItem('kredoQuestions');
