@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v24</title>
+<title>抱月クレドクエスト｜Prototype v25</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -371,7 +371,7 @@ body{display:flex;justify-content:center}
       <div class="ranking-title">クレドクエスト 総合ランキング</div>
       <div class="ranking-sub">参加＋正解＋BOSSクリアで貯めたポイントを表示</div>
       <div class="ranking-card" style="margin-top:12px">
-        <div class="ranking-head"><strong>🏆 MONTHLY RANKING</strong><div style="font-size:10px;color:var(--muted);margin-top:3px" id="rankingMonth"></div></div>
+        <div class="ranking-head"><strong>🏆 TOTAL RANKING</strong><div style="font-size:10px;color:var(--muted);margin-top:3px" id="rankingMonth"></div></div>
         <div id="rankingList"></div>
       </div>
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント</button><button class="mini-btn" onclick="goHome()">⌂ ホームへ戻る</button></div>
@@ -1050,6 +1050,7 @@ async function showResult(){
   const bossPoints=bossDone?5:0;
   const participationPoints=10;
   let earned=0;
+  let participationRecorded=false;
 
   if(supabaseClient&&currentUser){
     try{
@@ -1073,6 +1074,7 @@ async function showResult(){
       }else{
         earned=participationPoints+correctPoints+bossPoints;
         state.lastBonus=dailyQuestKey;
+        participationRecorded=true;
       }
     }catch(e){
       console.error('Quest attempt save error:',e);
@@ -1081,12 +1083,13 @@ async function showResult(){
   }else if(state.lastBonus!==dailyQuestKey){
     earned=participationPoints+correctPoints+bossPoints;
     state.lastBonus=dailyQuestKey;
+    participationRecorded=true;
   }
 
   points=earned;
   state.totalPoints+=earned;
   state.bestCombo=Math.max(state.bestCombo,maxCombo);
-  state.plays+=1;
+  if(participationRecorded)state.plays+=1;
   saveState();
 
   const local=getLocalAccount();
@@ -1219,7 +1222,7 @@ async function getRankingData(){
   localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
   return demo.slice(0,50).map((x,i)=>({rank:i+1,name:x.name||'プレイヤー',points:Number(x.points||0),me:local?.id===x.id}));
 }
-async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name">${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</div><div class="rank-meta">参加ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
+async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name">${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</div><div class="rank-meta">累計ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 async function ensureProfileAfterLogin(){
   if(!supabaseClient||!currentUser)return null;
