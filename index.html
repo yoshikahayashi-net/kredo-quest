@@ -986,7 +986,7 @@ document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openM
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='mypage')updateProfile();if(id==='ranking')renderRanking();if(id==='account')syncAccountUI()}
 function openRanking(){show('ranking');}
-function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;const loggedIn=Boolean(currentUser);const resetBtn=document.getElementById('resetPasswordBtn');const logoutBtn=document.getElementById('logoutBtn');if(resetBtn)resetBtn.style.display=loggedIn?'block':'none';if(logoutBtn)logoutBtn.style.display=loggedIn?'block':'none';}
+function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;const loggedIn=Boolean(currentUser);const resetBtn=document.getElementById('resetPasswordBtn');const logoutBtn=document.getElementById('logoutBtn');if(resetBtn)resetBtn.style.display=(supabaseClient&&(!loggedIn||authMode==='login'))?'block':'none';if(logoutBtn)logoutBtn.style.display=loggedIn?'block':'none';}
 
 
 function goHome(){show('home')}
@@ -1228,7 +1228,16 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
     if(authMode==='signup'){
       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName}}});
       if(error) throw error;
-      currentUser=data.user;await ensureProfileAfterLogin();if(data.session){showAccountStatus('アカウントを登録しました。');show('ranking')}else{showAccountStatus('登録しました。確認メールをご確認のうえ、ログインしてください。');}
+      if(data.session){
+        currentUser=data.user;
+        await ensureProfileAfterLogin();
+        showAccountStatus('アカウントを登録しました。');
+        show('ranking');
+      }else{
+        currentUser=null;
+        syncAccountUI();
+        showAccountStatus('登録しました。確認メールをご確認のうえ、メール確認後にログインしてください。');
+      }
     }else{
       const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');show('ranking');
     }
@@ -1312,8 +1321,11 @@ async function ensureProfileAfterLogin(){
       currentUser=data.session?.user||null;
       if(currentUser)await ensureProfileAfterLogin();
       if(location.hash.includes('type=recovery')){show('account');showRecoveryPanel();}
-      supabaseClient.auth.onAuthStateChange((event)=>{
-        if(event==='PASSWORD_RECOVERY'){currentUser=true;show('account');showRecoveryPanel();}
+      supabaseClient.auth.onAuthStateChange((event,session)=>{
+        if(event==='SIGNED_IN')currentUser=session?.user||currentUser;
+        if(event==='SIGNED_OUT')currentUser=null;
+        if(event==='PASSWORD_RECOVERY'){currentUser=session?.user||currentUser;show('account');showRecoveryPanel();}
+        syncAccountUI();
       });
     }catch(e){}
   }else{
