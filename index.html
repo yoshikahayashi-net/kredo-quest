@@ -1263,7 +1263,23 @@ async function ensureProfileAfterLogin(){
 }
 
 (async function restoreAuth(){if(supabaseClient){try{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;if(currentUser)await ensureProfileAfterLogin()}catch(e){}}else{currentUser=getLocalAccount()}})();
-(function restoreQuizData(){try{const saved=localStorage.getItem('kredoQuestions');if(saved){const parsed=JSON.parse(saved);if(Array.isArray(parsed)&&parsed.length)questions=parsed}}catch(e){localStorage.removeItem('kredoQuestions')}})();
+(function restoreQuizData(){
+  try{
+    const saved=localStorage.getItem('kredoQuestions');
+    if(saved){
+      const parsed=JSON.parse(saved);
+      // 旧デモ（5問など）が残っている端末は、本番28問へ自動更新。
+      if(Array.isArray(parsed)&&parsed.length>=questions.length)questions=parsed;
+      else{
+        localStorage.setItem('kredoQuestions',JSON.stringify(questions));
+      }
+    }else{
+      localStorage.setItem('kredoQuestions',JSON.stringify(questions));
+    }
+  }catch(e){
+    localStorage.setItem('kredoQuestions',JSON.stringify(questions));
+  }
+})();
 buildDailyQuest();
 saveState();
 renderLibrary();
