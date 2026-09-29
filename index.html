@@ -1078,7 +1078,6 @@ async function showResult(){
       }else{
         const missingRpc=/record_quest_attempt|function .* does not exist|PGRST202/i.test((attemptError.message||'')+' '+(attemptError.code||''));
         console.error('Quest RPC error:',attemptError);
-        const missingRpc=/record_quest_attempt|function .* does not exist|PGRST202/i.test((attemptError.message||'')+' '+(attemptError.code||''));
         showToast(missingRpc?'⚠ 本番用ポイント処理が未設定です':'⚠ 参加記録の保存に失敗しました');
       }
     }catch(e){
