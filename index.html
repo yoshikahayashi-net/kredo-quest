@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v29</title>
+<title>抱月クレドクエスト｜Prototype v30</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -1112,7 +1112,7 @@ async function showResult(){
   document.getElementById('resultPointsTop').textContent=earned+' pt';
   document.getElementById('resultCorrect').textContent=score+' / '+total;
   document.getElementById('resultCombo').textContent=maxCombo;
-  document.getElementById('resultBreakdown').textContent='参加 '+participationPoints+'pt ＋ 正解 '+correctPoints+'pt ＋ BOSS '+bossPoints+'pt';
+  document.getElementById('resultBreakdown').textContent=participationRecorded ? ('今回：参加 '+participationPoints+'pt ＋ 正解 '+correctPoints+'pt ＋ BOSS '+bossPoints+'pt') : ('今回は追加ポイントなし');
   show('result');
 }
 
@@ -1121,6 +1121,7 @@ let state={totalPoints:Number(localStorage.getItem('kredoTotalPoints')||0),plays
 function stateStoragePrefix(){const id=currentUser?.id||getLocalAccount()?.id||'guest';return 'kredoState:'+id+':';}
 function loadState(){const p=stateStoragePrefix();state={totalPoints:Number(localStorage.getItem(p+'totalPoints')||0),plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||''};}
 function saveState(){const p=stateStoragePrefix();localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');}
+async function syncAttemptCount(){if(!supabaseClient||!currentUser)return;try{const {count,error}=await supabaseClient.from('quiz_attempts').select('id',{count:'exact',head:true}).eq('user_id',currentUser.id);if(!error&&typeof count==='number'){state.plays=count;saveState();updateProfile()}}catch(e){console.error('Attempt count sync error:',e)}}
 function updateProfile(){document.getElementById('profilePoints').textContent=state.totalPoints+' pt';document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';}
 
 let editingIndex=-1;
@@ -1258,6 +1259,7 @@ async function ensureProfileAfterLogin(){
         .single();
       if(createError)throw createError;
       if(created?.total_points!=null){state.totalPoints=Number(created.total_points)||0;saveState();}
+      await syncAttemptCount();
       return created;
     }
 
@@ -1271,11 +1273,13 @@ async function ensureProfileAfterLogin(){
       if(updateError)throw updateError;
       state.totalPoints=Number(updated?.total_points||0);
       saveState();
+      await syncAttemptCount();
       return updated;
     }
 
     state.totalPoints=Number(existing.total_points||0);
     saveState();
+    await syncAttemptCount();
     return existing;
   }catch(e){
     console.error('Profile sync error:',e);
