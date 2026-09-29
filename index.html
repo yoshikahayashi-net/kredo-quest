@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v27</title>
+<title>抱月クレドクエスト｜Prototype v28</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -353,6 +353,8 @@ body{display:flex;justify-content:center}
         <div class="account-field"><label>パスワード</label><input id="authPassword" type="password" autocomplete="new-password" placeholder="8文字以上"></div>
         <button class="account-primary" onclick="submitAuth()" id="authSubmit">アカウントを登録する</button>
         <button class="account-secondary" onclick="continueDemoAccount()">今はデモモードで試す</button>
+        <button class="account-secondary" onclick="sendPasswordReset()" id="resetPasswordBtn" style="display:none">パスワードを再設定する</button>
+        <button class="account-secondary" onclick="logoutAccount()" id="logoutBtn" style="display:none">ログアウト</button>
         <div class="account-status" id="accountStatus"></div>
       </div>
       <div class="mini-actions">
@@ -390,7 +392,7 @@ body{display:flex;justify-content:center}
         <div class="profile-stat"><small>累計ポイント</small><strong id="profilePoints">0 pt</strong></div>
         <div class="profile-stat"><small>参加回数</small><strong id="profilePlays">0 回</strong></div>
         <div class="profile-stat"><small>最高COMBO</small><strong id="profileCombo">0</strong></div>
-        <div class="profile-stat"><small>登録クイズ</small><strong id="profileQuestions">5 問</strong></div>
+        <div class="profile-stat"><small>登録クイズ</small><strong id="profileQuestions">30 問</strong></div>
       </div>
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
       <div class="import-actions">
@@ -960,7 +962,7 @@ document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openM
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='mypage')updateProfile();if(id==='ranking')renderRanking();if(id==='account')syncAccountUI()}
 function openRanking(){show('ranking');}
-function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;}
+function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;const loggedIn=Boolean(currentUser);const resetBtn=document.getElementById('resetPasswordBtn');const logoutBtn=document.getElementById('logoutBtn');if(resetBtn)resetBtn.style.display=loggedIn?'block':'none';if(logoutBtn)logoutBtn.style.display=loggedIn?'block':'none';}
 
 
 function goHome(){show('home')}
@@ -1070,33 +1072,9 @@ async function showResult(){
         else showToast('🎮 今日は参加済みです｜追加ポイントなし');
       }else{
         const missingRpc=/record_quest_attempt|function .* does not exist|PGRST202/i.test((attemptError.message||'')+' '+(attemptError.code||''));
-        if(missingRpc){
-          console.warn('Server point RPC is not installed yet; using temporary legacy fallback.',attemptError);
-          const {error:fallbackError}=await supabaseClient
-            .from('quiz_attempts')
-            .insert({
-              user_id:currentUser.id,
-              quest_date:dailyQuestKey,
-              correct_count:score,
-              total_questions:total,
-              boss_cleared:bossDone,
-              points:participationPoints+correctPoints+bossPoints
-            });
-          if(!fallbackError){
-            earned=participationPoints+correctPoints+bossPoints;
-            state.lastBonus=dailyQuestKey;
-            participationRecorded=true;
-            showToast('⚠ 本番用ポイント処理が未反映のため暫定動作中');
-          }else if(fallbackError.code==='23505' || /duplicate key|unique/i.test(fallbackError.message||'')){
-            showToast('🎮 今日は参加済みです｜追加ポイントなし');
-          }else{
-            console.error('Quest attempt fallback error:',fallbackError);
-            showToast('⚠ 参加記録の保存に失敗しました');
-          }
-        }else{
-          console.error('Quest RPC error:',attemptError);
-          showToast('⚠ 参加記録の保存に失敗しました');
-        }
+        console.error('Quest RPC error:',attemptError);
+        const missingRpc=/record_quest_attempt|function .* does not exist|PGRST202/i.test((attemptError.message||'')+' '+(attemptError.code||''));
+        showToast(missingRpc?'⚠ 本番用ポイント処理が未設定です':'⚠ 参加記録の保存に失敗しました');
       }
     }catch(e){
       console.error('Quest attempt save error:',e);
@@ -1124,24 +1102,7 @@ async function showResult(){
     localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
   }
 
-  // 本番RPCを利用した場合は、ポイント台帳とprofiles更新をサーバー側で完了している。
-  // 旧スキーマへの暫定フォールバック時だけ、従来のprofiles更新を許可する。
-  if(supabaseClient&&currentUser&&earned>0&&!usedServerLedger){
-    try{
-      const {error}=await supabaseClient
-        .from('profiles')
-        .update({
-          display_name:currentUser.user_metadata?.display_name||'プレイヤー',
-          total_points:state.totalPoints,
-          updated_at:new Date().toISOString()
-        })
-        .eq('id',currentUser.id);
-      if(error)throw error;
-    }catch(e){
-      console.error('Profile points fallback update error:',e);
-      showToast('⚠ ポイント保存に失敗しました');
-    }
-  }
+  // 本番のポイント台帳と profiles.total_points は record_quest_attempt RPC が更新する。
 
   document.getElementById('resultPointsTop').textContent=earned+' pt';
   document.getElementById('resultCorrect').textContent=score+' / '+total;
@@ -1214,6 +1175,9 @@ function openAccount(){show('account')}
 function switchAuth(mode){authMode=mode;document.getElementById('tabSignup').classList.toggle('active',mode==='signup');document.getElementById('tabLogin').classList.toggle('active',mode==='login');document.getElementById('accountTitle').textContent=mode==='signup'?'アカウントをつくる':'ログイン';document.getElementById('accountSub').textContent=mode==='signup'?'ランキングに参加するにはアカウント登録が必要です。ゲーム内の表示名だけをランキングに表示します。':'登録したメールアドレスとパスワードでログインします。';document.getElementById('displayNameField').style.display=mode==='signup'?'block':'none';document.getElementById('authPassword').setAttribute('autocomplete',mode==='signup'?'new-password':'current-password');document.getElementById('authSubmit').textContent=mode==='signup'?'アカウントを登録する':'ログイン';showAccountStatus('')}
 function showAccountStatus(msg,error=false){const el=document.getElementById('accountStatus');el.textContent=msg;el.className='account-status'+(msg?' show':'');if(msg)el.style.background=error?'#FFF3F0':'#F4FBFD';if(msg)el.style.color=error?'#A64D44':'#5A6E7C'}
 function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;loadState();saveState();updateProfile();showAccountStatus('デモモードでプレイできます。ランキングはこの端末内で確認します。');showToast('👤 デモアカウントを設定しました')}
+async function sendPasswordReset(){const email=document.getElementById('authEmail').value.trim();if(!supabaseClient){showAccountStatus('デモモードではパスワード再設定は利用できません。',true);return}if(!email){showAccountStatus('先にメールアドレスを入力してください。',true);return}try{const redirectTo=location.href.split('#')[0];const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showAccountStatus('パスワード再設定メールを送信しました。メールの案内に沿って変更してください。')}catch(err){console.error('Password reset error:',err);showAccountStatus('再設定メールの送信に失敗しました：'+(err?.message||'不明なエラー'),true)}}
+async function logoutAccount(){try{if(supabaseClient)await supabaseClient.auth.signOut()}catch(err){console.error('Logout error:',err)}currentUser=null;setLocalAccount(null);loadState();syncAccountUI();showAccountStatus('ログアウトしました。');showToast('👋 またね！')}
+
 async function submitAuth(){const displayName=document.getElementById('authDisplayName').value.trim();const email=document.getElementById('authEmail').value.trim();const password=document.getElementById('authPassword').value;if(!email||!password||(authMode==='signup'&&!displayName)){showAccountStatus('入力内容を確認してください。',true);return}
   if(!supabaseClient){
     const account={id:'local-'+Date.now(),displayName:authMode==='signup'?displayName:(getLocalAccount()?.displayName||displayName||'プレイヤー'),email,demo:true};setLocalAccount(account);currentUser=account;loadState();saveState();updateProfile();showAccountStatus('現在はデモモードです。実運用のアカウント登録はSupabase接続後に有効になります。');showToast('👤 アカウント情報を保存しました');return;
@@ -1222,7 +1186,7 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
     if(authMode==='signup'){
       const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName}}});
       if(error) throw error;
-      currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('アカウントを登録しました。');show('ranking');
+      currentUser=data.user;await ensureProfileAfterLogin();if(data.session){showAccountStatus('アカウントを登録しました。');show('ranking')}else{showAccountStatus('登録しました。確認メールをご確認のうえ、ログインしてください。');}
     }else{
       const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');show('ranking');
     }
@@ -1270,10 +1234,7 @@ async function ensureProfileAfterLogin(){
         .select('id,display_name,total_points,updated_at')
         .single();
       if(createError)throw createError;
-      if(created?.total_points!=null){
-        state.totalPoints=Number(created.total_points)||0;
-        saveState();
-      }
+      if(created?.total_points!=null){state.totalPoints=Number(created.total_points)||0;saveState();}
       return created;
     }
 
