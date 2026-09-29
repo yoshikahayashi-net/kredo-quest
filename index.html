@@ -498,7 +498,7 @@ let questions=[
  {level:'上級',chapter:'クレド④ 経験を残す',question:'過去にうまくいった方法を後輩へ伝えるなら、何を残す？',scene:'手順だけでなく、なぜそうしたかも残そう。',art:'📝',choices:['結果だけ','手順だけ','自分と同じ方法だけ','なぜその方法を選んだかという判断の背景'],answer:3,explain:'判断の背景が残っていると、状況が変わっても応用しやすくなります。',credo:'【デモ用】経験・ノウハウを残す'},
  {level:'上級',chapter:'クレド⑤ 支えてつなぐ',question:'「自分が全部やった方が早い」と感じたとき、あえて任せる意味は？',scene:'経験を渡して、チームとして次も動ける状態をつくる。',art:'🤝',choices:['自分の仕事を減らすため','相手に経験を渡し、チームとして次も動ける状態をつくる','責任を相手に移すため','自分が楽をするため'],answer:1,explain:'目先の速さだけでなく、経験を渡してチームの力をつなぐ視点が重要です。',credo:'【デモ用】支えてつなぐ／経験を渡す'}
 ];
-let current=0,correct=0,combo=0,maxCombo=0,points=0,bossDone=false;
+let current=0,correct=0,combo=0,maxCombo=0,points=0,bossDone=false,resultShown=false;
 let questQuestions=[];
 let dailyQuestKey='';
 
@@ -575,7 +575,7 @@ function buildDailyQuest(){
 }
 
 function startQuest(){
-  current=0;correct=0;combo=0;maxCombo=0;points=0;bossDone=false;
+  current=0;correct=0;combo=0;maxCombo=0;points=0;bossDone=false;resultShown=false;
   buildDailyQuest();
   const today=new Date().toISOString().slice(0,10);
   if(state.lastBonus!==today){state.totalPoints+=10;state.lastBonus=today;saveState();showToast(`🎁 今日の参加ボーナス +10 pt｜${questQuestions.length}問＋BOSS`)}else{saveState();showToast(`🎮 今日のクエスト：${questQuestions.length}問＋BOSS`)}
@@ -610,6 +610,8 @@ function answer(i){
 function nextQuestion(){if(current<questQuestions.length-1){current++;renderQuestion()}else{show('boss');document.getElementById('bossMeter').style.width='100%';document.getElementById('bossHpText').textContent='100%'}}
 function bossAnswer(btn,good){document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;points+=50;document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
 async function showResult(){
+  if(resultShown)return;
+  resultShown=true;
   const total=questQuestions.length+1;
   const score=correct+(bossDone?1:0);
 
