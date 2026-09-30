@@ -281,7 +281,7 @@ body{display:flex;justify-content:center}
     <div class="home-grid">
       <button class="menu-card" onclick="openCredo()"><span class="menu-icon">📖</span><span class="menu-label">クレドを知る</span></button>
       <button class="menu-card" onclick="show('ranking')"><span class="menu-icon">♛</span><span class="menu-label">ランキング</span></button>
-      <button class="menu-card" onclick="toast('参加ポイントの履歴を表示します')"><span class="menu-icon">🎁</span><span class="menu-label">ポイント履歴</span></button>
+      <button class="menu-card" onclick="show('pointHistory')"><span class="menu-icon">🎁</span><span class="menu-label">ポイント履歴</span></button>
       <button class="menu-card" onclick="show('faq')"><span class="menu-icon">?</span><span class="menu-label">よくある質問</span></button>
       <button class="menu-card" style="grid-column:1/-1" onclick="openQuestMap()"><span class="menu-icon">⚔</span><span class="menu-label">クエストマップを見る</span></button>
     </div>
@@ -363,6 +363,26 @@ body{display:flex;justify-content:center}
         <button class="credo-external" onclick="window.open('https://www.hougetu.co.jp/recruit/credo/','_blank','noopener,noreferrer')">公式サイトを別タブで開く ↗</button>
         <button class="credo-back" onclick="goHome()">ホームへ戻る</button>
       </div>
+    </div>
+  </section>
+
+  <!-- POINT HISTORY -->
+  <section id="pointHistory" class="screen" style="background:#F4FBFD">
+    <div class="topbar"><div class="brand"><span class="brand-mark">◎</span>抱月クレドクエスト</div><div class="menu" onclick="goHome()" style="cursor:pointer">✕</div></div>
+    <div class="faq-wrap">
+      <div class="faq-hero">
+        <div class="faq-kicker">POINT HISTORY</div>
+        <div class="faq-title">ポイント履歴</div>
+        <div class="faq-sub">これまでに獲得したポイントの履歴を確認できる機能です。</div>
+      </div>
+      <div class="faq-item open" style="margin-top:12px">
+        <div style="padding:24px 18px;text-align:center">
+          <div style="font-size:34px;margin-bottom:8px">🎁</div>
+          <div style="font-size:17px;font-weight:900;color:var(--ink)">COMING SOON</div>
+          <div style="margin-top:7px;color:var(--muted);font-size:11px;line-height:1.7">ポイント履歴機能は現在準備中です。<br>今後のアップデートで追加予定です。</div>
+        </div>
+      </div>
+      <div class="faq-footer"><button class="faq-back" onclick="goHome()">⌂ ホームへ戻る</button></div>
     </div>
   </section>
 
