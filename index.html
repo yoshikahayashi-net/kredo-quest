@@ -511,50 +511,7 @@ body{display:flex;justify-content:center}
       <div class="map-sub">今日のクエストから、次のステージへ。いま開いている場所が緑で表示されます。</div>
       <div class="map-progress"><span>YOUR ADVENTURE</span><strong>STAGE 01</strong></div>
 
-      <div class="quest-map">
-        <div class="map-stage active">
-          <button class="map-badge" onclick="openQuestStage(1)" aria-label="STAGE 01 今日のクエスト">
-            <span><span class="icon">⚔</span></span>
-            <span class="num">01</span>
-          </button>
-          <button class="map-card" onclick="openQuestStage(1)" style="text-align:left;cursor:pointer">
-            <div class="map-card-head"><span class="map-card-title">今日のクエスト</span><span class="map-status">OPEN</span></div>
-            <div class="map-card-text">毎日切り替わるクイズに挑戦。最後にはBOSSが待っています。</div>
-          </button>
-        </div>
-
-        <div class="map-stage locked">
-          <button class="map-badge" onclick="openQuestStage(2)" aria-label="STAGE 02 ロック中"><span class="icon">🔒</span><span class="num">02</span></button>
-          <button class="map-card" onclick="openQuestStage(2)" style="text-align:left;cursor:pointer">
-            <div class="map-card-head"><span class="map-card-title">STAGE 02</span><span class="map-status">LOCKED</span></div>
-            <div class="map-card-text">次のクエストエリア。今後のアップデートで開放予定。</div>
-          </button>
-        </div>
-
-        <div class="map-stage locked">
-          <button class="map-badge" onclick="openQuestStage(3)" aria-label="STAGE 03 ロック中"><span class="icon">🔒</span><span class="num">03</span></button>
-          <button class="map-card" onclick="openQuestStage(3)" style="text-align:left;cursor:pointer">
-            <div class="map-card-head"><span class="map-card-title">STAGE 03</span><span class="map-status">LOCKED</span></div>
-            <div class="map-card-text">クレドの理解をさらに深めるエリア。</div>
-          </button>
-        </div>
-
-        <div class="map-stage locked">
-          <button class="map-badge" onclick="openQuestStage(4)" aria-label="STAGE 04 ロック中"><span class="icon">🔒</span><span class="num">04</span></button>
-          <button class="map-card" onclick="openQuestStage(4)" style="text-align:left;cursor:pointer">
-            <div class="map-card-head"><span class="map-card-title">STAGE 04</span><span class="map-status">LOCKED</span></div>
-            <div class="map-card-text">仲間と一緒に挑むクエストエリア。</div>
-          </button>
-        </div>
-
-        <div class="map-stage boss locked">
-          <button class="map-badge" onclick="openQuestStage(5)" aria-label="BOSS ロック中"><span class="icon">👑</span><span class="num">BOSS</span></button>
-          <button class="map-card" onclick="openQuestStage(5)" style="text-align:left;cursor:pointer">
-            <div class="map-card-head"><span class="map-card-title">FINAL BOSS</span><span class="map-status">LOCKED</span></div>
-            <div class="map-card-text">複数のクレドを組み合わせて挑む最終ステージ。</div>
-          </button>
-        </div>
-      </div>
+      <div class="quest-map" id="questMapList"></div>
 
       <div class="map-note">💡 まずはSTAGE 01を選んで、今日のクエストを始めよう。</div>
       <button class="sheet-close" onclick="closeQuestMap()">閉じる</button>
@@ -1233,6 +1190,13 @@ async function showResult(){
   state.totalPoints+=earned;
   state.bestCombo=Math.max(state.bestCombo,maxCombo);
   if(participationRecorded)state.plays+=1;
+
+  // BOSSまでクリアしたらSTAGE 01をCLEARにして次ステージを開放。
+  if(bossDone){
+    const wasFirstClear=Number(state.clearStage||0)<1;
+    state.clearStage=Math.max(Number(state.clearStage||0),1);
+    if(wasFirstClear)showToast('🗺️ STAGE 01 CLEAR！次のエリアが開放されました');
+  }
   saveState();
 
   const local=getLocalAccount();
@@ -1255,10 +1219,10 @@ async function showResult(){
 }
 
 const DEMO_QUESTIONS = JSON.parse(JSON.stringify(questions));
-let state={totalPoints:Number(localStorage.getItem('kredoTotalPoints')||0),plays:Number(localStorage.getItem('kredoPlays')||0),bestCombo:Number(localStorage.getItem('kredoBestCombo')||0),lastBonus:localStorage.getItem('kredoLastBonus')||''};
+let state={totalPoints:Number(localStorage.getItem('kredoTotalPoints')||0),plays:Number(localStorage.getItem('kredoPlays')||0),bestCombo:Number(localStorage.getItem('kredoBestCombo')||0),lastBonus:localStorage.getItem('kredoLastBonus')||'',clearStage:Number(localStorage.getItem('kredoClearStage')||0)};
 function stateStoragePrefix(){const id=currentUser?.id||getLocalAccount()?.id||'guest';return 'kredoState:'+id+':';}
-function loadState(){const p=stateStoragePrefix();state={totalPoints:Number(localStorage.getItem(p+'totalPoints')||0),plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||''};}
-function saveState(){const p=stateStoragePrefix();localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');}
+function loadState(){const p=stateStoragePrefix();state={totalPoints:Number(localStorage.getItem(p+'totalPoints')||0),plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||'',clearStage:Number(localStorage.getItem(p+'clearStage')||0)};}
+function saveState(){const p=stateStoragePrefix();localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');localStorage.setItem(p+'clearStage',String(state.clearStage||0));}
 async function syncAttemptCount(){if(!supabaseClient||!currentUser)return;try{const {count,error}=await supabaseClient.from('quiz_attempts').select('id',{count:'exact',head:true}).eq('user_id',currentUser.id);if(!error&&typeof count==='number'){state.plays=count;saveState();updateProfile()}}catch(e){console.error('Attempt count sync error:',e)}}
 function updateProfile(){document.getElementById('profilePoints').textContent=state.totalPoints+' pt';document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';}
 
@@ -1483,16 +1447,58 @@ function updateLanguageButtons(){const lang=getLanguage();document.querySelector
 function setLanguage(lang){if(!LANGUAGE_LABELS[lang])return;localStorage.setItem('kredoLanguage',lang);updateLanguageButtons();closeLanguageSettings();showToast('🌐 '+LANGUAGE_LABELS[lang]+' を選択しました');}
 function toggleFaq(btn){const item=btn.closest('.faq-item');if(!item)return;document.querySelectorAll('.faq-item.open').forEach(x=>{if(x!==item)x.classList.remove('open')});item.classList.toggle('open')}
 function openCredo(){show('credo')}
-function openQuestMap(){const panel=document.getElementById('questPanel');if(panel)panel.classList.add('open')}
+function openQuestMap(){
+  const panel=document.getElementById('questPanel');
+  if(panel){
+    renderQuestMap();
+    panel.classList.add('open');
+  }
+}
 function closeQuestMap(e){if(!e||e.target.id==='questPanel'){const panel=document.getElementById('questPanel');if(panel)panel.classList.remove('open')}}
+function renderQuestMap(){
+  const list=document.getElementById('questMapList');
+  if(!list)return;
+  const clearStage=Number(state?.clearStage||0);
+  const stages=[
+    {id:1,title:'今日のクエスト',text:'毎日切り替わるクイズに挑戦。最後にはBOSSが待っています。',icon:'⚔',kind:'quest'},
+    {id:2,title:'STAGE 02',text:'次のクエストエリア。ここから先は今後のアップデートで広がります。',icon:'✦',kind:'quest'},
+    {id:3,title:'STAGE 03',text:'クレドの理解をさらに深めるエリア。',icon:'✦',kind:'quest'},
+    {id:4,title:'STAGE 04',text:'仲間と一緒に挑むクエストエリア。',icon:'✦',kind:'quest'},
+    {id:5,title:'FINAL BOSS',text:'複数のクレドを組み合わせて挑む最終ステージ。',icon:'👑',kind:'boss'}
+  ];
+  list.innerHTML=stages.map(s=>{
+    const cleared=s.id<=clearStage;
+    const unlocked=s.id<=clearStage+1;
+    const active=s.id===1&&!cleared;
+    const status=cleared?'CLEAR':(unlocked?'OPEN':'LOCKED');
+    const icon=cleared?'✓':(unlocked?s.icon:'🔒');
+    const cls=['map-stage',s.kind==='boss'?'boss':'',cleared?'cleared':'',active?'active':'',!unlocked?'locked':''].filter(Boolean).join(' ');
+    return `<div class="${cls}">
+      <button class="map-badge" onclick="openQuestStage(${s.id})" aria-label="${s.title}">
+        <span class="icon">${icon}</span>
+        <span class="num">${s.kind==='boss'?'BOSS':String(s.id).padStart(2,'0')}</span>
+      </button>
+      <button class="map-card" onclick="openQuestStage(${s.id})" style="text-align:left;cursor:pointer">
+        <div class="map-card-head"><span class="map-card-title">${s.title}</span><span class="map-status">${status}</span></div>
+        <div class="map-card-text">${s.text}</div>
+      </button>
+    </div>`;
+  }).join('');
+  const note=document.querySelector('#questPanel .map-note');
+  if(note)note.innerHTML=clearStage>=1?'🎉 STAGE 01を突破！次のエリアが開放されています。':'💡 まずはSTAGE 01を選んで、今日のクエストを始めよう。';
+}
 function openQuestStage(stage){
+  const clearStage=Number(state?.clearStage||0);
   if(stage===1){
     closeQuestMap();
     startQuest();
     return;
   }
-  if(stage===5){showToast('👑 FINAL BOSSは、先のステージをクリアすると開放されます');return}
-  showToast('🔒 STAGE '+String(stage).padStart(2,'0')+' は準備中です');
+  if(stage<=clearStage+1){
+    showToast(stage===2?'🗺️ STAGE 02 OPEN｜クエスト追加予定です':'🔓 STAGE '+String(stage).padStart(2,'0')+' は開放済みです');
+    return;
+  }
+  showToast('🔒 STAGE '+String(stage).padStart(2,'0')+' は、前のステージをクリアすると開放されます');
 }
 function showToast(t){const x=document.getElementById('toast');x.textContent=t;x.style.display='block';clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.style.display='none',1200)}
 </script>
