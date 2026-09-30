@@ -256,6 +256,7 @@ body{display:flex;justify-content:center}
 }
 @keyframes menuIn{from{transform:translateY(-7px);opacity:0}to{transform:translateY(0);opacity:1}}
 
+.faq-wrap{padding:16px 16px 110px}.faq-hero{background:linear-gradient(135deg,#fff,#EAF9FE);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px}.faq-kicker{font-size:11px;color:#0D73AC;font-weight:900;letter-spacing:.08em}.faq-title{font-size:22px;font-weight:900;margin:4px 0}.faq-sub{font-size:11px;color:var(--muted);line-height:1.6}.faq-list{display:grid;gap:8px}.faq-item{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 3px 10px rgba(31,105,131,.05)}.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:#fff;padding:14px 13px;text-align:left;font:inherit;font-size:12px;font-weight:900;color:var(--ink);cursor:pointer}.faq-q::after{content:'＋';font-size:18px;line-height:1;color:#4285A3;flex:none}.faq-item.open .faq-q{background:#F5FBFE}.faq-item.open .faq-q::after{content:'−'}.faq-a{display:none;padding:0 13px 14px;color:#526C79;font-size:11px;line-height:1.7}.faq-item.open .faq-a{display:block}.faq-footer{margin-top:12px}.faq-back{width:100%;height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#176D9F;font-weight:900;cursor:pointer}
 </style>
 </head>
 <body>
@@ -281,7 +282,7 @@ body{display:flex;justify-content:center}
       <button class="menu-card" onclick="openCredo()"><span class="menu-icon">📖</span><span class="menu-label">クレドを知る</span></button>
       <button class="menu-card" onclick="show('ranking')"><span class="menu-icon">♛</span><span class="menu-label">ランキング</span></button>
       <button class="menu-card" onclick="toast('参加ポイントの履歴を表示します')"><span class="menu-icon">🎁</span><span class="menu-label">ポイント履歴</span></button>
-      <button class="menu-card" onclick="toast('よくある質問は今後追加予定')"><span class="menu-icon">?</span><span class="menu-label">よくある質問</span></button>
+      <button class="menu-card" onclick="show('faq')"><span class="menu-icon">?</span><span class="menu-label">よくある質問</span></button>
       <button class="menu-card" style="grid-column:1/-1" onclick="openQuestMap()"><span class="menu-icon">⚔</span><span class="menu-label">クエストマップを見る</span></button>
     </div>
   </section>
@@ -362,6 +363,29 @@ body{display:flex;justify-content:center}
         <button class="credo-external" onclick="window.open('https://www.hougetu.co.jp/recruit/credo/','_blank','noopener,noreferrer')">公式サイトを別タブで開く ↗</button>
         <button class="credo-back" onclick="goHome()">ホームへ戻る</button>
       </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="screen" style="background:#F4FBFD">
+    <div class="topbar"><div class="brand"><span class="brand-mark">◎</span>抱月クレドクエスト</div><div class="menu" onclick="goHome()" style="cursor:pointer">✕</div></div>
+    <div class="faq-wrap">
+      <div class="faq-hero">
+        <div class="faq-kicker">FAQ</div>
+        <div class="faq-title">よくある質問</div>
+        <div class="faq-sub">クレドクエストの遊び方やポイントについて、よくある質問をまとめています。</div>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">クレドクエストは何をするもの？</button><div class="faq-a">クレドをクイズ形式で楽しく学びながら、日々の行動に結びつけるためのゲームです。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">1日に何回でもできますか？</button><div class="faq-a">1日のクエストは1回まで参加できます。毎日、今日のクエストに挑戦できます。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">ポイントは何でもらえる？</button><div class="faq-a">クエストへの参加、クイズの正解、BOSSクリアでポイントを獲得できます。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">ランキングは何を競うの？</button><div class="faq-a">クレドクエストで獲得した累計ポイントでランキングされます。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">間違えたらポイントはもらえない？</button><div class="faq-a">クエストへの参加ポイントがあります。正解すると、さらにポイントを獲得できます。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">BOSSって何？</button><div class="faq-a">その日のクエストの最後に登場する、複数のクレドを組み合わせて考える最終問題です。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">クレドの詳しい内容を確認したい</button><div class="faq-a">ホームの「クレドを知る」から、抱月クレドの公式ページを確認できます。</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">英語やベトナム語でも遊べる？</button><div class="faq-a">メニューの「言語設定」から、日本語・English・Tiếng Việtを切り替えられます。</div></div>
+      </div>
+      <div class="faq-footer"><button class="faq-back" onclick="goHome()">⌂ ホームへ戻る</button></div>
     </div>
   </section>
 
@@ -1374,6 +1398,7 @@ function openLanguageSettings(){const panel=document.getElementById('languagePan
 function closeLanguageSettings(e){if(!e||e.target.id==='languagePanel'){const panel=document.getElementById('languagePanel');if(panel)panel.classList.remove('open')}}
 function updateLanguageButtons(){const lang=getLanguage();document.querySelectorAll('[data-lang]').forEach(b=>{b.classList.toggle('import-primary',b.dataset.lang===lang);b.classList.toggle('import-secondary',b.dataset.lang!==lang)});const current=document.getElementById('languageMenuCurrent');if(current)current.textContent=LANGUAGE_LABELS[lang]||LANGUAGE_LABELS.ja}
 function setLanguage(lang){if(!LANGUAGE_LABELS[lang])return;localStorage.setItem('kredoLanguage',lang);updateLanguageButtons();closeLanguageSettings();showToast('🌐 '+LANGUAGE_LABELS[lang]+' を選択しました');}
+function toggleFaq(btn){const item=btn.closest('.faq-item');if(!item)return;document.querySelectorAll('.faq-item.open').forEach(x=>{if(x!==item)x.classList.remove('open')});item.classList.toggle('open')}
 function openCredo(){show('credo')}
 function openQuestMap(){document.getElementById('questPanel').classList.add('open')}
 function closeQuestMap(e){if(!e||e.target.id==='questPanel')document.getElementById('questPanel').classList.remove('open')}
