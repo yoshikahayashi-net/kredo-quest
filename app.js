@@ -191,14 +191,28 @@ runBtn.addEventListener("click", async function() {
   try {
     const pipe = await getTranscriber();
     const audio = await decodeTo16k(file);
-    setStatus("文字起こし中…（" + Math.floor(audio.duration/60) + "分 " + Math.round(audio.duration%60) + "秒）");
+    const duration = audio.duration;
+    const chunkLength = 30;
+    const stride = 5;
+    const step = chunkLength - stride;
+    const totalChunks = Math.max(1, Math.ceil(Math.max(0, duration - stride) / step));
+    let doneChunks = 0;
+
+    setStatus("文字起こし中… 0 / " + totalChunks + " 区間（約 " + Math.floor(duration/60) + "分 " + Math.round(duration%60) + "秒）");
     setProgress(30);
+
     const res = await pipe(audio.mono, {
-      chunk_length_s: 30,
-      stride_length_s: 5,
+      chunk_length_s: chunkLength,
+      stride_length_s: stride,
       return_timestamps: true,
       language: "japanese",
-      task: "transcribe"
+      task: "transcribe",
+      chunk_callback: function(chunk) {
+        doneChunks += 1;
+        const pct = 30 + Math.min(69, (doneChunks / totalChunks) * 69);
+        setProgress(pct);
+        setStatus("文字起こし中… " + Math.min(doneChunks, totalChunks) + " / " + totalChunks + " 区間");
+      }
     });
     const raw = normalize(res.text || "");
     lastRaw = raw;
