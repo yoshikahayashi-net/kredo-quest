@@ -4,7 +4,7 @@ env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.useBrowserCache = true;
 
-const MODEL = "onnx-community/whisper-base";
+const MODEL = "onnx-community/whisper-small";
 let transcriber = null;
 let outputs = { all:"", finish:"", shot:"", unknown:"", raw:"" };
 let currentTab = "all";
@@ -192,41 +192,26 @@ runBtn.addEventListener("click", async function() {
     const pipe = await getTranscriber();
     const audio = await decodeTo16k(file);
     const duration = audio.duration;
-    const sampleRate = 16000;
-    const chunkSeconds = 30;
-    const overlapSeconds = 5;
-    const chunkSamples = chunkSeconds * sampleRate;
-    const overlapSamples = overlapSeconds * sampleRate;
-    const stepSamples = chunkSamples - overlapSamples;
-    const totalChunks = Math.max(1, Math.ceil(Math.max(0, audio.mono.length - overlapSamples) / stepSamples));
-    const texts = [];
-
-    setStatus("文字起こし中… 0 / " + totalChunks + " 区間（約 " + Math.floor(duration/60) + "分 " + Math.round(duration%60) + "秒）");
+    setStatus("文字起こし中…（約 " + Math.floor(duration/60) + "分 " + Math.round(duration%60) + "秒）");
     setProgress(30);
 
-    for (let i = 0; i < totalChunks; i++) {
-      const startSample = i * stepSamples;
-      const endSample = Math.min(audio.mono.length, startSample + chunkSamples);
-      const chunk = audio.mono.slice(startSample, endSample);
+    const res = await pipe(audio.mono, {
+      chunk_length_s: 30,
+      stride_length_s: 5,
+      return_timestamps: false,
+      language: "japanese",
+      task: "transcribe"
+    });
 
-      setStatus("文字起こし中… " + (i + 1) + " / " + totalChunks + " 区間");
-      setProgress(30 + ((i / totalChunks) * 69));
-
-      const part = await pipe(chunk, {
-        return_timestamps: false,
-        language: "japanese",
-        task: "transcribe"
-      });
-
-      if (part && part.text) {
-        texts.push(part.text.trim());
-      }
-
-      setProgress(30 + (((i + 1) / totalChunks) * 69));
-    }
-
-    const res = { text: texts.join(" ") };
+    setProgress(92);
     const raw = normalize(res.text || "");
+    const chars = raw.replace(/\s/g, "");
+    const repeated = chars.length >= 80
+      ? Math.max(...Array.from(new Set(chars)).map(function(ch){ return chars.split(ch).length - 1; })) / chars.length
+      : 0;
+    if (!raw || repeated > 0.65) {
+      throw new Error("文字起こし結果が不自然です。音声を正しく認識できていない可能性があります。");
+    }
     lastRaw = raw;
     const groups = classify(
       splitSentences(raw),
