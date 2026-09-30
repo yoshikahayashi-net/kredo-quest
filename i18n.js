@@ -167,66 +167,132 @@ function tq(q,index,l){
   if(!t)return q;
   return {level:CREDO_TRANSLATIONS[l].levels[q.level]||q.level,chapter:CREDO_TRANSLATIONS[l].chapters[q.chapter]||q.chapter,question:t.q,scene:t.s,art:q.art,choices:t.c,answer:q.answer,explain:t.e,credo:CREDO_TRANSLATIONS[l].credo[q.credo]||q.credo}
 }
+const originalTextNodes=new WeakMap();
 function replaceTextNodes(root,l){
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
   const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);
   nodes.forEach(node=>{
-    const raw=node.nodeValue;
-    const trimmed=raw.trim();
-    if(!trimmed||node.parentElement?.closest('iframe,script,style,textarea'))return;
+    if(node.parentElement?.closest('iframe,script,style,textarea'))return;
+    if(!originalTextNodes.has(node))originalTextNodes.set(node,node.nodeValue);
+    const original=originalTextNodes.get(node);
+    const trimmed=original.trim();
+    if(!trimmed)return;
     const translated=trText(trimmed,l);
-    if(translated!==trimmed)node.nodeValue=raw.replace(trimmed,translated);
+    node.nodeValue=original.replace(trimmed,translated);
   });
 }
 function applyStaticUI(){
   const l=lang();
   replaceTextNodes(document.body,l);
-  const current=document.getElementById('languageMenuCurrent');if(current)current.textContent=l==='en'?'English':l==='vi'?'Tiếng Việt':'日本語';
-  const nav=document.querySelectorAll('.nav-item');const navText=l==='en'?['Home','Quiz','My Page','Ranking']:l==='vi'?['Trang chủ','Câu đố','Trang cá nhân','Xếp hạng']:['ホーム','クイズ','マイページ','ランキング'];
-  nav.forEach((b,i)=>{const icon=b.querySelector('.nav-icon');if(icon){[...b.childNodes].filter(x=>x.nodeType===3).forEach(x=>x.remove());b.appendChild(document.createTextNode(navText[i]))}});
-  const next=document.getElementById('nextBtn');if(next&&next.style.display!=='none'){const last=typeof current!=='undefined'&&typeof questQuestions!=='undefined'&&current===questQuestions.length-1;next.textContent=l==='en'?(last?'Go to BOSS ›':'Next ›'):l==='vi'?(last?'Đến BOSS ›':'Tiếp theo ›'):(last?'BOSSへ進む':'次へ　›')}
+  const current=document.getElementById('languageMenuCurrent');
+  if(current)current.textContent=l==='en'?'English':l==='vi'?'Tiếng Việt':'日本語';
 }
 function applyQuizTranslation(){
-  const l=lang();if(l==='ja')return;
-  const q=questQuestions[current];if(!q)return;
-  const t=CREDO_TRANSLATIONS[l].q[questions.indexOf(q)];if(!t)return;
-  document.getElementById('qCount').textContent=(current+1)+' / '+(questQuestions.length+1);
-  document.getElementById('levelTag').textContent=CREDO_TRANSLATIONS[l].levels[q.level]||q.level;
-  document.getElementById('chapter').textContent=CREDO_TRANSLATIONS[l].chapters[q.chapter]||q.chapter;
-  document.getElementById('question').textContent=t.q;
-  document.getElementById('sceneLabel').textContent=l==='en'?'SCENE':'TÌNH HUỐNG';
-  document.getElementById('sceneText').textContent=t.s;
-  const buttons=document.querySelectorAll('#choices .choice');buttons.forEach((b,i)=>{const span=b.querySelector('span:last-child');if(span)span.textContent=t.c[i]});
-  const fb=document.getElementById('feedbackText');const credo=document.getElementById('credoText');
-  if(fb&&fb.textContent){const bad=fb.classList.contains('bad')||document.getElementById('feedbackTitle').textContent.includes('🤔');fb.textContent=t.e;credo.textContent=CREDO_TRANSLATIONS[l].credo[q.credo]||q.credo;const ft=document.getElementById('feedbackTitle');if(ft)ft.textContent=bad?(l==='en'?'🤔 Key point':'🤔 Điểm quan trọng'):(l==='en'?'✅ Correct!':'✅ Chính xác!')}
-  const nb=document.getElementById('nextBtn');if(nb&&nb.style.display!=='none')nb.textContent=current===questQuestions.length-1?(l==='en'?'Go to BOSS ›':'Đến BOSS ›'):(l==='en'?'Next ›':'Tiếp theo ›');
+  const l=lang();
+  const q=typeof questQuestions!=='undefined' ? questQuestions[current] : null;
+  if(!q)return;
+  const t=l==='ja'?null:CREDO_TRANSLATIONS[l]?.q?.[questions.indexOf(q)];
+  if(l!=='ja'&&!t)return;
+
+  const level=l==='ja'?q.level:(CREDO_TRANSLATIONS[l].levels[q.level]||q.level);
+  const chapter=l==='ja'?q.chapter:(CREDO_TRANSLATIONS[l].chapters[q.chapter]||q.chapter);
+  const question=l==='ja'?q.question:t.q;
+  const scene=l==='ja'?q.scene:t.s;
+  const choices=l==='ja'?q.choices:t.c;
+
+  const qCount=document.getElementById('qCount'); if(qCount)qCount.textContent=(current+1)+' / '+(questQuestions.length+1);
+  const levelTag=document.getElementById('levelTag'); if(levelTag)levelTag.textContent=level;
+  const chapterEl=document.getElementById('chapter'); if(chapterEl)chapterEl.textContent=chapter;
+  const questionEl=document.getElementById('question'); if(questionEl)questionEl.textContent=question;
+  const sceneLabel=document.getElementById('sceneLabel'); if(sceneLabel)sceneLabel.textContent=l==='en'?'SCENE':l==='vi'?'TÌNH HUỐNG':'シーン';
+  const sceneText=document.getElementById('sceneText'); if(sceneText)sceneText.textContent=scene;
+
+  const buttons=document.querySelectorAll('#choices .choice');
+  buttons.forEach((b,i)=>{
+    const span=b.querySelector('span:last-child');
+    if(span&&choices?.[i]!==undefined)span.textContent=choices[i];
+  });
+
+  const fb=document.getElementById('feedbackText');
+  const credo=document.getElementById('credoText');
+  const ft=document.getElementById('feedbackTitle');
+  const feedback=document.getElementById('feedback');
+  const isShown=!!(feedback&&feedback.classList.contains('show'));
+  if(isShown&&ft&&fb&&credo){
+    const good=feedback.classList.contains('good');
+    const combo=ft.textContent.includes('COMBO');
+    ft.textContent=good
+      ? (combo ? (l==='en'?'🔥 COMBO! Correct!':l==='vi'?'🔥 COMBO! Chính xác!':'🔥 COMBO! 正解！') : (l==='en'?'✅ Correct!':l==='vi'?'✅ Chính xác!':'✅ 正解！'))
+      : (l==='en'?'🤔 Key point':l==='vi'?'🤔 Điểm quan trọng':'🤔 ここがポイント');
+    fb.textContent=l==='ja'?q.explain:t.e;
+    credo.textContent=l==='ja'?q.credo:(CREDO_TRANSLATIONS[l].credo[q.credo]||q.credo);
+  }
+
+  const nb=document.getElementById('nextBtn');
+  if(nb&&nb.style.display!=='none'){
+    const last=current===questQuestions.length-1;
+    nb.textContent=l==='en'?(last?'Go to BOSS ›':'Next ›'):l==='vi'?(last?'Đến BOSS ›':'Tiếp theo ›'):(last?'BOSSへ進む':'次へ　›');
+  }
 }
 function applyBossTranslation(){
-  const l=lang();if(l==='ja')return;
+  const l=lang();
   const m=UI[l]||{};
   const banner=document.querySelector('.boss-banner');if(!banner)return;
+
   const h=document.querySelector('.boss-title'),sub=document.querySelector('.boss-sub');
-  if(h)h.textContent='👑 '+(l==='en'?'BOSS BATTLE':'TRẬN CHIẾN BOSS');
-  if(sub)sub.textContent=m['ここまでのクレドを組み合わせて、最後の判断を突破しよう。'];
-  const note=document.querySelectorAll('.boss-equipment-note');if(note[0])note[0].textContent=m['剣と盾を持ったBOSS'];if(note[1])note[1].textContent=m['BOSS EQUIPMENT'];
-  document.querySelectorAll('.boss-option').forEach(b=>{const txt=b.textContent.trim();if(m[txt])b.textContent=m[txt]});
-  const q=document.querySelector('.boss-q h3');if(q)q.textContent=m['納期直前、前工程から届いたデータに不備が見つかった。修正すると納期に影響する可能性もある。あなたなら、まずどう動く？'];
-  const clear=document.getElementById('bossClear');if(clear)clear.textContent=m['討伐結果を見る']|| (l==='en'?'See Quest Result':'Xem kết quả nhiệm vụ');
+  if(h)h.textContent='👑 '+(l==='en'?'BOSS BATTLE':l==='vi'?'TRẬN CHIẾN BOSS':'BOSS BATTLE');
+  if(sub)sub.textContent=l==='ja'?'ここまでのクレドを組み合わせて、最後の判断を突破しよう。':m['ここまでのクレドを組み合わせて、最後の判断を突破しよう。'];
+
+  const note=document.querySelectorAll('.boss-equipment-note');
+  if(note[0])note[0].textContent=l==='ja'?'剣と盾を持ったBOSS':m['剣と盾を持ったBOSS'];
+  if(note[1])note[1].textContent=l==='ja'?'BOSS EQUIPMENT':m['BOSS EQUIPMENT'];
+
+  document.querySelectorAll('.boss-option').forEach(b=>{
+    const ja=b.dataset.jaText||b.textContent.trim();
+    if(!b.dataset.jaText)b.dataset.jaText=ja;
+    b.textContent=l==='ja'?ja:(m[ja]||ja);
+  });
+
+  const q=document.querySelector('.boss-q h3');
+  if(q)q.textContent=l==='ja'
+    ?'納期直前、前工程から届いたデータに不備が見つかった。修正すると納期に影響する可能性もある。あなたなら、まずどう動く？'
+    :m['納期直前、前工程から届いたデータに不備が見つかった。修正すると納期に影響する可能性もある。あなたなら、まずどう動く？'];
+
+  const clear=document.getElementById('bossClear');
+  if(clear)clear.textContent=l==='ja'?'討伐結果を見る':(m['討伐結果を見る']||(l==='en'?'See Quest Result':'Xem kết quả nhiệm vụ'));
+
   const result=document.getElementById('bossResult');
-  if(result&&result.style.display!=='none'){result.innerHTML=bossDone?(l==='en'?'<strong>⚔ PERFECT!</strong><br>Assess the situation, impact, and people involved, then connect them to the next decision. This combines several Credo ideas.':'<strong>⚔ HOÀN HẢO!</strong><br>Xác định tình huống, ảnh hưởng và người liên quan để kết nối với quyết định tiếp theo. Đây là cách kết hợp nhiều Credo.'):(l==='en'?'<strong>Think about it once more.</strong><br>The key is to avoid carrying the issue alone and connect it to the next decision.':'<strong>Hãy suy nghĩ thêm một lần nữa.</strong><br>Điểm chính là không ôm vấn đề một mình mà kết nối với quyết định tiếp theo.')}
+  if(result&&result.style.display!=='none'){
+    const cleared=typeof bossDone!=='undefined'&&bossDone;
+    result.innerHTML=l==='ja'
+      ?(cleared?'<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。':'<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。')
+      :(l==='en'
+        ?(cleared?'<strong>⚔ PERFECT!</strong><br>Assess the situation, impact, and people involved, then connect them to the next decision. This combines several Credo ideas.':'<strong>Think about it once more.</strong><br>The key is to avoid carrying the issue alone and connect it to the next decision.')
+        :(cleared?'<strong>⚔ HOÀN HẢO!</strong><br>Xác định tình huống, ảnh hưởng và người liên quan để kết nối với quyết định tiếp theo. Đây là cách kết hợp nhiều Credo.':'<strong>Hãy suy nghĩ thêm một lần nữa.</strong><br>Điểm chính là không ôm vấn đề một mình mà kết nối với quyết định tiếp theo.'));
+  }
 }
 function saveLanguageMeta(){document.documentElement.lang=lang()==='ja'?'ja':lang()==='en'?'en':'vi'}
 function setLanguageReal(l){
   if(!CREDO_TRANSLATIONS[l]&&l!=='ja')return;
   localStorage.setItem('kredoLanguage',l);
-  location.reload();
+  saveLanguageMeta();
+  applyStaticUI();
+  const active=document.querySelector('.screen.active');
+  const id=active?.id;
+  if(id==='quiz')applyQuizTranslation();
+  if(id==='boss')applyBossTranslation();
+  if(id==='result')applyResultTranslation();
+  updateLanguageButtons();
 }
 
 function applyResultTranslation(){
-  const l=lang();if(l==='ja')return;const m=UI[l]||{};
-  const label=document.querySelector('.result-label');if(label)label.textContent=m['今回の獲得ポイント']||label.textContent;
-  const thanks=document.querySelector('.thanks');if(thanks)thanks.innerHTML=(l==='en'?'Great work!<br>Thank you for learning the Credo through quizzes!':'Bạn đã làm rất tốt!<br>Cảm ơn bạn đã học Credo qua các câu đố!');
-  const stats=document.querySelectorAll('.rstat small');if(stats[0])stats[0].textContent=l==='en'?'Correct Answers':'Số câu đúng';if(stats[1])stats[1].textContent=l==='en'?'Best Combo':'Combo cao nhất';
+  const l=lang();const m=UI[l]||{};
+  const label=document.querySelector('.result-label');if(label)label.textContent=l==='ja'?'今回の獲得ポイント':(m['今回の獲得ポイント']||label.textContent);
+  const thanks=document.querySelector('.thanks');
+  if(thanks)thanks.innerHTML=l==='ja'?'おつかれさまでした！<br>クレドをクイズで学んでくれてありがとうございます！':(l==='en'?'Great work!<br>Thank you for learning the Credo through quizzes!':'Bạn đã làm rất tốt!<br>Cảm ơn bạn đã học Credo qua các câu đố!');
+  const stats=document.querySelectorAll('.rstat small');
+  if(stats[0])stats[0].textContent=l==='ja'?'正解数':(l==='en'?'Correct Answers':'Số câu đúng');
+  if(stats[1])stats[1].textContent=l==='ja'?'最高COMBO':(l==='en'?'Best Combo':'Combo cao nhất');
 }
 const origShow=window.show;
 window.show=function(id){origShow(id);setTimeout(()=>{applyStaticUI();if(id==='quiz')applyQuizTranslation();if(id==='boss')applyBossTranslation();if(id==='result')applyResultTranslation()},0)};
