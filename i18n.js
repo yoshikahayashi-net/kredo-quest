@@ -218,17 +218,10 @@ function applyBossTranslation(){
 function saveLanguageMeta(){document.documentElement.lang=lang()==='ja'?'ja':lang()==='en'?'en':'vi'}
 function setLanguageReal(l){
   if(!CREDO_TRANSLATIONS[l]&&l!=='ja')return;
-  localStorage.setItem('kredoLanguage',l);saveLanguageMeta();
-  applyStaticUI();applyQuizTranslation();applyBossTranslation();applyResultTranslation();
-  if(window.closeLanguageSettings)window.closeLanguageSettings();
-  showToast('🌐 '+(l==='en'?'English':l==='vi'?'Tiếng Việt':'日本語')+' selected');
+  localStorage.setItem('kredoLanguage',l);
+  location.reload();
 }
-function translateDynamic(){
-  applyStaticUI();
-  if(document.getElementById('quiz')?.classList.contains('active'))applyQuizTranslation();
-  if(document.getElementById('boss')?.classList.contains('active'))applyBossTranslation();
-  if(document.getElementById('result')?.classList.contains('active'))applyResultTranslation();
-}
+
 function applyResultTranslation(){
   const l=lang();if(l==='ja')return;const m=UI[l]||{};
   const label=document.querySelector('.result-label');if(label)label.textContent=m['今回の獲得ポイント']||label.textContent;
