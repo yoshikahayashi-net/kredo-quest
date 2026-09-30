@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v34</title>
+<title>抱月クレドクエスト｜Prototype v35</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -57,7 +57,7 @@ body{display:flex;justify-content:center}
 .quest-sheet{width:min(100%,460px);max-height:82vh;overflow:auto;background:#fff;border-radius:24px;padding:16px;box-shadow:0 22px 55px rgba(4,31,44,.28);animation:sheet .22s ease}.handle{width:42px;height:5px;border-radius:99px;background:#D8E6EB;margin:0 auto 13px}.sheet-title{font-weight:900;font-size:20px}.map-kicker{font-size:10px;color:#0D73AC;font-weight:900;letter-spacing:.12em}.map-sub{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
 .map-progress{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:#F7FCFE}.map-progress span{font-size:10px;color:var(--muted);font-weight:800}.map-progress strong{font-size:12px;color:var(--blue-dark)}
 .quest-map{position:relative;margin-top:12px;padding:6px 2px 2px}.quest-map:before{content:"";position:absolute;left:34px;top:42px;bottom:42px;width:4px;border-radius:99px;background:linear-gradient(180deg,#62C97B 0%,#BFDCE7 45%,#D9E8ED 100%)}
-.map-stage{position:relative;display:grid;grid-template-columns:68px 1fr;gap:10px;align-items:center;padding:8px 0}.map-badge{position:relative;z-index:2;width:64px;height:64px;border-radius:18px;background:#fff;border:2px solid #D5E7ED;display:grid;place-items:center;box-shadow:0 5px 12px rgba(25,75,96,.08);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}.map-badge:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(25,75,96,.12)}.map-badge .num{font-size:13px;font-weight:900;color:#8EA4AE}.map-badge .icon{font-size:22px;line-height:1}.map-stage.active .map-badge{background:var(--green-soft);border-color:#8BCB96}.map-stage.active .map-badge .num{color:var(--green-dark)}.map-stage.locked .map-badge{background:#F5F8F9;color:#B4C3C9;cursor:pointer}.map-stage.locked .map-badge .icon{filter:grayscale(1);opacity:.62}
+.map-stage{position:relative;display:grid;grid-template-columns:68px 1fr;gap:10px;align-items:center;padding:8px 0}.map-badge{position:relative;z-index:2;width:64px;height:64px;border-radius:18px;background:#fff;border:2px solid #D5E7ED;display:grid;place-items:center;box-shadow:0 5px 12px rgba(25,75,96,.08);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}.map-badge:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(25,75,96,.12)}.map-badge .num{font-size:13px;font-weight:900;color:#8EA4AE}.map-badge .icon{font-size:22px;line-height:1}.map-stage.active .map-badge{background:var(--green-soft);border-color:#8BCB96}.map-stage.active .map-badge .num{color:var(--green-dark)}.map-stage.cleared .map-badge{background:#E8F8EC;border-color:#63BD78}.map-stage.cleared .map-badge .icon{color:#348C48}.map-stage.cleared .map-badge .num{color:#348C48}.map-stage.cleared .map-card{border-color:#A6D8B0;background:#F8FFF9}.map-stage.cleared .map-status{color:#348C48}.map-stage:not(.locked):not(.active):not(.cleared) .map-card{border-color:#BFDCE7;background:#F8FCFE}.map-stage:not(.locked):not(.active):not(.cleared) .map-status{color:var(--blue-dark)}.map-stage.locked .map-badge{background:#F5F8F9;color:#B4C3C9;cursor:pointer}.map-stage.locked .map-badge .icon{filter:grayscale(1);opacity:.62}
 .map-stage.boss .map-badge{border-color:#E4C84A;background:#FFF9D8}.map-stage.boss .map-badge .num{color:#A27E00}
 .map-card{min-width:0;border:1px solid #D7E8EE;border-radius:15px;padding:11px 12px;background:#fff}.map-stage.active .map-card{border-color:#9DD1A7;background:#F8FFF9}.map-stage.boss .map-card{border-color:#E7D88C;background:#FFFDF1}.map-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.map-card-title{font-weight:900;font-size:13px}.map-status{font-size:9px;font-weight:900;letter-spacing:.03em;color:#8EA4AE}.map-stage.active .map-status{color:var(--green-dark)}.map-card-text{margin-top:4px;color:var(--muted);font-size:10px;line-height:1.5}
 .map-note{margin-top:10px;padding:10px 12px;border-radius:12px;background:#EDF9FD;color:#58717F;font-size:10px;line-height:1.55}
@@ -509,7 +509,7 @@ body{display:flex;justify-content:center}
       <div class="map-kicker">QUEST PATH</div>
       <div class="sheet-title">⚔ クエストマップ</div>
       <div class="map-sub">今日のクエストから、次のステージへ。いま開いている場所が緑で表示されます。</div>
-      <div class="map-progress"><span>YOUR ADVENTURE</span><strong>STAGE 01</strong></div>
+      <div class="map-progress"><span>YOUR ADVENTURE</span><strong id="mapProgressLabel">STAGE 01</strong></div>
 
       <div class="quest-map" id="questMapList"></div>
 
@@ -1484,6 +1484,8 @@ function renderQuestMap(){
       </button>
     </div>`;
   }).join('');
+  const progress=document.getElementById('mapProgressLabel');
+  if(progress)progress.textContent=clearStage>=1?'STAGE 02 OPEN':'STAGE 01';
   const note=document.querySelector('#questPanel .map-note');
   if(note)note.innerHTML=clearStage>=1?'🎉 STAGE 01を突破！次のエリアが開放されています。':'💡 まずはSTAGE 01を選んで、今日のクエストを始めよう。';
 }
