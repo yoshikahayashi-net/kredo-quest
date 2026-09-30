@@ -192,28 +192,40 @@ runBtn.addEventListener("click", async function() {
     const pipe = await getTranscriber();
     const audio = await decodeTo16k(file);
     const duration = audio.duration;
-    const chunkLength = 30;
-    const stride = 5;
-    const step = chunkLength - stride;
-    const totalChunks = Math.max(1, Math.ceil(Math.max(0, duration - stride) / step));
-    let doneChunks = 0;
+    const sampleRate = 16000;
+    const chunkSeconds = 30;
+    const overlapSeconds = 5;
+    const chunkSamples = chunkSeconds * sampleRate;
+    const overlapSamples = overlapSeconds * sampleRate;
+    const stepSamples = chunkSamples - overlapSamples;
+    const totalChunks = Math.max(1, Math.ceil(Math.max(0, audio.mono.length - overlapSamples) / stepSamples));
+    const texts = [];
 
     setStatus("文字起こし中… 0 / " + totalChunks + " 区間（約 " + Math.floor(duration/60) + "分 " + Math.round(duration%60) + "秒）");
     setProgress(30);
 
-    const res = await pipe(audio.mono, {
-      chunk_length_s: chunkLength,
-      stride_length_s: stride,
-      return_timestamps: true,
-      language: "japanese",
-      task: "transcribe",
-      chunk_callback: function(chunk) {
-        doneChunks += 1;
-        const pct = 30 + Math.min(69, (doneChunks / totalChunks) * 69);
-        setProgress(pct);
-        setStatus("文字起こし中… " + Math.min(doneChunks, totalChunks) + " / " + totalChunks + " 区間");
+    for (let i = 0; i < totalChunks; i++) {
+      const startSample = i * stepSamples;
+      const endSample = Math.min(audio.mono.length, startSample + chunkSamples);
+      const chunk = audio.mono.slice(startSample, endSample);
+
+      setStatus("文字起こし中… " + (i + 1) + " / " + totalChunks + " 区間");
+      setProgress(30 + ((i / totalChunks) * 69));
+
+      const part = await pipe(chunk, {
+        return_timestamps: false,
+        language: "japanese",
+        task: "transcribe"
+      });
+
+      if (part && part.text) {
+        texts.push(part.text.trim());
       }
-    });
+
+      setProgress(30 + (((i + 1) / totalChunks) * 69));
+    }
+
+    const res = { text: texts.join(" ") };
     const raw = normalize(res.text || "");
     lastRaw = raw;
     const groups = classify(
