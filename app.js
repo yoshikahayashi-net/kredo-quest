@@ -290,12 +290,14 @@ runBtn.addEventListener("click", async function() {
     setProgress(100);
     setStatus("⑤ 完了。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
-        setProcessing(false);
+    stopTranscriptionProgress();
+    setProcessing(false);
     console.error(err);
     setStatus("処理に失敗しました：" + (err && err.message ? err.message : err), "error");
     setProgress(0);
   } finally {
-        setProcessing(false);
+    stopTranscriptionProgress();
+    setProcessing(false);
     runBtn.disabled = false;
   }
 });
