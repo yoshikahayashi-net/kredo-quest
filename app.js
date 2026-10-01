@@ -1,11 +1,4 @@
-import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
-
-env.allowLocalModels = false;
-env.allowRemoteModels = true;
-env.useBrowserCache = true;
-
-const MODEL = "onnx-community/whisper-large-v3-turbo";
-let transcriber = null;
+let worker = null;
 let outputs = { all:"", finish:"", shot:"", unknown:"", raw:"" };
 let currentTab = "all";
 let lastGroups = {finish:[], shot:[], unknown:[]};
@@ -75,36 +68,98 @@ fileInput.addEventListener("change", function() {
   }
 });
 
-async function getTranscriber() {
-  if (transcriber) return transcriber;
-  const webgpu = !!navigator.gpu;
-  setStatus("① 音声認識モデルを準備しています。初回だけ時間がかかります。");
-  const make = async function(device) {
-    return await pipeline("automatic-speech-recognition", MODEL, {
-      device: device,
-      dtype: device === "webgpu" ? "q4f16" : "q8",
-      progress_callback: function(p) {
-        if (p && p.status === "progress" && typeof p.progress === "number") {
-          setProgress(p.progress * 0.28);
-          setStatus("① モデルを準備中… " + Math.round(p.progress) + "%");
-        } else if (p && p.status === "ready") {
-          setProgress(28);
-          setStatus("① モデル準備完了（" + (device === "webgpu" ? "GPU" : "CPU") + "）");
-        }
-      }
-    });
-  };
-  try {
-    transcriber = await make(webgpu ? "webgpu" : "wasm");
-    return transcriber;
-  } catch (e) {
-    if (webgpu) {
-      setStatus("GPUで起動できなかったため、CPUモードに切り替えます…");
-      transcriber = await make("wasm");
-      return transcriber;
+function getWorker() {
+  if (worker) return worker;
+  worker = new Worker("./audio-worker.js", { type: "module" });
+  return worker;
+}
+
+function transcribeWithWorker(audio) {
+  return new Promise(function(resolve, reject) {
+    const w = getWorker();
+    const segments = [];
+    let settled = false;
+
+    function cleanup() {
+      w.removeEventListener("message", onMessage);
+      w.removeEventListener("error", onError);
     }
-    throw e;
-  }
+
+    function onError(event) {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error(event && event.message ? event.message : "音声認識Workerでエラーが発生しました。"));
+    }
+
+    function onMessage(event) {
+      const data = event.data || {};
+
+      if (data.type === "model-progress") {
+        setProgress(Math.min(28, data.progress * 0.28));
+        setStatus("① モデルを準備中… " + Math.round(data.progress) + "%");
+        return;
+      }
+
+      if (data.type === "model-ready") {
+        setProgress(28);
+        setStatus("① モデル準備完了（" + (data.device === "webgpu" ? "GPU" : "CPU") + "）");
+        return;
+      }
+
+      if (data.type === "model-fallback") {
+        setStatus(data.message || "CPUモードに切り替えます…");
+        return;
+      }
+
+      if (data.type === "status") {
+        setStatus(data.message || "処理中…");
+        return;
+      }
+
+      if (data.type === "chunk-start") {
+        setChunkProgress(data.done, data.total, "running");
+        setProcessing(true);
+        return;
+      }
+
+      if (data.type === "chunk-done") {
+        setChunkProgress(data.done, data.total, "done");
+        return;
+      }
+
+      if (data.type === "complete") {
+        settled = true;
+        cleanup();
+        resolve(data.segments || []);
+        return;
+      }
+
+      if (data.type === "error") {
+        settled = true;
+        cleanup();
+        reject(new Error(data.message || "音声認識に失敗しました。"));
+      }
+    }
+
+    w.addEventListener("message", onMessage);
+    w.addEventListener("error", onError);
+
+    try {
+      // Transfer the underlying audio buffer so the main thread does not
+      // keep copying a large Float32Array while the worker runs inference.
+      const transferable = audio.mono.buffer;
+      w.postMessage({
+        type: "transcribe",
+        audio: transferable,
+        sampleRate: 16000,
+        duration: audio.duration
+      }, [transferable]);
+    } catch (error) {
+      cleanup();
+      reject(error);
+    }
+  });
 }
 
 async function decodeTo16k(file) {
@@ -248,54 +303,22 @@ runBtn.addEventListener("click", async function() {
   results.style.display = "none";
   setProgress(0);
   try {
-    const pipe = await getTranscriber();
     const audio = await decodeTo16k(file);
     const duration = audio.duration;
     const sampleRate = 16000;
     const chunkSeconds = 30;
     const overlapSeconds = 3;
-    const chunkSamples = chunkSeconds * sampleRate;
-    const overlapSamples = overlapSeconds * sampleRate;
-    const stepSamples = chunkSamples - overlapSamples;
-    const totalChunks = Math.max(1, Math.ceil(Math.max(0, audio.mono.length - overlapSamples) / stepSamples));
-    let rawText = "";
-    const segments = [];
+    const totalChunks = Math.max(
+      1,
+      Math.ceil(Math.max(0, audio.mono.length - overlapSeconds * sampleRate) /
+        ((chunkSeconds - overlapSeconds) * sampleRate))
+    );
 
     setChunkProgress(0, totalChunks);
     setProcessing(true);
 
-    for (let i = 0; i < totalChunks; i++) {
-      const startSample = i * stepSamples;
-      const endSample = Math.min(audio.mono.length, startSample + chunkSamples);
-      const chunk = audio.mono.slice(startSample, endSample);
+    const segments = await transcribeWithWorker(audio);
 
-      setChunkProgress(i, totalChunks, "running");
-      // Give the browser one frame to paint the "processing" state
-      // before the heavy Whisper inference starts.
-      await new Promise(function(resolve) { requestAnimationFrame(resolve); });
-
-      const part = await pipe(chunk, {
-        return_timestamps: false,
-        language: "japanese",
-        task: "transcribe"
-      });
-
-      const partText = part && part.text ? part.text.trim() : "";
-      if (partText) {
-        segments.push({
-          start: startSample / sampleRate,
-          end: endSample / sampleRate,
-          text: partText
-        });
-        rawText = mergeChunkText(rawText, partText);
-      }
-      setChunkProgress(i + 1, totalChunks, "done");
-    }
-
-    stopTranscriptionProgress();
-    setProcessing(false);
-    setProgress(92);
-    setStatus("④ 文字起こし完了。資料化しています…");
     const res = { text: rawText };
     const raw = normalize(res.text || "");
     const chars = raw.replace(/\s/g, "");
@@ -328,14 +351,12 @@ runBtn.addEventListener("click", async function() {
     setProgress(100);
     setStatus("⑤ 完了。音声 " + totalChunks + "区間を資料化しました。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
-    stopTranscriptionProgress();
-    setProcessing(false);
+        setProcessing(false);
     console.error(err);
     setStatus("処理に失敗しました：" + (err && err.message ? err.message : err), "error");
     setProgress(0);
   } finally {
-    stopTranscriptionProgress();
-    setProcessing(false);
+        setProcessing(false);
     runBtn.disabled = false;
   }
 });
