@@ -4,6 +4,7 @@ let currentTab = "all";
 let lastGroups = {finish:[], shot:[], unknown:[]};
 let lastRaw = "";
 let lastSegments = [];
+let processingStartedAt = 0;
 
 const $ = (id) => document.getElementById(id);
 const fileInput = $("audioFile");
@@ -301,6 +302,7 @@ runBtn.addEventListener("click", async function() {
   runBtn.disabled = true;
   results.style.display = "none";
   setProgress(0);
+  processingStartedAt = performance.now();
   try {
     const audio = await decodeTo16k(file);
     const duration = audio.duration;
@@ -340,6 +342,9 @@ runBtn.addEventListener("click", async function() {
     );
     lastGroups = groups;
 
+    const totalSeconds = Math.max(0, Math.round((performance.now() - processingStartedAt) / 1000));
+    const elapsedLabel = Math.floor(totalSeconds / 60) + "分 " + String(totalSeconds % 60).padStart(2, "0") + "秒";
+
     const timedRaw = segments.length
       ? segments.map(formatSegment).join("\n")
       : raw;
@@ -352,7 +357,9 @@ runBtn.addEventListener("click", async function() {
     render();
     results.style.display = "block";
     setProgress(100);
-    setStatus("⑤ 完了。音声 " + totalChunks + "区間を資料化しました。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
+    outputs.all = buildText(groups, raw) +
+      "\n\n【処理時間】\n" + elapsedLabel;
+    setStatus("⑤ 完了。音声 " + totalChunks + "区間を資料化しました。処理時間 " + elapsedLabel + " ／ 仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
         setProcessing(false);
     console.error(err);
