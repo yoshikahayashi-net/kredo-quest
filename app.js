@@ -19,33 +19,16 @@ const bar = $("bar");
 const results = $("results");
 const out = $("out");
 let transcriptionTimer = null;
-let transcriptionStartedAt = 0;
-let transcriptionDuration = 0;
 
-function startEstimatedProgress(duration) {
-  transcriptionStartedAt = Date.now();
-  transcriptionDuration = duration;
-  clearInterval(transcriptionTimer);
-
-  // Standard Whisper chunking uses 30s chunks with a 5s stride.
-  const step = 25;
-  const totalChunks = Math.max(1, Math.ceil(Math.max(0, duration - 5) / step));
-
-  transcriptionTimer = setInterval(function() {
-    const elapsed = (Date.now() - transcriptionStartedAt) / 1000;
-    // Show a conservative estimated completion based on observed processing time.
-    // The bar is intentionally capped below 90% until inference actually finishes.
-    const estimatedSecondsPerChunk = Math.max(8, elapsed / Math.max(1, Math.min(3, elapsed / 12)));
-    const estimatedDone = Math.min(totalChunks - 1, Math.max(0, Math.floor(elapsed / estimatedSecondsPerChunk)));
-    const pct = Math.min(88, 30 + (estimatedDone / totalChunks) * 58);
-
-    setProgress(pct);
-    setStatus("③ 文字起こし中…（推定 " + estimatedDone + " / " + totalChunks + " 区間）");
-  }, 1000);
-}
-function stopEstimatedProgress() {
+function stopTranscriptionProgress() {
   clearInterval(transcriptionTimer);
   transcriptionTimer = null;
+}
+
+function setChunkProgress(done, total) {
+  const pct = total ? 30 + (done / total) * 62 : 30;
+  setProgress(Math.min(92, pct));
+  setStatus("③ 文字起こし中… " + done + " / " + total + " 区間");
 }
 
 
@@ -147,6 +130,23 @@ async function decodeTo16k(file) {
   };
 }
 
+function mergeChunkText(previous, current) {
+  const a = normalize(previous);
+  const b = normalize(current);
+  if (!a) return b;
+  if (!b) return a;
+
+  // Find the longest exact overlap between the end of the previous chunk
+  // and the beginning of the current chunk.
+  const max = Math.min(80, a.length, b.length);
+  for (let n = max; n >= 8; n--) {
+    if (a.slice(-n) === b.slice(0, n)) {
+      return a + b.slice(n);
+    }
+  }
+  return a + " " + b;
+}
+
 function normalize(s) {
   return s.replace(/\s+/g, " ").replace(/\s*([、。！？])\s*/g, "$1").trim();
 }
@@ -231,26 +231,40 @@ runBtn.addEventListener("click", async function() {
     const pipe = await getTranscriber();
     const audio = await decodeTo16k(file);
     const duration = audio.duration;
-    setStatus("③ 文字起こしを開始します（推定 " + Math.max(1, Math.ceil(Math.max(0, duration - 5) / 25)) + " 区間）");
-    setProgress(30);
+    const sampleRate = 16000;
+    const chunkSeconds = 30;
+    const overlapSeconds = 3;
+    const chunkSamples = chunkSeconds * sampleRate;
+    const overlapSamples = overlapSeconds * sampleRate;
+    const stepSamples = chunkSamples - overlapSamples;
+    const totalChunks = Math.max(1, Math.ceil(Math.max(0, audio.mono.length - overlapSamples) / stepSamples));
+    let rawText = "";
+
+    setChunkProgress(0, totalChunks);
     setProcessing(true);
-    startEstimatedProgress(duration);
 
-    const res = await pipe(audio.mono, {
-      chunk_length_s: 30,
-      stride_length_s: 5,
-      return_timestamps: false,
-      language: "japanese",
-      task: "transcribe"
-    });
+    for (let i = 0; i < totalChunks; i++) {
+      const startSample = i * stepSamples;
+      const endSample = Math.min(audio.mono.length, startSample + chunkSamples);
+      const chunk = audio.mono.slice(startSample, endSample);
 
-    stopEstimatedProgress();
-    setProcessing(false);
-    setProgress(92);
-    stopEstimatedProgress();
+      setChunkProgress(i, totalChunks);
+
+      const part = await pipe(chunk, {
+        return_timestamps: false,
+        language: "japanese",
+        task: "transcribe"
+      });
+
+      rawText = mergeChunkText(rawText, part && part.text ? part.text : "");
+      setChunkProgress(i + 1, totalChunks);
+    }
+
+    stopTranscriptionProgress();
     setProcessing(false);
     setProgress(92);
     setStatus("④ 文字起こし完了。資料化しています…");
+    const res = { text: rawText };
     const raw = normalize(res.text || "");
     const chars = raw.replace(/\s/g, "");
     const repeated = chars.length >= 80
@@ -276,14 +290,12 @@ runBtn.addEventListener("click", async function() {
     setProgress(100);
     setStatus("⑤ 完了。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
-    stopEstimatedProgress();
-    setProcessing(false);
+        setProcessing(false);
     console.error(err);
     setStatus("処理に失敗しました：" + (err && err.message ? err.message : err), "error");
     setProgress(0);
   } finally {
-    stopEstimatedProgress();
-    setProcessing(false);
+        setProcessing(false);
     runBtn.disabled = false;
   }
 });
