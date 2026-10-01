@@ -118,12 +118,21 @@ function transcribeWithWorker(audio) {
         return;
       }
 
-      if (data.type === "chunk-start") {
-        setChunkProgress(data.done, data.total, "running");
+      if (data.type === "batch-start") {
+        const nextStart = Math.min(data.done + 1, data.total);
+        const nextEnd = Math.min(data.batchEnd, data.total);
+        setProgress(Math.min(92, 30 + (data.done / data.total) * 62));
+        setStatus("③ 文字起こし中… " + data.done + " / " + data.total + " 区間完了｜" +
+          nextStart + "〜" + nextEnd + "区間を同時処理中");
         return;
       }
 
-      if (data.type === "chunk-done") {
+      if (data.type === "batch-fallback") {
+        setStatus(data.message || "1区間ずつ処理しています…");
+        return;
+      }
+
+      if (data.type === "batch-done") {
         setChunkProgress(data.done, data.total, "done");
         return;
       }
