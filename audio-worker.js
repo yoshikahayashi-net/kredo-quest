@@ -100,8 +100,6 @@ self.onmessage = async function(event) {
           task: "transcribe"
         });
       } catch (batchError) {
-        // Safe fallback: if this runtime/model cannot batch ASR inputs,
-        // process this batch sequentially rather than failing the whole job.
         send("batch-fallback", {
           message: "GPUの同時処理に対応できないため、1区間ずつ処理します。"
         });
