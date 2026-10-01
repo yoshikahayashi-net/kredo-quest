@@ -317,7 +317,7 @@ runBtn.addEventListener("click", async function() {
     const duration = audio.duration;
     const sampleRate = 16000;
     const chunkSeconds = 30;
-    const overlapSeconds = 3;
+    const overlapSeconds = 2;
     const totalChunks = Math.max(
       1,
       Math.ceil(Math.max(0, audio.mono.length - overlapSeconds * sampleRate) /
