@@ -10,6 +10,7 @@ let outputs = { all:"", finish:"", shot:"", unknown:"", raw:"" };
 let currentTab = "all";
 let lastGroups = {finish:[], shot:[], unknown:[]};
 let lastRaw = "";
+let lastSegments = [];
 
 const $ = (id) => document.getElementById(id);
 const fileInput = $("audioFile");
@@ -162,25 +163,40 @@ function splitSentences(text) {
 function parseKeywords(raw) {
   return raw.split(/[、,，\n]/).map(function(x){return x.trim();}).filter(Boolean).sort(function(a,b){return b.length-a.length;});
 }
-function classify(sentences, finishKeys, shotKeys) {
+function formatTime(sec) {
+  const total = Math.max(0, Math.floor(sec));
+  const m = String(Math.floor(total / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return m + ":" + s;
+}
+function formatSegment(seg) {
+  return "[" + formatTime(seg.start) + "] " + normalize(seg.text || "");
+}
+function classifySegments(segments, finishKeys, shotKeys) {
   let current = "unknown";
   const groups = {finish:[], shot:[], unknown:[]};
-  for (const sentence of sentences) {
-    const f = finishKeys.some(function(k){return sentence.includes(k);});
-    const s = shotKeys.some(function(k){return sentence.includes(k);});
+
+  for (const seg of segments) {
+    const text = seg.text || "";
+    const f = finishKeys.some(function(k){return text.includes(k);});
+    const s = shotKeys.some(function(k){return text.includes(k);});
+
     if (f && !s) current = "finish";
     else if (s && !f) current = "shot";
     else if (f && s) {
-      const fk = finishKeys.find(function(k){return sentence.includes(k);});
-      const sk = shotKeys.find(function(k){return sentence.includes(k);});
-      current = sentence.indexOf(fk) <= sentence.indexOf(sk) ? "finish" : "shot";
+      const fk = finishKeys.find(function(k){return text.includes(k);});
+      const sk = shotKeys.find(function(k){return text.includes(k);});
+      current = text.indexOf(fk) <= text.indexOf(sk) ? "finish" : "shot";
     }
-    groups[current].push(sentence);
+
+    groups[current].push(seg);
   }
   return groups;
 }
 function joinLines(list, prefix) {
-  return list.length ? list.map(function(x){return prefix + x;}).join("\n") : prefix + "内容なし";
+  return list.length
+    ? list.map(function(x){return prefix + (typeof x === "string" ? x : formatSegment(x));}).join("\n")
+    : prefix + "内容なし";
 }
 function buildText(groups, raw) {
   return "【仕上】\n" + joinLines(groups.finish, "・") +
@@ -243,6 +259,7 @@ runBtn.addEventListener("click", async function() {
     const stepSamples = chunkSamples - overlapSamples;
     const totalChunks = Math.max(1, Math.ceil(Math.max(0, audio.mono.length - overlapSamples) / stepSamples));
     let rawText = "";
+    const segments = [];
 
     setChunkProgress(0, totalChunks);
     setProcessing(true);
@@ -263,7 +280,15 @@ runBtn.addEventListener("click", async function() {
         task: "transcribe"
       });
 
-      rawText = mergeChunkText(rawText, part && part.text ? part.text : "");
+      const partText = part && part.text ? part.text.trim() : "";
+      if (partText) {
+        segments.push({
+          start: startSample / sampleRate,
+          end: endSample / sampleRate,
+          text: partText
+        });
+        rawText = mergeChunkText(rawText, partText);
+      }
       setChunkProgress(i + 1, totalChunks, "done");
     }
 
@@ -281,21 +306,27 @@ runBtn.addEventListener("click", async function() {
       throw new Error("文字起こし結果が不自然です。音声を正しく認識できていない可能性があります。");
     }
     lastRaw = raw;
-    const groups = classify(
-      splitSentences(raw),
+    lastSegments = segments;
+    const groups = classifySegments(
+      segments,
       parseKeywords($("kwFinish").value),
       parseKeywords($("kwShot").value)
     );
     lastGroups = groups;
-    outputs.raw = raw;
-    outputs.finish = groups.finish.length ? groups.finish.join("\n") : "（該当内容なし）";
-    outputs.shot = groups.shot.length ? groups.shot.join("\n") : "（該当内容なし）";
-    outputs.unknown = groups.unknown.length ? groups.unknown.join("\n") : "（該当内容なし）";
+
+    const timedRaw = segments.length
+      ? segments.map(formatSegment).join("\n")
+      : raw;
+
+    outputs.raw = timedRaw;
+    outputs.finish = groups.finish.length ? groups.finish.map(formatSegment).join("\n") : "（該当内容なし）";
+    outputs.shot = groups.shot.length ? groups.shot.map(formatSegment).join("\n") : "（該当内容なし）";
+    outputs.unknown = groups.unknown.length ? groups.unknown.map(formatSegment).join("\n") : "（該当内容なし）";
     outputs.all = buildText(groups, raw);
     render();
     results.style.display = "block";
     setProgress(100);
-    setStatus("⑤ 完了。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
+    setStatus("⑤ 完了。音声 " + totalChunks + "区間を資料化しました。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
     stopTranscriptionProgress();
     setProcessing(false);
