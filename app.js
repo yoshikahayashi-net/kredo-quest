@@ -4,7 +4,7 @@ env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.useBrowserCache = true;
 
-const MODEL = "onnx-community/whisper-small";
+const MODEL = "onnx-community/whisper-large-v3-turbo";
 let transcriber = null;
 let outputs = { all:"", finish:"", shot:"", unknown:"", raw:"" };
 let currentTab = "all";
@@ -54,7 +54,7 @@ async function getTranscriber() {
   const make = async function(device) {
     return await pipeline("automatic-speech-recognition", MODEL, {
       device: device,
-      dtype: device === "webgpu" ? "fp16" : "q8",
+      dtype: device === "webgpu" ? "q4f16" : "q8",
       progress_callback: function(p) {
         if (p && p.status === "progress" && typeof p.progress === "number") {
           setProgress(p.progress * 0.28);
@@ -81,31 +81,30 @@ async function getTranscriber() {
 
 async function decodeTo16k(file) {
   setStatus("音声を読み込んでいます…");
-  const ctx = new AudioContext();
   const raw = await file.arrayBuffer();
-  const audio = await ctx.decodeAudioData(raw);
-  const channels = audio.numberOfChannels;
-  const sourceLength = audio.length;
-  const targetRate = 16000;
-  const targetLength = Math.floor(sourceLength * targetRate / audio.sampleRate);
-  const mono = new Float32Array(targetLength);
-  const data = Array.from({length: channels}, function(_, c) { return audio.getChannelData(c); });
-  const ratio = audio.sampleRate / targetRate;
+  const sourceCtx = new AudioContext();
+  const audio = await sourceCtx.decodeAudioData(raw);
+  await sourceCtx.close();
 
-  for (let i = 0; i < targetLength; i++) {
-    const pos = i * ratio;
-    const j = Math.floor(pos);
-    const frac = pos - j;
-    let sum = 0;
-    for (let c = 0; c < channels; c++) {
-      const a = data[c][j] || 0;
-      const b = data[c][j + 1] !== undefined ? data[c][j + 1] : a;
-      sum += a + (b-a) * frac;
-    }
-    mono[i] = sum / channels;
+  const targetRate = 16000;
+  const targetLength = Math.max(1, Math.ceil(audio.duration * targetRate));
+  const offline = new OfflineAudioContext(1, targetLength, targetRate);
+  const buffer = offline.createBuffer(audio.numberOfChannels, audio.length, audio.sampleRate);
+
+  for (let c = 0; c < audio.numberOfChannels; c++) {
+    buffer.copyToChannel(audio.getChannelData(c), c);
   }
-  await ctx.close();
-  return {mono: mono, duration: audio.duration};
+
+  const source = offline.createBufferSource();
+  source.buffer = buffer;
+  source.connect(offline.destination);
+  source.start(0);
+
+  const rendered = await offline.startRendering();
+  return {
+    mono: rendered.getChannelData(0),
+    duration: audio.duration
+  };
 }
 
 function normalize(s) {
