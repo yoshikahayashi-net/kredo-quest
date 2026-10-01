@@ -9,8 +9,8 @@ const LANGUAGE = "japanese";
 const TASK = "transcribe";
 const CHUNK_SECONDS = 30;
 const OVERLAP_SECONDS = 1;
-const WEBGPU_BATCH_SIZE = 4;
-const MAX_NEW_TOKENS = 384;
+const WEBGPU_BATCH_SIZE = 2;
+const MAX_NEW_TOKENS = 256;
 let transcriber = null;
 
 function send(type, payload) {
@@ -29,7 +29,7 @@ async function getTranscriber() {
     return await pipeline("automatic-speech-recognition", MODEL, {
       device,
       dtype: device === "webgpu"
-        ? { encoder_model: "q4f16", decoder_model_merged: "q4f16" }
+        ? { encoder_model: "fp16", decoder_model_merged: "q4f16" }
         : "q8",
       progress_callback: function(p) {
         if (!p) return;
