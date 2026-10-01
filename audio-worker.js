@@ -4,7 +4,7 @@ env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.useBrowserCache = true;
 
-const MODEL = "onnx-community/whisper-large-v3-turbo";
+const MODEL = "onnx-community/lite-whisper-large-v3-turbo-acc-ONNX";
 let transcriber = null;
 
 function send(type, payload) {
