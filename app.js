@@ -119,7 +119,6 @@ function transcribeWithWorker(audio) {
 
       if (data.type === "chunk-start") {
         setChunkProgress(data.done, data.total, "running");
-        setProcessing(true);
         return;
       }
 
@@ -319,8 +318,12 @@ runBtn.addEventListener("click", async function() {
 
     const segments = await transcribeWithWorker(audio);
 
-    const res = { text: rawText };
-    const raw = normalize(res.text || "");
+    let rawText = "";
+    for (const seg of segments) {
+      rawText = mergeChunkText(rawText, seg && seg.text ? seg.text : "");
+    }
+
+    const raw = normalize(rawText || "");
     const chars = raw.replace(/\s/g, "");
     const repeated = chars.length >= 80
       ? Math.max(...Array.from(new Set(chars)).map(function(ch){ return chars.split(ch).length - 1; })) / chars.length
