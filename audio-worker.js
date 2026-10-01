@@ -68,39 +68,69 @@ self.onmessage = async function(event) {
     );
 
     const segments = [];
+    const BATCH_SIZE = 2;
 
-    for (let i = 0; i < totalChunks; i++) {
-      const startSample = i * stepSamples;
-      const endSample = Math.min(audio.length, startSample + chunkSamples);
-      const chunk = audio.slice(startSample, endSample);
+    for (let batchStart = 0; batchStart < totalChunks; batchStart += BATCH_SIZE) {
+      const inputs = [];
+      const meta = [];
+      const batchEnd = Math.min(totalChunks, batchStart + BATCH_SIZE);
 
-      send("chunk-start", {
-        done: i,
-        total: totalChunks,
-        start: startSample / sampleRate,
-        end: endSample / sampleRate
-      });
-
-      const part = await pipe(chunk, {
-        return_timestamps: false,
-        language: "japanese",
-        task: "transcribe"
-      });
-
-      const text = normalize(part && part.text ? part.text : "");
-      if (text) {
-        segments.push({
+      for (let i = batchStart; i < batchEnd; i++) {
+        const startSample = i * stepSamples;
+        const endSample = Math.min(audio.length, startSample + chunkSamples);
+        inputs.push(audio.slice(startSample, endSample));
+        meta.push({
+          index: i,
           start: startSample / sampleRate,
-          end: endSample / sampleRate,
-          text
+          end: endSample / sampleRate
         });
       }
 
-      send("chunk-done", {
-        done: i + 1,
+      send("batch-start", {
+        done: batchStart,
         total: totalChunks,
-        start: startSample / sampleRate,
-        end: endSample / sampleRate
+        batchEnd
+      });
+
+      let parts;
+      try {
+        parts = await pipe(inputs, {
+          return_timestamps: false,
+          language: "japanese",
+          task: "transcribe"
+        });
+      } catch (batchError) {
+        // Safe fallback: if this runtime/model cannot batch ASR inputs,
+        // process this batch sequentially rather than failing the whole job.
+        send("batch-fallback", {
+          message: "GPUの同時処理に対応できないため、1区間ずつ処理します。"
+        });
+        parts = [];
+        for (const input of inputs) {
+          parts.push(await pipe(input, {
+            return_timestamps: false,
+            language: "japanese",
+            task: "transcribe"
+          }));
+        }
+      }
+
+      const results = Array.isArray(parts) ? parts : [parts];
+
+      for (let j = 0; j < meta.length; j++) {
+        const text = normalize(results[j] && results[j].text ? results[j].text : "");
+        if (text) {
+          segments.push({
+            start: meta[j].start,
+            end: meta[j].end,
+            text
+          });
+        }
+      }
+
+      send("batch-done", {
+        done: batchEnd,
+        total: totalChunks
       });
     }
 
