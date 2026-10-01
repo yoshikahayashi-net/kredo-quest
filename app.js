@@ -18,14 +18,42 @@ const statusEl = $("status");
 const bar = $("bar");
 const results = $("results");
 const out = $("out");
+let transcriptionTimer = null;
+let transcriptionStartedAt = 0;
+
+function startElapsedTimer() {
+  transcriptionStartedAt = Date.now();
+  clearInterval(transcriptionTimer);
+  transcriptionTimer = setInterval(function() {
+    const sec = Math.floor((Date.now() - transcriptionStartedAt) / 1000);
+    const m = Math.floor(sec / 60);
+    const s = String(sec % 60).padStart(2, "0");
+    setStatus("文字起こし中… " + m + ":" + s + " 経過");
+  }, 1000);
+}
+function stopElapsedTimer() {
+  clearInterval(transcriptionTimer);
+  transcriptionTimer = null;
+}
+
 
 function setStatus(message, kind) {
   statusEl.textContent = message;
   statusEl.className = "status" + (kind ? " " + kind : "");
 }
 function setProgress(v) {
+  bar.classList.remove("processing");
   bar.style.width = Math.max(0, Math.min(100, v)) + "%";
 }
+function setProcessing(active) {
+  if (active) {
+    bar.style.width = "45%";
+    bar.classList.add("processing");
+  } else {
+    bar.classList.remove("processing");
+  }
+}
+
 function fmtBytes(n) {
   return n < 1024*1024 ? (n/1024).toFixed(0) + " KB" : (n/1024/1024).toFixed(1) + " MB";
 }
@@ -50,7 +78,7 @@ fileInput.addEventListener("change", function() {
 async function getTranscriber() {
   if (transcriber) return transcriber;
   const webgpu = !!navigator.gpu;
-  setStatus("音声認識モデルを準備しています。初回だけ時間がかかります。");
+  setStatus("① 音声認識モデルを準備しています。初回だけ時間がかかります。");
   const make = async function(device) {
     return await pipeline("automatic-speech-recognition", MODEL, {
       device: device,
@@ -58,10 +86,10 @@ async function getTranscriber() {
       progress_callback: function(p) {
         if (p && p.status === "progress" && typeof p.progress === "number") {
           setProgress(p.progress * 0.28);
-          setStatus("モデルを準備中… " + Math.round(p.progress) + "%");
+          setStatus("① モデルを準備中… " + Math.round(p.progress) + "%");
         } else if (p && p.status === "ready") {
           setProgress(28);
-          setStatus("モデル準備完了（" + (device === "webgpu" ? "GPU" : "CPU") + "）");
+          setStatus("① モデル準備完了（" + (device === "webgpu" ? "GPU" : "CPU") + "）");
         }
       }
     });
@@ -80,7 +108,7 @@ async function getTranscriber() {
 }
 
 async function decodeTo16k(file) {
-  setStatus("音声を読み込んでいます…");
+  setStatus("② 音声を読み込んでいます…");
   const raw = await file.arrayBuffer();
   const sourceCtx = new AudioContext();
   const audio = await sourceCtx.decodeAudioData(raw);
@@ -191,8 +219,10 @@ runBtn.addEventListener("click", async function() {
     const pipe = await getTranscriber();
     const audio = await decodeTo16k(file);
     const duration = audio.duration;
-    setStatus("文字起こし中…（約 " + Math.floor(duration/60) + "分 " + Math.round(duration%60) + "秒）");
+    setStatus("③ 文字起こしを開始します（約 " + Math.floor(duration/60) + "分 " + Math.round(duration%60) + "秒）");
     setProgress(30);
+    setProcessing(true);
+    startElapsedTimer();
 
     const res = await pipe(audio.mono, {
       chunk_length_s: 30,
@@ -202,7 +232,10 @@ runBtn.addEventListener("click", async function() {
       task: "transcribe"
     });
 
+    stopElapsedTimer();
+    setProcessing(false);
     setProgress(92);
+    setStatus("④ 文字起こし完了。資料化しています…");
     const raw = normalize(res.text || "");
     const chars = raw.replace(/\s/g, "");
     const repeated = chars.length >= 80
@@ -226,12 +259,16 @@ runBtn.addEventListener("click", async function() {
     render();
     results.style.display = "block";
     setProgress(100);
-    setStatus("完了。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
+    setStatus("⑤ 完了。仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
+    stopElapsedTimer();
+    setProcessing(false);
     console.error(err);
     setStatus("処理に失敗しました：" + (err && err.message ? err.message : err), "error");
     setProgress(0);
   } finally {
+    stopElapsedTimer();
+    setProcessing(false);
     runBtn.disabled = false;
   }
 });
