@@ -353,12 +353,11 @@ runBtn.addEventListener("click", async function() {
     outputs.finish = groups.finish.length ? groups.finish.map(formatSegment).join("\n") : "（該当内容なし）";
     outputs.shot = groups.shot.length ? groups.shot.map(formatSegment).join("\n") : "（該当内容なし）";
     outputs.unknown = groups.unknown.length ? groups.unknown.map(formatSegment).join("\n") : "（該当内容なし）";
-    outputs.all = buildText(groups, raw);
+    outputs.all = buildText(groups, raw) +
+      "\n\n【処理時間】\n" + elapsedLabel;
     render();
     results.style.display = "block";
     setProgress(100);
-    outputs.all = buildText(groups, raw) +
-      "\n\n【処理時間】\n" + elapsedLabel;
     setStatus("⑤ 完了。音声 " + totalChunks + "区間を資料化しました。処理時間 " + elapsedLabel + " ／ 仕上 " + groups.finish.length + "件 ／ ショット " + groups.shot.length + "件 ／ 未分類 " + groups.unknown.length + "件", "ok");
   } catch (err) {
         setProcessing(false);
