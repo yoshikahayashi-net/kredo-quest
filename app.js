@@ -25,10 +25,14 @@ function stopTranscriptionProgress() {
   transcriptionTimer = null;
 }
 
-function setChunkProgress(done, total) {
+function setChunkProgress(done, total, state) {
   const pct = total ? 30 + (done / total) * 62 : 30;
   setProgress(Math.min(92, pct));
-  setStatus("③ 文字起こし中… " + done + " / " + total + " 区間");
+  if (state === "running") {
+    setStatus("③ 文字起こし中… " + done + " / " + total + " 区間完了｜" + Math.min(done + 1, total) + "区間目を処理中");
+  } else {
+    setStatus("③ 文字起こし中… " + done + " / " + total + " 区間完了");
+  }
 }
 
 
@@ -248,7 +252,10 @@ runBtn.addEventListener("click", async function() {
       const endSample = Math.min(audio.mono.length, startSample + chunkSamples);
       const chunk = audio.mono.slice(startSample, endSample);
 
-      setChunkProgress(i, totalChunks);
+      setChunkProgress(i, totalChunks, "running");
+      // Give the browser one frame to paint the "processing" state
+      // before the heavy Whisper inference starts.
+      await new Promise(function(resolve) { requestAnimationFrame(resolve); });
 
       const part = await pipe(chunk, {
         return_timestamps: false,
@@ -257,7 +264,7 @@ runBtn.addEventListener("click", async function() {
       });
 
       rawText = mergeChunkText(rawText, part && part.text ? part.text : "");
-      setChunkProgress(i + 1, totalChunks);
+      setChunkProgress(i + 1, totalChunks, "done");
     }
 
     stopTranscriptionProgress();
