@@ -101,7 +101,10 @@ self.onmessage = async function(event) {
       return_timestamps: false,
       language: LANGUAGE,
       task: TASK,
-      max_new_tokens: MAX_NEW_TOKENS
+      max_new_tokens: MAX_NEW_TOKENS,
+      repetition_penalty: 1.05,
+      no_repeat_ngram_size: 3,
+      renormalize_logits: true
     };
 
     for (let batchStart = 0; batchStart < totalChunks; batchStart += BATCH_SIZE) {
