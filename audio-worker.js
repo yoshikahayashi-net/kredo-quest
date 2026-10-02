@@ -29,7 +29,7 @@ async function getTranscriber() {
     return await pipeline("automatic-speech-recognition", MODEL, {
       device,
       dtype: device === "webgpu"
-        ? { encoder_model: "fp16", decoder_model_merged: "q4f16" }
+        ? { encoder_model: "fp16", decoder_model_merged: "fp16" }
         : "q8",
       progress_callback: function(p) {
         if (!p) return;
