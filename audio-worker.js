@@ -9,7 +9,7 @@ const LANGUAGE = "japanese";
 const TASK = "transcribe";
 const CHUNK_SECONDS = 30;
 const OVERLAP_SECONDS = 1;
-const WEBGPU_BATCH_SIZE = 2;
+const WEBGPU_BATCH_SIZE = 1;
 const MAX_NEW_TOKENS = 256;
 let transcriber = null;
 
