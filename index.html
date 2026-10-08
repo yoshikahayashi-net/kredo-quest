@@ -614,43 +614,58 @@ body{display:flex;justify-content:center}
       window.scrollTo(0,0);
     };
 
-    window.__pointExchangeClick=function(id,cost,name){
-      if(window.__pointExchangeBusy)return;
-      window.__pointExchangeBusy=true;
+    window.__safeCompletePointExchange=function(id,cost,name){
       try{
-        const p=safeSpendablePoints();
-        if(p<cost){
-          pointExchangeModal('ポイントが足りません','現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert',function(){
-            window.__pointExchangeBusy=false;
-          });
+        const account=JSON.parse(localStorage.getItem('kredoAccount')||'null');
+        const uid=account&&account.id?account.id:'guest';
+        const key='kredoCustomization:'+uid;
+        let c={spentPoints:0};
+        try{ c=JSON.parse(localStorage.getItem(key)||'null')||c; }catch(e){}
+        const currentSpent=Number(c.spentPoints||0);
+        const total=Number(localStorage.getItem('kredoState:'+uid+':totalPoints')||localStorage.getItem('kredoTotalPoints')||0);
+        const available=Math.max(0,total-currentSpent);
+        if(available<cost){
+          pointExchangeModal('ポイントが足りません','現在 <strong>'+available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
           return;
         }
-        pointExchangeModal('交換しますか？','「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',function(){
-          window.__pointExchangeBusy=false;
-          try{
-            if(typeof doExchangeReward==='function'){
-              doExchangeReward(id,cost,name);
-              return;
-            }
-            /* 本体関数が使えない場合のみ、ここでは処理を止めて表示だけにする */
-            pointExchangeModal('交換できませんでした','交換処理を開始できませんでした。','alert');
-          }catch(e){
-            pointExchangeModal('交換できませんでした','交換処理を開始できませんでした。','alert');
-          }
-        });
-        /* 「いいえ」で閉じた場合 */
-        const originalCancel=document.getElementById('exchangeModalCancel');
-        if(originalCancel){
-          const prev=originalCancel.onclick;
-          originalCancel.onclick=function(){
-            if(prev)prev();
-            window.__pointExchangeBusy=false;
-          };
-        }
+        c.spentPoints=currentSpent+cost;
+        localStorage.setItem(key,JSON.stringify(c));
+        try{
+          if(typeof customization!=='undefined')customization.spentPoints=c.spentPoints;
+        }catch(e){}
+        try{
+          if(typeof addPointHistory==='function')addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());
+        }catch(e){}
+        try{if(typeof renderPointExchange==='function')renderPointExchange();}catch(e){}
+        try{if(typeof renderPointHistory==='function')renderPointHistory();}catch(e){}
+        try{if(typeof renderPointsInNewUI==='function')renderPointsInNewUI();}catch(e){}
+        pointExchangeModal('交換しました','「'+name+'」と交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert');
       }catch(e){
-        window.__pointExchangeBusy=false;
-        pointExchangeModal('交換できませんでした','交換処理を開始できませんでした。','alert');
+        pointExchangeModal('交換に失敗しました','交換処理でエラーが発生しました。<br>ポイントは消費していません。','alert');
       }
+    };
+
+    window.__pointExchangeClick=function(id,cost,name){
+      let p=safeSpendablePoints();
+      try{
+        if(typeof exchangeBusy!=='undefined' && exchangeBusy)return;
+        if(typeof exchangeReward==='function'){
+          exchangeReward(id,cost,name);
+          const m=document.getElementById('exchangeModal');
+          if(m && !m.hidden)return;
+        }
+      }catch(e){}
+      p=safeSpendablePoints();
+      if(p<cost){
+        pointExchangeModal('ポイントが足りません','現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
+        return;
+      }
+      pointExchangeModal('交換しますか？','「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',function(){
+        try{window.__safeCompletePointExchange(id,cost,name)}catch(e){
+          pointExchangeModal('交換に失敗しました','交換処理でエラーが発生しました。<br>ポイントは消費していません。','alert');
+        }
+      });
+    };
     };
   })();
   </script>
