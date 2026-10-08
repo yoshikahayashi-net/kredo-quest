@@ -1519,22 +1519,23 @@ function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':
 async function grantExchangeTestPoints(){
   if(new URLSearchParams(location.search).get('testpoints')!=='1')return;
   const id=currentUser?.id||getLocalAccount()?.id||'guest';
-  const key='kredoExchangeTestGranted:v3:'+id;
-  if(localStorage.getItem(key)==='1')return;
+  const key='kredoExchangeTestGranted:v4:'+id;
   loadState();
   const amount=1100;
-  state.totalPoints=Number(state.totalPoints||0)+amount;
+  state.totalPoints=Number(state.totalPoints||0);
+  if(localStorage.getItem(key)!=='1'){
+    state.totalPoints+=amount;
+    addPointHistory('earn','交換テスト用ポイント',amount,'テスト用一時付与・交換可能ポイントへ反映','exchange-test-1100-v4');
+    localStorage.setItem(key,'1');
+  }
   saveState();
-  await loadCustomization(true);
   customization.spentPoints=0;
   await saveCustomization();
-  addPointHistory('earn','交換テスト用ポイント',amount,'テスト用一時付与・交換可能ポイントへ反映','exchange-test-1100-v3');
-  localStorage.setItem(key,'1');
-  updateProfile();
   renderPointsInNewUI();
   if(typeof renderPointExchange==='function')renderPointExchange();
   if(typeof renderPointHistory==='function')renderPointHistory();
-  showToast('交換テスト用に1,100ptを交換可能ポイントへ付与しました');
+  updateProfile();
+  showToast('交換テスト用ポイント：利用可能1,100pt');
 }
 
 async function ensureProfileAfterLogin(){
