@@ -1516,6 +1516,21 @@ async function getRankingData(){
 }
 async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name">${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</div><div class="rank-meta">累計ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function grantExchangeTestPoints(){
+  if(new URLSearchParams(location.search).get('testpoints')!=='1')return;
+  const id=currentUser?.id||getLocalAccount()?.id||'guest';
+  const key='kredoExchangeTestGranted:'+id;
+  if(localStorage.getItem(key)==='1')return;
+  const amount=1100;
+  state.totalPoints=Number(state.totalPoints||0)+amount;
+  saveState();
+  addPointHistory('earn','交換テスト用ポイント',amount,'テスト用一時付与','exchange-test-1100');
+  localStorage.setItem(key,'1');
+  updateProfile();
+  renderPointsInNewUI();
+  showToast('交換テスト用に1,100ptを付与しました');
+}
+
 async function ensureProfileAfterLogin(){
   if(!supabaseClient||!currentUser)return null;
   loadState();
@@ -1570,6 +1585,7 @@ async function ensureProfileAfterLogin(){
       const {data}=await supabaseClient.auth.getSession();
       currentUser=data.session?.user||null;
       if(currentUser)await ensureProfileAfterLogin();
+      grantExchangeTestPoints();
       if(location.hash.includes('type=recovery')){show('account');showRecoveryPanel();}
       supabaseClient.auth.onAuthStateChange((event,session)=>{
         if(event==='SIGNED_IN')currentUser=session?.user||currentUser;
@@ -1581,6 +1597,7 @@ async function ensureProfileAfterLogin(){
   }else{
     currentUser=getLocalAccount();
     if(currentUser){loadState();updateProfile()}
+    grantExchangeTestPoints();
   }
 })();
 (function restoreQuizData(){
