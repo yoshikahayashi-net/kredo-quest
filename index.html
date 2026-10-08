@@ -163,7 +163,14 @@ body{display:flex;justify-content:center}
   50%{transform:translate(165px,232px) rotate(-10deg)}
 }
 
-/* v13: learning-data import + persistent player state */
+/* point exchange */
+.exchange-screen{padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}
+.exchange-head{padding:20px 16px 16px;background:linear-gradient(180deg,#1489C9,#0B72AE);color:#fff}
+.exchange-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82}.exchange-title{font-size:25px;font-weight:900;margin-top:5px}.exchange-sub{font-size:11px;line-height:1.55;opacity:.9;margin-top:5px}
+.exchange-balance{margin:14px 16px 0;background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+.exchange-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.exchange-balance strong{display:block;font-size:24px;color:var(--blue-dark);margin-top:2px}.exchange-balance .coin{width:45px;height:45px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-weight:900;color:#8A6900}
+.exchange-body{padding:15px 16px}.exchange-section-title{font-size:14px;font-weight:900;margin:4px 0 9px}.exchange-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 5px 14px rgba(31,105,131,.07);margin-bottom:10px}.exchange-card-top{display:flex;gap:12px;align-items:center}.exchange-icon{width:62px;height:62px;border-radius:16px;background:#FFF5C8;border:1px solid #F0D96D;display:grid;place-items:center;font-size:31px;flex:0 0 62px}.exchange-card h3{font-size:15px;margin:0 0 4px}.exchange-card p{font-size:10px;line-height:1.5;color:var(--muted);margin:0}.exchange-price{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:12px;border-top:1px dashed #C9DFE8}.exchange-price strong{font-size:18px;color:#9A7800}.exchange-btn{height:42px;padding:0 16px;border:0;border-radius:12px;background:var(--yellow);color:#304858;font-weight:900;cursor:pointer}.exchange-btn:disabled{background:#DDE8EC;color:#8A9AA2;cursor:not-allowed}.exchange-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#EDF8FC;color:#5A7481;font-size:10px;line-height:1.55}.exchange-history{margin-top:18px}.exchange-history-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #E1EDF1;font-size:10px}.exchange-history-row strong{font-size:11px}.exchange-history-row span{color:#6F8792}.exchange-empty{padding:15px;border:1px dashed #BFD9E3;border-radius:13px;color:#718792;text-align:center;font-size:10px;background:#FAFDFE}
+\n/* v13: learning-data import + persistent player state */
 .import-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .import-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
 .import-card h3{margin:0 0 6px;font-size:14px}
@@ -534,10 +541,27 @@ body{display:flex;justify-content:center}
         <div class="points-box"><small>累計獲得ポイント</small><strong id="profileLifetimePoints">0 pt</strong></div>
         <div class="points-box"><small>利用可能ポイント</small><strong id="profileSpendablePoints">0 pt</strong></div>
       </div>
-      <div class="reward-preview"><strong>🎟 交換予定：300pt → 抽選権</strong><span>詳細な交換条件・その他アイテム価格は今後決定予定です。</span></div>
+      <button class="reward-preview" onclick="openPointExchange()" style="width:100%;text-align:left;border:0;cursor:pointer"><strong>🎟 ポイント交換：300pt → 抽選権</strong><span>ポイントを使って特典と交換できます。タップして交換画面へ。</span></button>
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
       <div class="production-note"><strong>📖 クレドを学ぶ</strong><br>毎日のクエストで出会ったクレドを、公式ページでも確認できます。ホームの「クレドを知る」から見られます。</div>
 
+    </div>
+  </section>
+
+  <!-- POINT EXCHANGE -->
+  <section id="pointExchange" class="screen exchange-screen">
+    <div class="topbar"><div class="brand"><span class="brand-mark">P</span>ポイント交換</div><div class="menu" onclick="openMyPage()" style="cursor:pointer">✕</div></div>
+    <div class="exchange-head"><div class="exchange-kicker">POINT REWARD</div><div class="exchange-title">ポイントを交換</div><div class="exchange-sub">クエストで貯めたポイントを、ゲーム内の特典と交換できます。</div></div>
+    <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong></div><div class="coin">P</div></div>
+    <div class="exchange-body">
+      <div class="exchange-section-title">交換できる特典</div>
+      <div class="exchange-card">
+        <div class="exchange-card-top"><div class="exchange-icon">🎟</div><div><h3>抽選権</h3><p>対象イベントの抽選に参加できる権利。<br>1回の交換につき1口として利用します。</p></div></div>
+        <div class="exchange-price"><strong>300 pt</strong><button class="exchange-btn" id="exchangeLotteryBtn" onclick="exchangeLottery()">交換する</button></div>
+      </div>
+      <div class="exchange-card" style="opacity:.72"><div class="exchange-card-top"><div class="exchange-icon" style="background:#EEF5F7;border-color:#D7E5E9">✦</div><div><h3>クレド関連アイテム</h3><p>ゲーム内で使える限定アイテムなどを順次追加予定です。</p></div></div><div class="exchange-price"><strong style="font-size:13px;color:#78909A">COMING SOON</strong></div></div>
+      <div class="exchange-note">※ 交換した特典は「ポイント履歴」に記録されます。今後、交換できる特典を順次追加します。</div>
+      <div class="exchange-history"><div class="exchange-section-title">交換履歴</div><div id="exchangeHistory"></div></div>
     </div>
   </section>
 
@@ -1554,6 +1578,11 @@ buildDailyQuest();
 saveState();
 renderLibrary();
 updateLanguageButtons();
+function exchangeHistoryKey(){return'kredoExchangeHistory:'+(currentUser?.id||getLocalAccount()?.id||'guest')}
+function loadExchangeHistory(){try{const x=JSON.parse(localStorage.getItem(exchangeHistoryKey())||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}}
+function renderPointExchange(){const p=spendablePoints();const el=document.getElementById('exchangeSpendablePoints');if(el)el.textContent=p+' pt';const btn=document.getElementById('exchangeLotteryBtn');if(btn){btn.disabled=p<300;btn.textContent=p>=300?'交換する':'ポイント不足'}const box=document.getElementById('exchangeHistory');if(box){const h=loadExchangeHistory();box.innerHTML=h.length?h.slice().reverse().map(x=>'<div class="exchange-history-row"><div><strong>'+x.name+'</strong><br><span>'+x.date+'</span></div><strong>-'+x.points+' pt</strong></div>').join(''):'<div class="exchange-empty">まだ交換履歴はありません。</div>'}}
+function openPointExchange(){show('pointExchange');renderPointExchange()}
+function exchangeLottery(){const p=spendablePoints();if(p<300){showToast('ポイントが不足しています');return}if(!confirm('300ptを使って「抽選権」1口と交換しますか？'))return;customization.spentPoints=Number(customization.spentPoints||0)+300;const h=loadExchangeHistory();h.push({name:'抽選権 1口',points:300,date:new Date().toLocaleString('ja-JP')});localStorage.setItem(exchangeHistoryKey(),JSON.stringify(h));saveCustomization().then(()=>{renderPointExchange();renderPointsInNewUI();showToast('🎟 抽選権と交換しました')})}
 const AVATAR_OPTIONS={hairStyle:[{id:'short',name:'ショート',icon:'💇'},{id:'medium',name:'ミディアム',icon:'🧑'},{id:'long',name:'ロング',icon:'👩'},{id:'pony',name:'ポニー',icon:'👱'},{id:'spiky',name:'ワイルド',icon:'✦'}],hairColor:[{id:'black',name:'ブラック',color:'#24313B'},{id:'brown',name:'ブラウン',color:'#76513E'},{id:'ash',name:'アッシュ',color:'#8A8496'},{id:'blue',name:'ネイビー',color:'#395A88'},{id:'rose',name:'ローズ',color:'#B86F83'}],outfit:[{id:'work',name:'ワーク',color:'#4A90A9',icon:'🧢'},{id:'casual',name:'カジュアル',color:'#7DA6C4',icon:'👕'},{id:'neat',name:'きれいめ',color:'#6B7AA7',icon:'🧥'},{id:'sporty',name:'スポーティ',color:'#5DBA91',icon:'🏃'},{id:'pop',name:'ポップ',color:'#D784A4',icon:'⭐'}],accessory:[{id:'none',name:'なし',icon:'—'},{id:'glasses',name:'メガネ',icon:'👓'},{id:'cap',name:'キャップ',icon:'🧢'},{id:'headphone',name:'ヘッドホン',icon:'🎧'},{id:'badge',name:'バッジ',icon:'🎖'}],effect:[{id:'none',name:'なし',icon:'○'},{id:'sparkle',name:'キラキラ',icon:'✦'},{id:'leaf',name:'リーフ',icon:'🍃'},{id:'star',name:'スター',icon:'★'},{id:'shield',name:'シールド',icon:'🛡'}]};
 const AVATAR_CATEGORY_NAMES={hairStyle:'髪型',hairColor:'髪色',outfit:'服装',accessory:'アクセサリー',effect:'エフェクト'};
 const ROOM_THEMES=[{id:'basic',name:'ベーシック',desc:'明るく落ち着いた部屋',bg:'#EAF5F9',floor:'#B78660'},{id:'nature',name:'森・自然',desc:'グリーンを感じる部屋',bg:'#E6F4E6',floor:'#9B7B5D'},{id:'workshop',name:'工房',desc:'道具が並ぶ作業空間',bg:'#ECE6DA',floor:'#8C694F'},{id:'tech',name:'未来・テック',desc:'すっきり近未来',bg:'#E8EEFA',floor:'#687A99'},{id:'credo',name:'クレドスペシャル',desc:'クレドの世界観',bg:'#FFF4C9',floor:'#B28659'}];
