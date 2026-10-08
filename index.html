@@ -164,7 +164,7 @@ body{display:flex;justify-content:center}
 }
 
 /* point exchange */
-.exchange-screen{padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}
+.exchange-screen{position:relative;z-index:40;padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}.exchange-card,.exchange-price,.exchange-btn{position:relative;z-index:41;pointer-events:auto}.exchange-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .exchange-head{padding:20px 16px 16px;background:linear-gradient(180deg,#1489C9,#0B72AE);color:#fff}
 .exchange-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82}.exchange-title{font-size:25px;font-weight:900;margin-top:5px}.exchange-sub{font-size:11px;line-height:1.55;opacity:.9;margin-top:5px}
 .exchange-balance{margin:14px 16px 0;background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
@@ -566,18 +566,18 @@ body{display:flex;justify-content:center}
 
       <div class="exchange-card">
         <div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div>
-        <div class="exchange-price"><strong>100 pt</strong><button class="exchange-btn" onclick="exchangeReward('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div>
+        <div class="exchange-price"><strong>100 pt</strong><button class="exchange-btn" data-exchange-id="cafe1" data-exchange-cost="100" data-exchange-name="ホウゲツカフェから好きな1品券">交換する</button></div>
       </div>
 
       <div class="exchange-card">
         <div class="exchange-card-top"><div class="exchange-icon">☕☕</div><div><h3>ホウゲツカフェ 2人分</h3><p>2人で、それぞれ1品ずつ頼める券です。</p></div></div>
-        <div class="exchange-price"><strong>200 pt</strong><button class="exchange-btn" onclick="exchangeReward('cafe2',200,'ホウゲツカフェから2人で、それぞれ1品ずつ頼める券')">交換する</button></div>
+        <div class="exchange-price"><strong>200 pt</strong><button class="exchange-btn" data-exchange-id="cafe2" data-exchange-cost="200" data-exchange-name="ホウゲツカフェから2人で、それぞれ1品ずつ頼める券">交換する</button></div>
       </div>
 
       <div class="exchange-card">
         <div class="exchange-card-top"><div class="exchange-icon">🎟</div><div><h3>抽せん確率アップ権</h3><p>抽せん時の当選確率アップに使える権利です。必要な個数に応じて交換できます。</p></div></div>
-        <div class="exchange-price"><strong>300 pt（1個）</strong><button class="exchange-btn" onclick="exchangeReward('lottery1',300,'抽せん確率アップ権 1個')">1個交換</button></div>
-        <div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button class="exchange-btn" onclick="exchangeReward('lottery2',500,'抽せん確率アップ権 2個')">2個交換</button></div>
+        <div class="exchange-price"><strong>300 pt（1個）</strong><button class="exchange-btn" data-exchange-id="lottery1" data-exchange-cost="300" data-exchange-name="抽せん確率アップ権 1個">1個交換</button></div>
+        <div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button class="exchange-btn" data-exchange-id="lottery2" data-exchange-cost="500" data-exchange-name="抽せん確率アップ権 2個">2個交換</button></div>
       </div>
 
       <div id="exchangeModal" class="exchange-modal" aria-hidden="true">
@@ -1694,6 +1694,11 @@ function renderPointHistory(){
     return '<div class="point-history-row"><div class="point-history-main"><strong>'+x.name+'</strong><span>'+x.date+(x.detail?'｜'+x.detail:'')+'</span></div><div class="point-history-amount '+(plus?'plus':'minus')+'">'+(plus?'+':'-')+x.points+' pt</div></div>';
   }).join(''):'<div class="point-history-empty">まだポイント履歴はありません。<br>クエストに挑戦すると、獲得ポイントがここに表示されます。</div>';
 }
+function bindExchangeButtons(){
+  document.querySelectorAll('#pointExchange .exchange-btn').forEach(btn=>{
+    btn.onclick=()=>exchangeReward(btn.dataset.exchangeId,Number(btn.dataset.exchangeCost),btn.dataset.exchangeName);
+  });
+}
 function renderPointExchange(){
   migrateExchangeHistory();
   const p=spendablePoints();
@@ -1703,6 +1708,7 @@ function renderPointExchange(){
     box.innerHTML=h.length?h.slice(0,5).map(x=>'<div class="exchange-history-row"><div><strong>'+x.name+'</strong><br><span>'+x.date+'</span></div><strong>-'+x.points+' pt</strong></div>').join(''):'<div class="exchange-empty">まだ交換履歴はありません。</div>';
   }
   renderPointsInNewUI();
+  bindExchangeButtons();
 }
 function openPointExchange(){show('pointExchange')}
 let exchangeBusy=false;
