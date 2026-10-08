@@ -615,57 +615,58 @@ body{display:flex;justify-content:center}
     };
 
     window.__safeCompletePointExchange=function(id,cost,name){
-      try{
-        const account=JSON.parse(localStorage.getItem('kredoAccount')||'null');
-        const uid=(typeof currentUser!=='undefined'&&currentUser&&currentUser.id)||(account&&account.id)||'guest';
-        const key='kredoCustomization:'+uid;
-        let c={spentPoints:0};
-        try{ c=JSON.parse(localStorage.getItem(key)||'null')||c; }catch(e){}
-        const currentSpent=Number(c.spentPoints||0);
-        const total=Number(localStorage.getItem('kredoState:'+uid+':totalPoints')||localStorage.getItem('kredoTotalPoints')||0);
-        const available=Math.max(0,total-currentSpent);
-        if(available<cost){
-          pointExchangeModal('ポイントが足りません','現在 <strong>'+available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
-          return;
-        }
-        c.spentPoints=currentSpent+cost;
-        localStorage.setItem(key,JSON.stringify(c));
-        try{
-          if(typeof customization!=='undefined')customization.spentPoints=c.spentPoints;
-        }catch(e){}
-        try{
-          if(typeof addPointHistory==='function')addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());
-        }catch(e){}
-        try{if(typeof renderPointExchange==='function')renderPointExchange();}catch(e){}
-        try{if(typeof renderPointHistory==='function')renderPointHistory();}catch(e){}
-        try{if(typeof renderPointsInNewUI==='function')renderPointsInNewUI();}catch(e){}
-        pointExchangeModal('交換しました','「'+name+'」と交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert');
-      }catch(e){
-        pointExchangeModal('交換に失敗しました','交換処理でエラーが発生しました。<br>ポイントは消費していません。','alert');
+      const account=JSON.parse(localStorage.getItem('kredoAccount')||'null');
+      const uid=(typeof currentUser!=='undefined'&&currentUser&&currentUser.id)||(account&&account.id)||'guest';
+      const key='kredoCustomization:'+uid;
+      let c={};
+      try{c=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){c={};}
+      const currentSpent=Number(c.spentPoints||0);
+      const total=Number(
+        localStorage.getItem('kredoState:'+uid+':totalPoints') ||
+        localStorage.getItem('kredoTotalPoints') || 0
+      );
+      const available=Math.max(0,total-currentSpent);
+
+      if(available<cost){
+        pointExchangeModal(
+          'ポイントが足りません',
+          '現在 <strong>'+available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。',
+          'alert'
+        );
+        return;
       }
+
+      c.spentPoints=currentSpent+cost;
+      localStorage.setItem(key,JSON.stringify(c));
+      try{if(typeof customization!=='undefined')customization.spentPoints=c.spentPoints;}catch(e){}
+      try{if(typeof addPointHistory==='function')addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());}catch(e){}
+      try{if(typeof renderPointExchange==='function')renderPointExchange();}catch(e){}
+      try{if(typeof renderPointHistory==='function')renderPointHistory();}catch(e){}
+      try{if(typeof renderPointsInNewUI==='function')renderPointsInNewUI();}catch(e){}
+      pointExchangeModal(
+        '交換しました',
+        '「'+name+'」と交換しました。<br><strong>'+cost+' pt</strong>を使用しました。',
+        'alert'
+      );
     };
 
     window.__pointExchangeClick=function(id,cost,name){
-      let p=safeSpendablePoints();
-      try{
-        if(typeof exchangeBusy!=='undefined' && exchangeBusy)return;
-        if(typeof exchangeReward==='function'){
-          exchangeReward(id,cost,name);
-          const m=document.getElementById('exchangeModal');
-          if(m && !m.hidden)return;
-        }
-      }catch(e){}
-      p=safeSpendablePoints();
+      const p=safeSpendablePoints();
       if(p<cost){
-        pointExchangeModal('ポイントが足りません','現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
+        pointExchangeModal(
+          'ポイントが足りません',
+          '現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。',
+          'alert'
+        );
         return;
       }
-      pointExchangeModal('交換しますか？','「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',function(){
-        try{window.__safeCompletePointExchange(id,cost,name)}catch(e){
-          pointExchangeModal('交換に失敗しました','交換処理でエラーが発生しました。<br>ポイントは消費していません。','alert');
-        }
-      });
-    };
+      pointExchangeModal(
+        '交換しますか？',
+        '「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。',
+        'confirm',
+        function(){window.__safeCompletePointExchange(id,cost,name);}
+      );
+    };;
   })();
   </script>
 
@@ -1706,20 +1707,14 @@ function pointHistoryKey(){return 'kredoPointHistory:'+(currentUser?.id||getLoca
   }
   exchangeBusy=true;
   const before=Number(customization.spentPoints||0);
-  try{
-    customization.spentPoints=before+cost;
-    addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());
-    saveCustomization();
-    renderPointExchange();
-    renderPointHistory();
-    renderPointsInNewUI();
-    showExchangeModal('交換しました','「'+name+'」を交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert');
-  }catch(e){
-    customization.spentPoints=before;
-    showExchangeModal('交換できませんでした','交換処理を開始できませんでした。','alert');
-  }finally{
-    exchangeBusy=false;
-  }
+  customization.spentPoints=before+cost;
+  try{addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());}catch(e){}
+  try{renderPointExchange();}catch(e){}
+  try{renderPointHistory();}catch(e){}
+  try{renderPointsInNewUI();}catch(e){}
+  try{saveCustomization();}catch(e){}
+  showExchangeModal('交換しました','「'+name+'」と交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert');
+  exchangeBusy=false;
 }
 
 function defaultCustomization(){return{avatar:{hairStyle:'short',hairColor:'black',outfit:'work',accessory:'none',effect:'none'},roomTheme:'basic',roomWallpaper:'basic',roomFloor:'wood',roomItems:['desk','chair','plant'],ownedItems:{skins:[],furniture:['desk','chair','plant']},spentPoints:0}}
