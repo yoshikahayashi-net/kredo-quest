@@ -1593,10 +1593,10 @@ async function ensureProfileAfterLogin(){
       currentUser=data.session?.user||null;
       if(currentUser)await ensureProfileAfterLogin();
       grantExchangeTestPoints();
-      setTimeout(grantExchangeTestPoints,800);
+      setTimeout(grantExchangeTestPoints,2500);
       if(location.hash.includes('type=recovery')){show('account');showRecoveryPanel();}
       supabaseClient.auth.onAuthStateChange((event,session)=>{
-        if(event==='SIGNED_IN'){currentUser=session?.user||currentUser;setTimeout(grantExchangeTestPoints,800);}
+        if(event==='SIGNED_IN'){currentUser=session?.user||currentUser;setTimeout(grantExchangeTestPoints,2500);}
         if(event==='SIGNED_OUT')currentUser=null;
         if(event==='PASSWORD_RECOVERY'){currentUser=session?.user||currentUser;show('account');showRecoveryPanel();}
         syncAccountUI();
