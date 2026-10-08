@@ -9,7 +9,7 @@
 </div><div class="panel" id="panel"><div class="panelhead" id="panelHead"></div><div class="choices" id="choices"></div><button class="save" onclick="saveAvatar()">この設定を保存</button></div><div class="note">この画面の見た目は、指定された完成イメージをそのまま使用しています。選択操作だけを重ねています。</div></div></div>
 <script>
 const account=JSON.parse(localStorage.getItem('kredoAccount')||'null');const key='kredoCustomization:'+(account?.id||'guest');let state={};try{state=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}
-function openPanel(title,arr){document.getElementById('panelHead').textContent=title;document.getElementById('choices').innerHTML=arr.map(x=>'<button class="choice" onclick="selectOpt(this,''+x.replaceAll("'","")+"')"'>"+x+"</button>").join('');document.getElementById('panel').classList.add('open')}
+function openPanel(title,arr){document.getElementById('panelHead').textContent=title;const box=document.getElementById('choices');box.innerHTML=arr.map(x=>'<button class="choice" data-v="'+encodeURIComponent(x)+'">'+x+'</button>').join('');box.querySelectorAll('.choice').forEach(b=>b.onclick=()=>selectOpt(b,decodeURIComponent(b.dataset.v)));document.getElementById('panel').classList.add('open')}
 function selectOpt(btn,v){document.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));btn.classList.add('sel');state.lastChoice=v}
 function saveAvatar(){localStorage.setItem(key,JSON.stringify({...state,avatarSaved:true}));document.getElementById('panelHead').textContent='保存しました';document.getElementById('choices').innerHTML='<span style="font-size:9px;color:#367947">アバター設定を保存しました。</span>';document.getElementById('panel').classList.add('open')}
 </script></div></body></html>
