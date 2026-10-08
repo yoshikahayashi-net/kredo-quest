@@ -1563,8 +1563,23 @@ async function ensureProfileAfterLogin(){
         .select('id,display_name,total_points,updated_at')
         .single();
       if(updateError)throw updateError;
-      state.totalPoints=Number(updated?.total_points||0);
-      saveState();
+      const serverPoints=Number(updated?.total_points||0);
+      const localPoints=Number(state.totalPoints||0);
+      if(serverPoints>0 || localPoints<=0){
+        state.totalPoints=serverPoints;
+        saveState();
+      }else{
+        state.totalPoints=localPoints;
+        saveState();
+        try{
+          await supabaseClient.from('profiles').update({
+            total_points:localPoints,
+            updated_at:new Date().toISOString()
+          }).eq('id',currentUser.id);
+        }catch(e){
+          console.warn('Profile point recovery skipped',e);
+        }
+      }
       await syncAttemptCount();
       return updated;
     }
