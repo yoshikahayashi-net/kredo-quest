@@ -634,7 +634,7 @@ body{display:flex;justify-content:center}
         try{
           if(typeof doExchangeReward==='function'){doExchangeReward(id,cost,name);return;}
         }catch(e){}
-        pointExchangeModal('交換に失敗しました','交換処理を完了できませんでした。ポイントは減らしていません。','alert');
+        pointExchangeModal('交換に失敗しました','特典の交換処理を完了できませんでした。<br>ポイントは消費されていません。','alert');
       });
     };
   })();
