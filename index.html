@@ -566,18 +566,18 @@ body{display:flex;justify-content:center}
 
       <div class="exchange-card">
         <div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div>
-        <div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" onclick="exchangeReward('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div>
+        <div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" data-exchange-id="cafe1" data-exchange-cost="100" data-exchange-name="ホウゲツカフェから好きな1品券">交換する</button></div>
       </div>
 
       <div class="exchange-card">
         <div class="exchange-card-top"><div class="exchange-icon">☕☕</div><div><h3>ホウゲツカフェ 2人分</h3><p>2人で、それぞれ1品ずつ頼める券です。</p></div></div>
-        <div class="exchange-price"><strong>200 pt</strong><button type="button" class="exchange-btn" onclick="exchangeReward('cafe2',200,'ホウゲツカフェから2人で、それぞれ1品ずつ頼める券')">交換する</button></div>
+        <div class="exchange-price"><strong>200 pt</strong><button type="button" class="exchange-btn" data-exchange-id="cafe2" data-exchange-cost="200" data-exchange-name="ホウゲツカフェから2人で、それぞれ1品ずつ頼める券">交換する</button></div>
       </div>
 
       <div class="exchange-card">
         <div class="exchange-card-top"><div class="exchange-icon">🎟</div><div><h3>抽せん確率アップ権</h3><p>抽せん時の当選確率アップに使える権利です。必要な個数に応じて交換できます。</p></div></div>
-        <div class="exchange-price"><strong>300 pt（1個）</strong><button type="button" class="exchange-btn" onclick="exchangeReward('lottery1',300,'抽せん確率アップ権 1個')">1個交換</button></div>
-        <div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button type="button" class="exchange-btn" onclick="exchangeReward('lottery2',500,'抽せん確率アップ権 2個')">2個交換</button></div>
+        <div class="exchange-price"><strong>300 pt（1個）</strong><button type="button" class="exchange-btn" data-exchange-id="lottery1" data-exchange-cost="300" data-exchange-name="抽せん確率アップ権 1個">1個交換</button></div>
+        <div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button type="button" class="exchange-btn" data-exchange-id="lottery2" data-exchange-cost="500" data-exchange-name="抽せん確率アップ権 2個">2個交換</button></div>
       </div>
 
       <div id="exchangeModal" class="exchange-modal" aria-hidden="true">
@@ -1719,7 +1719,23 @@ function bindExchangeButtons(){
   document.querySelectorAll('#pointExchange .exchange-btn').forEach(btn=>{
     btn.style.pointerEvents='auto';
     btn.style.position='relative';
-    btn.style.zIndex='10';
+    btn.style.zIndex='50';
+    btn.style.touchAction='manipulation';
+    if(btn.dataset.exchangeBound==='1')return;
+    btn.dataset.exchangeBound='1';
+    const handler=e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      exchangeReward(
+        btn.dataset.exchangeId,
+        Number(btn.dataset.exchangeCost||0),
+        btn.dataset.exchangeName||'特典'
+      );
+    };
+    btn.addEventListener('click',handler);
+    btn.addEventListener('pointerup',e=>{
+      if(e.pointerType==='touch')handler(e);
+    },{passive:false});
   });
 }
 function renderPointExchange(){
