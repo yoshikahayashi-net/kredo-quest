@@ -528,7 +528,7 @@ body{display:flex;justify-content:center}
         <div class="points-box"><small>累計獲得ポイント</small><strong id="profileLifetimePoints">0 pt</strong></div>
         <div class="points-box"><small>利用可能ポイント</small><strong id="profileSpendablePoints">0 pt</strong></div>
       </div>
-      <button class="reward-preview" onclick="openPointExchange()" style="width:100%;text-align:left;cursor:pointer"><strong>🎁 ポイント交換</strong><span>100ptからホウゲツカフェの特典などに交換できます。タップして交換画面へ。</span></button>
+      <button class="reward-preview" onclick="__openPointExchangeSafe()" style="width:100%;text-align:left;cursor:pointer"><strong>🎁 ポイント交換</strong><span>100ptからホウゲツカフェの特典などに交換できます。タップして交換画面へ。</span></button>
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
       <div class="production-note"><strong>📖 クレドを学ぶ</strong><br>毎日のクエストで出会ったクレドを、公式ページでも確認できます。ホームの「クレドを知る」から見られます。</div>
 
@@ -542,9 +542,9 @@ body{display:flex;justify-content:center}
     <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong></div><div class="coin">P</div></div>
     <div class="exchange-body">
       <div class="exchange-section-title">交換できる特典</div>
-      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div><div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" onclick="exchangeReward('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div></div>
-      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕☕</div><div><h3>ホウゲツカフェ 2人分</h3><p>2人で、それぞれ1品ずつ頼める券です。</p></div></div><div class="exchange-price"><strong>200 pt</strong><button type="button" class="exchange-btn" onclick="exchangeReward('cafe2',200,'ホウゲツカフェから2人で、それぞれ1品ずつ頼める券')">交換する</button></div></div>
-      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">🎟</div><div><h3>抽せん確率アップ権</h3><p>抽せん時の当選確率アップに使える権利です。</p></div></div><div class="exchange-price"><strong>300 pt（1個）</strong><button type="button" class="exchange-btn" onclick="exchangeReward('lottery1',300,'抽せん確率アップ権 1個')">1個交換</button></div><div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button type="button" class="exchange-btn" onclick="exchangeReward('lottery2',500,'抽せん確率アップ権 2個')">2個交換</button></div></div>
+      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div><div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" onclick="__pointExchangeClick('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div></div>
+      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕☕</div><div><h3>ホウゲツカフェ 2人分</h3><p>2人で、それぞれ1品ずつ頼める券です。</p></div></div><div class="exchange-price"><strong>200 pt</strong><button type="button" class="exchange-btn" onclick="__pointExchangeClick('cafe2',200,'ホウゲツカフェから2人で、それぞれ1品ずつ頼める券')">交換する</button></div></div>
+      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">🎟</div><div><h3>抽せん確率アップ権</h3><p>抽せん時の当選確率アップに使える権利です。</p></div></div><div class="exchange-price"><strong>300 pt（1個）</strong><button type="button" class="exchange-btn" onclick="__pointExchangeClick('lottery1',300,'抽せん確率アップ権 1個')">1個交換</button></div><div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button type="button" class="exchange-btn" onclick="__pointExchangeClick('lottery2',500,'抽せん確率アップ権 2個')">2個交換</button></div></div>
       <div class="exchange-note">※ 交換した特典はポイント履歴に記録されます。実際の券・権利の利用方法は社内運用に合わせて案内します。</div>
       <div class="exchange-history"><div class="exchange-section-title">最近の交換履歴</div><div id="exchangeHistory"></div></div>
     </div>
@@ -556,6 +556,89 @@ body{display:flex;justify-content:center}
       <div class="exchange-modal-actions"><button id="exchangeModalCancel" class="exchange-modal-btn secondary" type="button">閉じる</button><button id="exchangeModalOk" class="exchange-modal-btn primary" type="button">はい、交換する</button></div>
     </div>
   </div>
+
+  <script>
+  /* POINT EXCHANGE SAFE CLICK LAYER
+     交換ボタンのクリック経路を本体ロジックから独立させる。
+     本体側で別のJSエラーが起きても、ダイアログ表示までは止めない。 */
+  (function(){
+    function pointExchangeModal(title,message,mode,onConfirm){
+      const m=document.getElementById('exchangeModal');
+      if(!m){ window.alert(title+'\\n\\n'+message.replace(/<[^>]*>/g,'')); return; }
+      const titleEl=document.getElementById('exchangeModalTitle');
+      const msgEl=document.getElementById('exchangeModalMessage');
+      const ok=document.getElementById('exchangeModalOk');
+      const cancel=document.getElementById('exchangeModalCancel');
+      if(titleEl)titleEl.textContent=title;
+      if(msgEl)msgEl.innerHTML=message;
+      if(ok){
+        ok.style.display=mode==='confirm'?'inline-flex':'none';
+        ok.onclick=function(){
+          m.hidden=true;m.setAttribute('aria-hidden','true');m.style.display='none';
+          if(onConfirm)onConfirm();
+        };
+      }
+      if(cancel){
+        cancel.textContent=mode==='confirm'?'いいえ':'閉じる';
+        cancel.onclick=function(){m.hidden=true;m.setAttribute('aria-hidden','true');m.style.display='none'};
+      }
+      document.body.appendChild(m);
+      m.hidden=false;
+      m.removeAttribute('hidden');
+      m.style.display='flex';
+      m.setAttribute('aria-hidden','false');
+    }
+
+    function safeSpendablePoints(){
+      try{ if(typeof spendablePoints==='function') return Math.max(0,Number(spendablePoints()||0)); }catch(e){}
+      try{
+        const a=JSON.parse(localStorage.getItem('kredoAccount')||'null');
+        const id=a&&a.id?a.id:'guest';
+        const total=Number(localStorage.getItem('kredoState:'+id+':totalPoints')||localStorage.getItem('kredoTotalPoints')||0);
+        let spent=0;
+        try{
+          const c=JSON.parse(localStorage.getItem('kredoCustomization:'+id)||'null');
+          spent=Number(c&&c.spentPoints||0);
+        }catch(e){}
+        return Math.max(0,total-spent);
+      }catch(e){return 0}
+    }
+
+    window.__openPointExchangeSafe=function(){
+      try{
+        if(typeof show==='function' && document.getElementById('pointExchange')){show('pointExchange');return;}
+      }catch(e){}
+      document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});
+      const target=document.getElementById('pointExchange');
+      if(target)target.classList.add('active');
+      window.scrollTo(0,0);
+    };
+
+    window.__pointExchangeClick=function(id,cost,name){
+      let p=safeSpendablePoints();
+      try{
+        if(typeof exchangeBusy!=='undefined' && exchangeBusy)return;
+        if(typeof exchangeReward==='function'){
+          exchangeReward(id,cost,name);
+          const m=document.getElementById('exchangeModal');
+          if(m && !m.hidden)return;
+          /* exchangeRewardが実行されてもモーダルが開かなかった場合は即フォールバック */
+        }
+      }catch(e){}
+      p=safeSpendablePoints();
+      if(p<cost){
+        pointExchangeModal('ポイントが足りません','現在の利用可能ポイントは <strong>'+p+' pt</strong>です。<br>'+cost+' pt必要です。','alert');
+        return;
+      }
+      pointExchangeModal('交換しますか？','<strong>'+cost+' pt</strong>を使って<br>「'+name+'」と交換しますか？','confirm',function(){
+        try{
+          if(typeof doExchangeReward==='function'){doExchangeReward(id,cost,name);return;}
+        }catch(e){}
+        pointExchangeModal('交換に失敗しました','交換処理を完了できませんでした。ポイントは減らしていません。','alert');
+      });
+    };
+  })();
+  </script>
 
   <!-- AVATAR CUSTOMIZER -->
   <section id="avatarCustomizer" class="screen" style="background:#F4FBFD">
