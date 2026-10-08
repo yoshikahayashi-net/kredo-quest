@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v37</title>
+<title>抱月クレドクエスト｜Prototype v38</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -1547,11 +1547,6 @@ buildDailyQuest();
 saveState();
 renderLibrary();
 updateLanguageButtons();
-loadCustomization().catch(()=>{});
-setTimeout(()=>{bindAvatarCategories();bindRoomCategories();renderHomeAvatar();renderMyPageAvatar();renderPointsInNewUI()},50);
-loadCustomization().catch(()=>{});
-setTimeout(()=>{renderHomeAvatar();renderMyPageAvatar();renderPointsInNewUI()},50);
-
 const AVATAR_OPTIONS={hairStyle:[{id:'short',name:'ショート',icon:'💇'},{id:'medium',name:'ミディアム',icon:'🧑'},{id:'long',name:'ロング',icon:'👩'},{id:'pony',name:'ポニー',icon:'👱'},{id:'spiky',name:'ワイルド',icon:'✦'}],hairColor:[{id:'black',name:'ブラック',color:'#24313B'},{id:'brown',name:'ブラウン',color:'#76513E'},{id:'ash',name:'アッシュ',color:'#8A8496'},{id:'blue',name:'ネイビー',color:'#395A88'},{id:'rose',name:'ローズ',color:'#B86F83'}],outfit:[{id:'work',name:'ワーク',color:'#4A90A9',icon:'🧢'},{id:'casual',name:'カジュアル',color:'#7DA6C4',icon:'👕'},{id:'neat',name:'きれいめ',color:'#6B7AA7',icon:'🧥'},{id:'sporty',name:'スポーティ',color:'#5DBA91',icon:'🏃'},{id:'pop',name:'ポップ',color:'#D784A4',icon:'⭐'}],accessory:[{id:'none',name:'なし',icon:'—'},{id:'glasses',name:'メガネ',icon:'👓'},{id:'cap',name:'キャップ',icon:'🧢'},{id:'headphone',name:'ヘッドホン',icon:'🎧'},{id:'badge',name:'バッジ',icon:'🎖'}],effect:[{id:'none',name:'なし',icon:'○'},{id:'sparkle',name:'キラキラ',icon:'✦'},{id:'leaf',name:'リーフ',icon:'🍃'},{id:'star',name:'スター',icon:'★'},{id:'shield',name:'シールド',icon:'🛡'}]};
 const AVATAR_CATEGORY_NAMES={hairStyle:'髪型',hairColor:'髪色',outfit:'服装',accessory:'アクセサリー',effect:'エフェクト'};
 const ROOM_THEMES=[{id:'basic',name:'ベーシック',desc:'明るく落ち着いた部屋',bg:'#EAF5F9',floor:'#B78660'},{id:'nature',name:'森・自然',desc:'グリーンを感じる部屋',bg:'#E6F4E6',floor:'#9B7B5D'},{id:'workshop',name:'工房',desc:'道具が並ぶ作業空間',bg:'#ECE6DA',floor:'#8C694F'},{id:'tech',name:'未来・テック',desc:'すっきり近未来',bg:'#E8EEFA',floor:'#687A99'},{id:'credo',name:'クレドスペシャル',desc:'クレドの世界観',bg:'#FFF4C9',floor:'#B28659'}];
@@ -1580,7 +1575,11 @@ function renderRoomUI(){const stage=document.getElementById('roomStage'),scene=d
 function renderRoomOptions(cat){const box=document.getElementById('roomOptions');if(!box)return;const meta=ROOM_TAB_META[cat]||{title:'アイテム'};if(cat==='bgm'){box.innerHTML='<div style="min-width:250px;padding:15px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:10px;color:var(--muted)">♫ BGMは準備中です。今後のアップデートで追加予定。</div>';return}if(cat==='theme'||cat==='wall'||cat==='floor'){box.innerHTML=ROOM_THEMES.map(t=>'<button class="room-theme-card '+(customization.roomTheme===t.id?'active':'')+'" data-id="'+t.id+'"><div class="room-theme-thumb">'+roomMiniSvg(t.id)+'</div><strong>'+t.name+'</strong><small>'+t.desc+'</small></button>').join('');box.querySelectorAll('.room-theme-card').forEach(b=>b.onclick=()=>{customization.roomTheme=b.dataset.id;renderRoomUI()});return}box.innerHTML=ROOM_ITEMS.map(i=>'<button class="room-item-card '+((customization.roomItems||[]).includes(i.id)?'active':'')+'" data-id="'+i.id+'"><strong>'+i.icon+' '+i.name+'</strong><small>'+((customization.roomItems||[]).includes(i.id)?'配置中':'タップして配置')+'</small></button>').join('');box.querySelectorAll('.room-item-card').forEach(b=>b.onclick=()=>{const id=b.dataset.id,arr=customization.roomItems||[];customization.roomItems=arr.includes(id)?arr.filter(x=>x!==id):arr.concat(id);renderRoomUI()})}
 function bindRoomCategories(){document.querySelectorAll('.room-category-btn').forEach(b=>b.onclick=()=>{if(b.dataset.roomcat==='bgm'){showToast('♫ BGMは準備中です');return}document.querySelectorAll('.room-category-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderRoomOptions(b.dataset.roomcat)})}
 function saveRoomAndReturn(){saveCustomization().then(()=>{showToast('⌂ マイルームを保存しました');show('mypage')})}
-function openMyRoom(){show('myroom');loadCustomization().then(()=>{bindRoomCategories();renderRoomUI()})}const LANGUAGE_LABELS={ja:'日本語',en:'English',vi:'Tiếng Việt'};
+function openMyRoom(){show('myroom');loadCustomization().then(()=>{bindRoomCategories();renderRoomUI()})}
+loadCustomization().catch(()=>{});
+setTimeout(()=>{bindAvatarCategories();bindRoomCategories();renderHomeAvatar();renderMyPageAvatar();renderPointsInNewUI()},80);
+
+const LANGUAGE_LABELS={ja:'日本語',en:'English',vi:'Tiếng Việt'};
 function getLanguage(){return localStorage.getItem('kredoLanguage')||'ja'}
 function openLanguageSettings(){const panel=document.getElementById('languagePanel');if(panel)panel.classList.add('open');updateLanguageButtons()}
 function closeLanguageSettings(e){if(!e||e.target.id==='languagePanel'){const panel=document.getElementById('languagePanel');if(panel)panel.classList.remove('open')}}
