@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v42</title>
+<title>抱月クレドクエスト｜Prototype v43</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -164,7 +164,7 @@ body{display:flex;justify-content:center}
 }
 
 /* point exchange */
-.exchange-screen{position:relative;z-index:160;padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}.exchange-card,.exchange-price,.exchange-btn{position:relative;z-index:41;pointer-events:auto}.exchange-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.exchange-screen{position:relative;z-index:1000;isolation:isolate;padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}.exchange-card,.exchange-price,.exchange-btn{position:relative;z-index:41;pointer-events:auto}.exchange-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .exchange-head{padding:20px 16px 16px;background:linear-gradient(180deg,#1489C9,#0B72AE);color:#fff}
 .exchange-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82}.exchange-title{font-size:25px;font-weight:900;margin-top:5px}.exchange-sub{font-size:11px;line-height:1.55;opacity:.9;margin-top:5px}
 .exchange-balance{margin:14px 16px 0;background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
@@ -1719,11 +1719,33 @@ function bindExchangeButtons(){
   document.querySelectorAll('#pointExchange .exchange-btn').forEach(btn=>{
     btn.style.pointerEvents='auto';
     btn.style.position='relative';
-    btn.style.zIndex='310';
+    btn.style.zIndex='1001';
     btn.style.touchAction='manipulation';
   });
 }
+// 透明なオーバーレイ等でボタン自体にクリックが届かない場合でも、座標から交換ボタンを拾う
+if(!window.__exchangeCoordinateGuard){
+  window.__exchangeCoordinateGuard=true;
+  window.addEventListener('pointerdown',function(e){
+    const screen=document.getElementById('pointExchange');
+    if(!screen || !screen.classList.contains('active'))return;
+    const target=e.target;
+    if(target && target.closest && target.closest('.exchange-btn'))return;
+    const buttons=screen.querySelectorAll('.exchange-btn');
+    for(const btn of buttons){
+      const r=btn.getBoundingClientRect();
+      if(e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom){
+        e.preventDefault();
+        e.stopPropagation();
+        btn.click();
+        return;
+      }
+    }
+  },true);
+}
+
 function renderPointExchange(){
+  migrateExchangeHistory();
   migrateExchangeHistory();
   const p=spendablePoints();
   const el=document.getElementById('exchangeSpendablePoints');if(el)el.textContent=p+' pt';
