@@ -617,7 +617,7 @@ body{display:flex;justify-content:center}
     window.__safeCompletePointExchange=function(id,cost,name){
       try{
         const account=JSON.parse(localStorage.getItem('kredoAccount')||'null');
-        const uid=account&&account.id?account.id:'guest';
+        const uid=(typeof currentUser!=='undefined'&&currentUser&&currentUser.id)||(account&&account.id)||'guest';
         const key='kredoCustomization:'+uid;
         let c={spentPoints:0};
         try{ c=JSON.parse(localStorage.getItem(key)||'null')||c; }catch(e){}
@@ -665,7 +665,6 @@ body{display:flex;justify-content:center}
           pointExchangeModal('交換に失敗しました','交換処理でエラーが発生しました。<br>ポイントは消費していません。','alert');
         }
       });
-    };
     };
   })();
   </script>
