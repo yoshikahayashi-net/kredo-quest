@@ -1519,15 +1519,18 @@ function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':
 function grantExchangeTestPoints(){
   if(new URLSearchParams(location.search).get('testpoints')!=='1')return;
   const id=currentUser?.id||getLocalAccount()?.id||'guest';
-  const key='kredoExchangeTestGranted:'+id;
+  const key='kredoExchangeTestGranted:v2:'+id;
   if(localStorage.getItem(key)==='1')return;
+  loadState();
   const amount=1100;
   state.totalPoints=Number(state.totalPoints||0)+amount;
   saveState();
-  addPointHistory('earn','交換テスト用ポイント',amount,'テスト用一時付与','exchange-test-1100');
+  addPointHistory('earn','交換テスト用ポイント',amount,'テスト用一時付与','exchange-test-1100-v2');
   localStorage.setItem(key,'1');
   updateProfile();
   renderPointsInNewUI();
+  if(typeof renderPointExchange==='function')renderPointExchange();
+  if(typeof renderPointHistory==='function')renderPointHistory();
   showToast('交換テスト用に1,100ptを付与しました');
 }
 
@@ -1586,9 +1589,10 @@ async function ensureProfileAfterLogin(){
       currentUser=data.session?.user||null;
       if(currentUser)await ensureProfileAfterLogin();
       grantExchangeTestPoints();
+      setTimeout(grantExchangeTestPoints,800);
       if(location.hash.includes('type=recovery')){show('account');showRecoveryPanel();}
       supabaseClient.auth.onAuthStateChange((event,session)=>{
-        if(event==='SIGNED_IN')currentUser=session?.user||currentUser;
+        if(event==='SIGNED_IN'){currentUser=session?.user||currentUser;setTimeout(grantExchangeTestPoints,800);}
         if(event==='SIGNED_OUT')currentUser=null;
         if(event==='PASSWORD_RECOVERY'){currentUser=session?.user||currentUser;show('account');showRecoveryPanel();}
         syncAccountUI();
