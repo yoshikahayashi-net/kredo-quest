@@ -169,7 +169,7 @@ body{display:flex;justify-content:center}
 .exchange-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82}.exchange-title{font-size:25px;font-weight:900;margin-top:5px}.exchange-sub{font-size:11px;line-height:1.55;opacity:.9;margin-top:5px}
 .exchange-balance{margin:14px 16px 0;background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
 .exchange-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.exchange-balance strong{display:block;font-size:24px;color:var(--blue-dark);margin-top:2px}.exchange-balance .coin{width:45px;height:45px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-weight:900;color:#8A6900}
-.exchange-body{padding:15px 16px}.exchange-section-title{font-size:14px;font-weight:900;margin:4px 0 9px}.exchange-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 5px 14px rgba(31,105,131,.07);margin-bottom:10px}.exchange-card-top{display:flex;gap:12px;align-items:center}.exchange-icon{width:62px;height:62px;border-radius:16px;background:#FFF5C8;border:1px solid #F0D96D;display:grid;place-items:center;font-size:31px;flex:0 0 62px}.exchange-card h3{font-size:15px;margin:0 0 4px}.exchange-card p{font-size:10px;line-height:1.5;color:var(--muted);margin:0}.exchange-price{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:12px;border-top:1px dashed #C9DFE8}.exchange-price strong{font-size:18px;color:#9A7800}.exchange-btn{height:42px;padding:0 16px;border:0;border-radius:12px;background:var(--yellow);color:#304858;font-weight:900;cursor:pointer}.exchange-btn:disabled{background:#DDE8EC;color:#8A9AA2;cursor:not-allowed}.exchange-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#EDF8FC;color:#5A7481;font-size:10px;line-height:1.55}.exchange-history{margin-top:18px}.exchange-history-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #E1EDF1;font-size:10px}.exchange-history-row strong{font-size:11px}.exchange-history-row span{color:#6F8792}.exchange-empty{padding:15px;border:1px dashed #BFD9E3;border-radius:13px;color:#718792;text-align:center;font-size:10px;background:#FAFDFE}
+.exchange-body{padding:15px 16px}.exchange-section-title{font-size:14px;font-weight:900;margin:4px 0 9px}.exchange-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 5px 14px rgba(31,105,131,.07);margin-bottom:10px}.exchange-card-top{display:flex;gap:12px;align-items:center}.exchange-icon{width:62px;height:62px;border-radius:16px;background:#FFF5C8;border:1px solid #F0D96D;display:grid;place-items:center;font-size:31px;flex:0 0 62px}.exchange-card h3{font-size:15px;margin:0 0 4px}.exchange-card p{font-size:10px;line-height:1.5;color:var(--muted);margin:0}.exchange-price{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:12px;border-top:1px dashed #C9DFE8}.exchange-price strong{font-size:18px;color:#9A7800}.exchange-btn{height:42px;padding:0 16px;border:0;border-radius:12px;background:var(--yellow);color:#304858;font-weight:900;cursor:pointer}.exchange-btn:disabled{background:#DDE8EC;color:#8A9AA2;cursor:not-allowed}.exchange-modal{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:20px}.exchange-modal.open{display:flex}.exchange-modal-backdrop{position:absolute;inset:0;background:rgba(23,52,64,.42);backdrop-filter:blur(3px)}.exchange-modal-card{position:relative;width:min(92vw,420px);background:#fff;border-radius:22px;padding:24px 20px 20px;box-shadow:0 18px 50px rgba(23,52,64,.24);text-align:center;border:1px solid #D9EDF4}.exchange-modal-icon{font-size:30px;margin-bottom:6px}.exchange-modal-card h3{margin:0 0 10px;font-size:20px;color:#234B5B}.exchange-modal-card p{margin:0;color:#506875;font-size:13px;line-height:1.8}.exchange-modal-actions{display:flex;gap:10px;justify-content:center;margin-top:20px}.exchange-modal-btn{min-width:110px;border:0;border-radius:12px;padding:11px 16px;font-weight:900;cursor:pointer}.exchange-modal-btn.primary{background:#3E8EAA;color:#fff}.exchange-modal-btn.secondary{background:#EEF4F6;color:#48616D}..exchange-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#EDF8FC;color:#5A7481;font-size:10px;line-height:1.55}.exchange-history{margin-top:18px}.exchange-history-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #E1EDF1;font-size:10px}.exchange-history-row strong{font-size:11px}.exchange-history-row span{color:#6F8792}.exchange-empty{padding:15px;border:1px dashed #BFD9E3;border-radius:13px;color:#718792;text-align:center;font-size:10px;background:#FAFDFE}
 .point-history-wrap{padding:16px}
 .point-history-balance{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center}
 .point-history-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.point-history-balance strong{display:block;font-size:25px;color:var(--blue-dark);margin-top:2px}
@@ -580,6 +580,18 @@ body{display:flex;justify-content:center}
         <div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button class="exchange-btn" onclick="exchangeReward('lottery2',500,'抽せん確率アップ権 2個')">2個交換</button></div>
       </div>
 
+      <div id="exchangeModal" class="exchange-modal" aria-hidden="true">
+        <div class="exchange-modal-backdrop" onclick="document.getElementById('exchangeModal').classList.remove('open')"></div>
+        <div class="exchange-modal-card" role="dialog" aria-modal="true" aria-labelledby="exchangeModalTitle">
+          <div class="exchange-modal-icon">🎁</div>
+          <h3 id="exchangeModalTitle">交換しますか？</h3>
+          <p id="exchangeModalMessage"></p>
+          <div class="exchange-modal-actions">
+            <button id="exchangeModalCancel" class="exchange-modal-btn secondary" type="button">閉じる</button>
+            <button id="exchangeModalOk" class="exchange-modal-btn primary" type="button">はい、交換する</button>
+          </div>
+        </div>
+      </div>
       <div class="exchange-note">※ 交換した特典はポイント履歴に記録されます。実際の券・権利の利用方法は社内運用に合わせて案内します。</div>
       <div class="exchange-history"><div class="exchange-section-title">最近の交換履歴</div><div id="exchangeHistory"></div></div>
     </div>
@@ -1693,13 +1705,47 @@ function renderPointExchange(){
   renderPointsInNewUI();
 }
 function openPointExchange(){show('pointExchange')}
+let exchangeBusy=false;
+function showExchangeModal(title,message,mode,onConfirm){
+  const modal=document.getElementById('exchangeModal'),ttl=document.getElementById('exchangeModalTitle'),msg=document.getElementById('exchangeModalMessage'),ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');
+  if(!modal)return;
+  if(ttl)ttl.textContent=title;
+  if(msg)msg.innerHTML=message;
+  if(ok)ok.style.display=mode==='confirm'?'inline-flex':'none';
+  if(cancel){cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.style.display='inline-flex'}
+  modal.classList.add('open');
+  const close=()=>{modal.classList.remove('open');if(ok)ok.onclick=null;if(cancel)cancel.onclick=null};
+  if(cancel)cancel.onclick=close;
+  if(ok)ok.onclick=()=>{close();if(onConfirm)onConfirm()};
+}
 function exchangeReward(id,cost,name){
+  if(exchangeBusy)return;
   const p=spendablePoints();
-  if(p<cost){showToast('ポイントが不足しています');return}
-  if(!confirm(cost+'ptを使って「'+name+'」と交換しますか？'))return;
+  if(p<cost){
+    showExchangeModal('ポイントが足りません','現在の利用可能ポイントは <strong>'+p+' pt</strong> です。<br>'+cost+' pt必要です。','alert');
+    return;
+  }
+  showExchangeModal('交換しますか？','<strong>'+cost+' pt</strong>を使って<br>「'+name+'」と交換しますか？','confirm',()=>doExchangeReward(id,cost,name));
+}
+function doExchangeReward(id,cost,name){
+  if(exchangeBusy)return;
+  const p=spendablePoints();
+  if(p<cost){
+    showExchangeModal('ポイントが足りません','現在の利用可能ポイントは <strong>'+p+' pt</strong> です。','alert');
+    return;
+  }
+  exchangeBusy=true;
   customization.spentPoints=Number(customization.spentPoints||0)+cost;
   addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());
-  saveCustomization().then(()=>{renderPointExchange();renderPointHistory();renderPointsInNewUI();showToast('🎁 '+name+'と交換しました')});
+  saveCustomization().then(()=>{
+    renderPointExchange();
+    renderPointHistory();
+    renderPointsInNewUI();
+    showExchangeModal('交換しました','「'+name+'」を交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert');
+  }).catch(()=>{
+    customization.spentPoints=Math.max(0,Number(customization.spentPoints||0)-cost);
+    showExchangeModal('交換に失敗しました','保存できなかったため、ポイントは減らしていません。もう一度お試しください。','alert');
+  }).finally(()=>{exchangeBusy=false});
 }
 const AVATAR_OPTIONS={hairStyle:[{id:'short',name:'ショート',icon:'💇'},{id:'medium',name:'ミディアム',icon:'🧑'},{id:'long',name:'ロング',icon:'👩'},{id:'pony',name:'ポニー',icon:'👱'},{id:'spiky',name:'ワイルド',icon:'✦'}],hairColor:[{id:'black',name:'ブラック',color:'#24313B'},{id:'brown',name:'ブラウン',color:'#76513E'},{id:'ash',name:'アッシュ',color:'#8A8496'},{id:'blue',name:'ネイビー',color:'#395A88'},{id:'rose',name:'ローズ',color:'#B86F83'}],outfit:[{id:'work',name:'ワーク',color:'#4A90A9',icon:'🧢'},{id:'casual',name:'カジュアル',color:'#7DA6C4',icon:'👕'},{id:'neat',name:'きれいめ',color:'#6B7AA7',icon:'🧥'},{id:'sporty',name:'スポーティ',color:'#5DBA91',icon:'🏃'},{id:'pop',name:'ポップ',color:'#D784A4',icon:'⭐'}],accessory:[{id:'none',name:'なし',icon:'—'},{id:'glasses',name:'メガネ',icon:'👓'},{id:'cap',name:'キャップ',icon:'🧢'},{id:'headphone',name:'ヘッドホン',icon:'🎧'},{id:'badge',name:'バッジ',icon:'🎖'}],effect:[{id:'none',name:'なし',icon:'○'},{id:'sparkle',name:'キラキラ',icon:'✦'},{id:'leaf',name:'リーフ',icon:'🍃'},{id:'star',name:'スター',icon:'★'},{id:'shield',name:'シールド',icon:'🛡'}]};
 const AVATAR_CATEGORY_NAMES={hairStyle:'髪型',hairColor:'髪色',outfit:'服装',accessory:'アクセサリー',effect:'エフェクト'};
