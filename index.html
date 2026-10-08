@@ -248,11 +248,11 @@ body{display:flex;justify-content:center}
 
 /* Hamburger menu */
 .menu{cursor:pointer;background:transparent;border:0;color:inherit;padding:4px 2px;line-height:1}
-.main-menu-panel{
+.main-menu-panel{pointer-events:none;
   position:fixed;inset:0;background:rgba(8,53,75,.30);z-index:150;
   display:none;
 }
-.main-menu-panel.open{display:block}
+.main-menu-panel.open{display:block;pointer-events:auto}
 .main-menu-sheet{
   position:absolute;top:62px;right:max(12px,calc(50% - 218px));
   width:min(300px,calc(100vw - 24px));
@@ -1233,7 +1233,28 @@ function closeMainMenu(e){
 }
 document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openMainMenu));
 
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const target=document.getElementById(id);if(!target)return;target.classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage'||id==='avatarCustomizer'||id==='myroom');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='home'){renderHomeAvatar();renderPointsInNewUI()}if(id==='mypage'){updateProfile();loadCustomization()}if(id==='avatarCustomizer'){loadCustomization()}if(id==='myroom'){loadCustomization()}if(id==='ranking')renderRanking();if(id==='pointHistory')renderPointHistory();if(id==='pointExchange')renderPointExchange();if(id==='account')syncAccountUI()}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const target=document.getElementById(id);
+  if(!target)return;
+  const mainMenu=document.getElementById('mainMenuPanel');
+  if(mainMenu)mainMenu.classList.remove('open');
+  document.querySelectorAll('.import-panel.open,.editor-panel.open').forEach(p=>p.classList.remove('open'));
+  target.classList.add('active');
+  document.getElementById('navHome').classList.toggle('active',id==='home');
+  document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');
+  document.getElementById('navMy').classList.toggle('active',id==='mypage'||id==='avatarCustomizer'||id==='myroom');
+  document.getElementById('navRank').classList.toggle('active',id==='ranking');
+  window.scrollTo(0,0);
+  if(id==='home'){renderHomeAvatar();renderPointsInNewUI()}
+  if(id==='mypage'){updateProfile();loadCustomization()}
+  if(id==='avatarCustomizer'){loadCustomization()}
+  if(id==='myroom'){loadCustomization()}
+  if(id==='ranking')renderRanking();
+  if(id==='pointHistory')renderPointHistory();
+  if(id==='pointExchange')renderPointExchange();
+  if(id==='account')syncAccountUI()
+}
 function openRanking(){show('ranking');}
 function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;const loggedIn=Boolean(currentUser);const resetBtn=document.getElementById('resetPasswordBtn');const logoutBtn=document.getElementById('logoutBtn');if(resetBtn)resetBtn.style.display=(supabaseClient&&(!loggedIn||authMode==='login'))?'block':'none';if(logoutBtn)logoutBtn.style.display=loggedIn?'block':'none';}
 
