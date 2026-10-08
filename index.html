@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v42</title>
+<title>抱月クレドクエスト｜Prototype v45-clean</title>
 <style>
 :root{
   --blue:#168BCB;
@@ -292,6 +292,9 @@ body{display:flex;justify-content:center}
 .mypage-avatar-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-top:10px}.mypage-avatar-preview{width:82px;height:82px;border-radius:18px;background:#EDF8FC;display:grid;place-items:center;overflow:hidden}.mypage-avatar-copy{min-width:0}.mypage-avatar-copy strong{display:block;font-size:14px}.mypage-avatar-copy small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
 @media(max-width:420px){.avatar-workspace{grid-template-columns:106px 1fr}.avatar-preview{width:98px}.avatar-category-rail{grid-template-columns:1fr 1fr}.room-category-rail{gap:4px}.room-category-btn{font-size:7px}.room-stage{min-height:270px}}
 
+
+.point-history-wrap{padding:16px 16px 110px}.point-history-balance{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}.point-history-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.point-history-balance strong{display:block;font-size:25px;color:var(--blue-dark);margin-top:2px}.point-history-list{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:4px 14px;box-shadow:0 5px 14px rgba(31,105,131,.07)}.point-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid #E1EDF1}.point-history-row:last-child{border-bottom:0}.point-history-main strong{display:block;font-size:12px}.point-history-main span{display:block;margin-top:3px;color:#78909A;font-size:9px}.point-history-amount{font-size:13px;font-weight:900}.point-history-amount.plus{color:#368F4C}.point-history-amount.minus{color:#C6534A}.point-history-empty{padding:28px 10px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
+.exchange-screen{position:relative;z-index:200;padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}.exchange-head{padding:20px 16px 16px;background:linear-gradient(180deg,#1489C9,#0B72AE);color:#fff}.exchange-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82}.exchange-title{font-size:25px;font-weight:900;margin-top:5px}.exchange-sub{font-size:11px;line-height:1.55;opacity:.9;margin-top:5px}.exchange-balance{margin:14px 16px 0;background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}.exchange-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.exchange-balance strong{display:block;font-size:24px;color:var(--blue-dark);margin-top:2px}.exchange-balance .coin{width:45px;height:45px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-weight:900;color:#8A6900}.exchange-body{padding:15px 16px}.exchange-section-title{font-size:14px;font-weight:900;margin:4px 0 9px}.exchange-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 5px 14px rgba(31,105,131,.07);margin-bottom:10px}.exchange-card-top{display:flex;gap:12px;align-items:center}.exchange-icon{width:62px;height:62px;border-radius:16px;background:#FFF5C8;border:1px solid #F0D96D;display:grid;place-items:center;font-size:31px;flex:0 0 62px}.exchange-card h3{font-size:15px;margin:0 0 4px}.exchange-card p{font-size:10px;line-height:1.5;color:var(--muted);margin:0}.exchange-price{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:12px;border-top:1px dashed #C9DFE8}.exchange-price strong{font-size:18px;color:#9A7800}.exchange-btn{position:relative;z-index:2;height:42px;padding:0 16px;border:0;border-radius:12px;background:var(--yellow);color:#304858;font-weight:900;cursor:pointer;touch-action:manipulation}.exchange-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#EDF8FC;color:#5A7481;font-size:10px;line-height:1.55}.exchange-history{margin-top:18px}.exchange-history-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #E1EDF1;font-size:10px}.exchange-history-row strong{font-size:11px}.exchange-history-row span{color:#6F8792}.exchange-empty{padding:15px;border:1px dashed #BFD9E3;border-radius:13px;color:#718792;text-align:center;font-size:10px;background:#FAFDFE}.exchange-modal[hidden]{display:none!important}.exchange-modal{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;padding:20px}.exchange-modal-backdrop{position:absolute;inset:0;background:rgba(23,52,64,.48);backdrop-filter:blur(3px)}.exchange-modal-card{position:relative;z-index:1;width:min(92vw,420px);background:#fff;border-radius:22px;padding:24px 20px 20px;box-shadow:0 18px 50px rgba(23,52,64,.24);text-align:center;border:1px solid #D9EDF4}.exchange-modal-icon{font-size:30px;margin-bottom:6px}.exchange-modal-card h3{margin:0 0 10px;font-size:20px;color:#234B5B}.exchange-modal-card p{margin:0;color:#506875;font-size:13px;line-height:1.8}.exchange-modal-actions{display:flex;gap:10px;justify-content:center;margin-top:20px}.exchange-modal-btn{min-width:110px;border:0;border-radius:12px;padding:11px 16px;font-weight:900;cursor:pointer}.exchange-modal-btn.primary{background:#3E8EAA;color:#fff}.exchange-modal-btn.secondary{background:#EEF4F6;color:#48616D}
 </style>
 </head>
 <body>
@@ -416,19 +419,10 @@ body{display:flex;justify-content:center}
   <!-- POINT HISTORY -->
   <section id="pointHistory" class="screen" style="background:#F4FBFD">
     <div class="topbar"><div class="brand"><span class="brand-mark">◎</span>抱月クレドクエスト</div><div class="menu" onclick="goHome()" style="cursor:pointer">✕</div></div>
-    <div class="faq-wrap">
-      <div class="faq-hero">
-        <div class="faq-kicker">POINT HISTORY</div>
-        <div class="faq-title">ポイント履歴</div>
-        <div class="faq-sub">これまでに獲得したポイントの履歴を確認できる機能です。</div>
-      </div>
-      <div class="faq-item open" style="margin-top:12px">
-        <div style="padding:24px 18px;text-align:center">
-          <div style="font-size:34px;margin-bottom:8px">🎁</div>
-          <div style="font-size:17px;font-weight:900;color:var(--ink)">COMING SOON</div>
-          <div style="margin-top:7px;color:var(--muted);font-size:11px;line-height:1.7">ポイント履歴機能は現在準備中です。<br>今後のアップデートで追加予定です。</div>
-        </div>
-      </div>
+    <div class="point-history-wrap">
+      <div class="faq-hero"><div class="faq-kicker">POINT HISTORY</div><div class="faq-title">ポイント履歴</div><div class="faq-sub">獲得したポイントと、交換に使ったポイントを確認できます。</div></div>
+      <div class="point-history-balance"><div><small>利用可能ポイント</small><strong id="historySpendablePoints">0 pt</strong></div></div>
+      <div id="pointHistoryList" class="point-history-list"></div>
       <div class="faq-footer"><button class="faq-back" onclick="goHome()">⌂ ホームへ戻る</button></div>
     </div>
   </section>
@@ -534,12 +528,34 @@ body{display:flex;justify-content:center}
         <div class="points-box"><small>累計獲得ポイント</small><strong id="profileLifetimePoints">0 pt</strong></div>
         <div class="points-box"><small>利用可能ポイント</small><strong id="profileSpendablePoints">0 pt</strong></div>
       </div>
-      <div class="reward-preview"><strong>🎟 交換予定：300pt → 抽選権</strong><span>詳細な交換条件・その他アイテム価格は今後決定予定です。</span></div>
+      <button class="reward-preview" onclick="openPointExchange()" style="width:100%;text-align:left;cursor:pointer"><strong>🎁 ポイント交換</strong><span>100ptからホウゲツカフェの特典などに交換できます。タップして交換画面へ。</span></button>
       <div class="mini-actions"><button class="mini-btn" onclick="openAccount()">👤 アカウント設定</button><button class="mini-btn" onclick="show('ranking')">🏆 ランキング</button></div>
       <div class="production-note"><strong>📖 クレドを学ぶ</strong><br>毎日のクエストで出会ったクレドを、公式ページでも確認できます。ホームの「クレドを知る」から見られます。</div>
 
     </div>
   </section>
+
+  <!-- POINT EXCHANGE -->
+  <section id="pointExchange" class="screen exchange-screen">
+    <div class="topbar"><div class="brand"><span class="brand-mark">P</span>ポイント交換</div><div class="menu" onclick="openMyPage()" style="cursor:pointer">✕</div></div>
+    <div class="exchange-head"><div class="exchange-kicker">POINT REWARD</div><div class="exchange-title">ポイントを交換</div><div class="exchange-sub">クエストで貯めたポイントを、抱月カフェの特典などと交換できます。</div></div>
+    <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong></div><div class="coin">P</div></div>
+    <div class="exchange-body">
+      <div class="exchange-section-title">交換できる特典</div>
+      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div><div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" onclick="exchangeReward('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div></div>
+      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕☕</div><div><h3>ホウゲツカフェ 2人分</h3><p>2人で、それぞれ1品ずつ頼める券です。</p></div></div><div class="exchange-price"><strong>200 pt</strong><button type="button" class="exchange-btn" onclick="exchangeReward('cafe2',200,'ホウゲツカフェから2人で、それぞれ1品ずつ頼める券')">交換する</button></div></div>
+      <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">🎟</div><div><h3>抽せん確率アップ権</h3><p>抽せん時の当選確率アップに使える権利です。</p></div></div><div class="exchange-price"><strong>300 pt（1個）</strong><button type="button" class="exchange-btn" onclick="exchangeReward('lottery1',300,'抽せん確率アップ権 1個')">1個交換</button></div><div class="exchange-price" style="margin-top:9px"><strong>500 pt（2個）</strong><button type="button" class="exchange-btn" onclick="exchangeReward('lottery2',500,'抽せん確率アップ権 2個')">2個交換</button></div></div>
+      <div class="exchange-note">※ 交換した特典はポイント履歴に記録されます。実際の券・権利の利用方法は社内運用に合わせて案内します。</div>
+      <div class="exchange-history"><div class="exchange-section-title">最近の交換履歴</div><div id="exchangeHistory"></div></div>
+    </div>
+  </section>
+  <div id="exchangeModal" class="exchange-modal" hidden aria-hidden="true">
+    <div class="exchange-modal-backdrop" id="exchangeModalBackdrop"></div>
+    <div class="exchange-modal-card" role="dialog" aria-modal="true" aria-labelledby="exchangeModalTitle">
+      <div class="exchange-modal-icon">🎁</div><h3 id="exchangeModalTitle">交換しますか？</h3><p id="exchangeModalMessage"></p>
+      <div class="exchange-modal-actions"><button id="exchangeModalCancel" class="exchange-modal-btn secondary" type="button">閉じる</button><button id="exchangeModalOk" class="exchange-modal-btn primary" type="button">はい、交換する</button></div>
+    </div>
+  </div>
 
   <!-- AVATAR CUSTOMIZER -->
   <section id="avatarCustomizer" class="screen" style="background:#F4FBFD">
@@ -1177,7 +1193,17 @@ function closeMainMenu(e){
 }
 document.querySelectorAll('.menu').forEach(el=>el.addEventListener('click',openMainMenu));
 
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const target=document.getElementById(id);if(!target)return;target.classList.add('active');document.getElementById('navHome').classList.toggle('active',id==='home');document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');document.getElementById('navMy').classList.toggle('active',id==='mypage'||id==='avatarCustomizer'||id==='myroom');document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);if(id==='home'){renderHomeAvatar();renderPointsInNewUI()}if(id==='mypage'){updateProfile();loadCustomization()}if(id==='avatarCustomizer'){loadCustomization()}if(id==='myroom'){loadCustomization()}if(id==='ranking')renderRanking();if(id==='account')syncAccountUI()}
+function show(id){
+document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+const target=document.getElementById(id);if(!target)return;
+document.querySelectorAll('.main-menu-panel.open,.quest-panel.open,.import-panel.open,.editor-panel.open').forEach(p=>p.classList.remove('open'));
+target.classList.add('active');
+document.getElementById('navHome').classList.toggle('active',id==='home');
+document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');
+document.getElementById('navMy').classList.toggle('active',id==='mypage'||id==='avatarCustomizer'||id==='myroom'||id==='pointExchange'||id==='pointHistory');
+document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);
+if(id==='home'){renderHomeAvatar();renderPointsInNewUI()}if(id==='mypage'){updateProfile();loadCustomization()}if(id==='avatarCustomizer'){loadCustomization()}if(id==='myroom'){loadCustomization()}if(id==='ranking')renderRanking();if(id==='pointHistory')renderPointHistory();if(id==='pointExchange')renderPointExchange();if(id==='account')syncAccountUI()
+}
 function openRanking(){show('ranking');}
 function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;const loggedIn=Boolean(currentUser);const resetBtn=document.getElementById('resetPasswordBtn');const logoutBtn=document.getElementById('logoutBtn');if(resetBtn)resetBtn.style.display=(supabaseClient&&(!loggedIn||authMode==='login'))?'block':'none';if(logoutBtn)logoutBtn.style.display=loggedIn?'block':'none';}
 
@@ -1559,6 +1585,7 @@ const AVATAR_CATEGORY_NAMES={hairStyle:'髪型',hairColor:'髪色',outfit:'服�
 const ROOM_THEMES=[{id:'basic',name:'ベーシック',desc:'明るく落ち着いた部屋',bg:'#EAF5F9',floor:'#B78660'},{id:'nature',name:'森・自然',desc:'グリーンを感じる部屋',bg:'#E6F4E6',floor:'#9B7B5D'},{id:'workshop',name:'工房',desc:'道具が並ぶ作業空間',bg:'#ECE6DA',floor:'#8C694F'},{id:'tech',name:'未来・テック',desc:'すっきり近未来',bg:'#E8EEFA',floor:'#687A99'},{id:'credo',name:'クレドスペシャル',desc:'クレドの世界観',bg:'#FFF4C9',floor:'#B28659'}];
 const ROOM_ITEMS=[{id:'desk',name:'デスク',icon:'🗄️'},{id:'chair',name:'チェア',icon:'🪑'},{id:'plant',name:'植物',icon:'🪴'},{id:'books',name:'本棚',icon:'📚'},{id:'poster',name:'ポスター',icon:'🖼️'},{id:'lamp',name:'ランプ',icon:'💡'}];
 const ROOM_TAB_META={theme:{title:'家具・テーマ'},wall:{title:'壁紙'},floor:{title:'床'},items:{title:'アイテム'},bgm:{title:'BGM'}};
+function pointHistoryKey(){return 'kredoPointHistory:'+(currentUser?.id||getLocalAccount()?.id||'guest')}function loadPointHistory(){try{const x=JSON.parse(localStorage.getItem(pointHistoryKey())||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}}function savePointHistory(h){localStorage.setItem(pointHistoryKey(),JSON.stringify(h.slice(-100)))}function addPointHistory(type,name,points,detail,key){const h=loadPointHistory();if(key&&h.some(x=>x.key===key))return;h.push({type,name,points:Number(points||0),detail:detail||'',date:new Date().toLocaleString('ja-JP'),key:key||''});savePointHistory(h)}function renderPointHistory(){const p=spendablePoints();const bal=document.getElementById('historySpendablePoints');if(bal)bal.textContent=p+' pt';const box=document.getElementById('pointHistoryList');if(!box)return;const h=loadPointHistory().slice().reverse();box.innerHTML=h.length?h.map(x=>{const plus=x.type==='earn';return '<div class="point-history-row"><div class="point-history-main"><strong>'+x.name+'</strong><span>'+x.date+(x.detail?'｜'+x.detail:'')+'</span></div><div class="point-history-amount '+(plus?'plus':'minus')+'">'+(plus?'+':'-')+x.points+' pt</div></div>'}).join(''):'<div class="point-history-empty">まだポイント履歴はありません。<br>クエストに挑戦すると、獲得ポイントがここに表示されます。</div>'}function renderPointExchange(){const p=spendablePoints();const el=document.getElementById('exchangeSpendablePoints');if(el)el.textContent=p+' pt';const box=document.getElementById('exchangeHistory');if(box){const h=loadPointHistory().filter(x=>x.type==='spend').slice().reverse();box.innerHTML=h.length?h.slice(0,5).map(x=>'<div class="exchange-history-row"><div><strong>'+x.name+'</strong><br><span>'+x.date+'</span></div><strong>-'+x.points+' pt</strong></div>').join(''):'<div class="exchange-empty">まだ交換履歴はありません。</div>'}}function openPointExchange(){show('pointExchange')}let exchangeBusy=false;function closeExchangeModal(){const m=document.getElementById('exchangeModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true')}function showExchangeModal(title,message,mode,onConfirm){const m=document.getElementById('exchangeModal');if(!m)return;if(m.parentElement!==document.body)document.body.appendChild(m);const ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');document.getElementById('exchangeModalTitle').textContent=title;document.getElementById('exchangeModalMessage').innerHTML=message;ok.style.display=mode==='confirm'?'inline-flex':'none';cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.onclick=closeExchangeModal;ok.onclick=()=>{closeExchangeModal();if(onConfirm)onConfirm()};m.hidden=false;m.setAttribute('aria-hidden','false')}function exchangeReward(id,cost,name){if(exchangeBusy)return;const p=spendablePoints();if(p<cost){showExchangeModal('ポイントが足りません','現在の利用可能ポイントは <strong>'+p+' pt</strong>です。<br>'+cost+' pt必要です。','alert');return}showExchangeModal('交換しますか？','<strong>'+cost+' pt</strong>を使って<br>「'+name+'」と交換しますか？','confirm',()=>doExchangeReward(id,cost,name))}function doExchangeReward(id,cost,name){if(exchangeBusy)return;const p=spendablePoints();if(p<cost){showExchangeModal('ポイントが足りません','現在の利用可能ポイントは <strong>'+p+' pt</strong>です。','alert');return}exchangeBusy=true;const before=Number(customization.spentPoints||0);customization.spentPoints=before+cost;addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());Promise.resolve(saveCustomization()).then(()=>{renderPointExchange();renderPointHistory();renderPointsInNewUI();showExchangeModal('交換しました','「'+name+'」を交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert')}).catch(()=>{customization.spentPoints=before;showExchangeModal('交換に失敗しました','保存できなかったため、ポイントは減らしていません。もう一度お試しください。','alert')}).finally(()=>{exchangeBusy=false})}
 function defaultCustomization(){return{avatar:{hairStyle:'short',hairColor:'black',outfit:'work',accessory:'none',effect:'none'},roomTheme:'basic',roomWallpaper:'basic',roomFloor:'wood',roomItems:['desk','chair','plant'],ownedItems:{skins:[],furniture:['desk','chair','plant']},spentPoints:0}}
 let customization=defaultCustomization(),customizationLoadedFor='';
 function customizationKey(){return'kredoCustomization:'+(currentUser?.id||getLocalAccount()?.id||'guest')}
