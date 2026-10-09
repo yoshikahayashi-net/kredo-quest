@@ -5,10 +5,49 @@
   let busy = false;
   const REWARDS = {
     cafe1: {cost:100, name:'ホウゲツカフェから好きな1品券'},
-    cafe2: {cost:200, name:'ホウゲツカフェ 2人分'},
     lottery1: {cost:300, name:'抽せん確率アップ権 1個'},
     lottery2: {cost:500, name:'抽せん確率アップ権 2個'}
   };
+  // ホウゲツカフェ2人分は、運用が複雑になるため一時的に非表示にします。
+  function hideCafeTwoReward(){
+    const pausedTitle = /ホウゲツカフェ\\s*2人分/;
+    let hiddenAny = false;
+
+    function hideMatchingCard(start){
+      let node = start;
+      for(let depth = 0; node && node !== document.body && depth < 12; depth++, node = node.parentElement){
+        const text = String(node.innerText || node.textContent || '').replace(/\\s+/g, ' ');
+        const buttons = node.querySelectorAll ? node.querySelectorAll('button, .exchange-btn') : [];
+        if(pausedTitle.test(text) && buttons.length >= 1 && buttons.length <= 2){
+          node.style.setProperty('display', 'none', 'important');
+          node.hidden = true;
+          node.setAttribute('aria-hidden', 'true');
+          hiddenAny = true;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    document.querySelectorAll('[onclick*="cafe2"], [data-reward-id="cafe2"], [data-reward="cafe2"], [data-item-id="cafe2"]').forEach(hideMatchingCard);
+    if(!hiddenAny){
+      document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,strong,b,div').forEach(function(el){
+        if(el.children.length <= 2 && pausedTitle.test(String(el.textContent || '').replace(/\\s+/g, ' '))){
+          hideMatchingCard(el);
+        }
+      });
+    }
+    return hiddenAny;
+  }
+
+  function watchForPausedCafeTwoReward(){
+    if(hideCafeTwoReward() || !document.body || typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(function(){
+      if(hideCafeTwoReward()) observer.disconnect();
+    });
+    observer.observe(document.body, {childList:true, subtree:true});
+  }
+
   function currentAuthUser(){
     try { return (typeof currentUser !== 'undefined') ? currentUser : null; }
     catch(e){ return null; }
@@ -166,6 +205,12 @@
       busy = false;
       buttons.forEach(function(button){button.disabled = false;});
     }
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', watchForPausedCafeTwoReward, {once:true});
+  } else {
+    watchForPausedCafeTwoReward();
   }
 
   window.__safeCompletePointExchange = completeRedemption;
