@@ -604,18 +604,48 @@ body{display:flex;justify-content:center}
       }catch(e){return 0}
     }
 
-    // The diagnostic shares the same resilient modal path and always surfaces errors.
-    window.__diagnosePointBalanceSafe=async function(){
+    // Independent local-storage diagnostics: does not depend on the main app's state or modal code.
+    window.__diagnosePointBalanceSafe=function(){
       try{
-        if(typeof diagnosePointBalance==='function'){
-          await diagnosePointBalance();
-          return;
+        let account=null;
+        try{account=JSON.parse(localStorage.getItem('kredoAccount')||'null')}catch(e){}
+        let activeId=(account&&account.id)||'guest';
+        try{if(typeof currentUser!=='undefined'&&currentUser&&currentUser.id)activeId=currentUser.id}catch(e){}
+        const keys=[];
+        for(let i=0;i<localStorage.length;i++){
+          const key=localStorage.key(i);
+          if(key&&/^kredoState:.+:totalPoints$/.test(key)){
+            keys.push({key:key,value:Math.max(0,Number(localStorage.getItem(key))||0)});
+          }
         }
-        pointExchangeModal('ポイント表示の診断','診断機能を読み込めませんでした。画面を再読み込みしてください。','alert');
+        const scopedKey='kredoState:'+activeId+':totalPoints';
+        const scopedRaw=localStorage.getItem(scopedKey);
+        const legacyRaw=localStorage.getItem('kredoTotalPoints');
+        const activeTotal=scopedRaw===null?'未保存':String(Math.max(0,Number(scopedRaw)||0))+' pt';
+        const legacyTotal=legacyRaw===null?'未保存':String(Math.max(0,Number(legacyRaw)||0))+' pt';
+        const allSaved=keys.length?keys.map(x=>x.key.replace('kredoState:','').replace(':totalPoints','')+'：'+x.value+' pt').join('<br>'):'アカウント別ポイント保存値なし';
+        let ranking='読み取り不可';
+        try{
+          const data=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
+          ranking=Array.isArray(data)?(data.filter(x=>x&&(x.id===activeId||x.id===(account&&account.id))).map(x=>String(x.name||x.displayName||'ローカル記録')+'：'+Math.max(0,Number(x.points)||0)+' pt').join('<br>')||'該当記録なし'):'形式不一致';
+        }catch(e){}
+        let customization={};
+        try{customization=JSON.parse(localStorage.getItem('kredoCustomization:'+activeId)||'{}')||{}}catch(e){}
+        let memory='メイン画面の状態を取得できません';
+        try{if(typeof state!=='undefined')memory=Math.max(0,Number(state.totalPoints)||0)+' pt'}catch(e){}
+        const spent=Math.max(0,Number(customization.spentPoints)||0);
+        const msg='<strong>ポイント保存状況（読み取りのみ）</strong><br>'+
+          '現在参照中のアカウント：'+String(activeId).replace(/[&<>]/g,'')+'<br>'+
+          'アカウント別保存値：'+activeTotal+'<br>'+
+          '旧形式の保存値：'+legacyTotal+'<br>'+
+          '画面メモリ上の累計：'+memory+'<br>'+
+          '使用済みポイント：'+spent+' pt<br>'+
+          '<strong>保存されているアカウント別ポイント</strong><br>'+allSaved+'<br>'+
+          '<strong>ローカルランキング記録</strong><br>'+ranking+'<br><br>'+
+          'この診断はデータを変更しません。';
+        pointExchangeModal('ポイント表示の診断',msg,'alert');
       }catch(error){
-        const message=String(error&&error.message?error.message:error||'不明なエラー');
-        try{pointExchangeModal('診断でエラーが発生しました','診断処理でエラーが発生しました。<br>'+message.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]}),'alert');}
-        catch(fallbackError){window.alert('診断でエラーが発生しました\\n'+message)}
+        window.alert('診断画面でエラーが発生しました。\n'+String(error&&error.message?error.message:error));
       }
     };
 
@@ -1490,7 +1520,8 @@ async function showResult(){
 }
 
 const DEMO_QUESTIONS = JSON.parse(JSON.stringify(questions));
-let state={totalPoints:Number(localStorage.getItem('kredoTotalPoints')||0),plays:Number(localStorage.getItem('kredoPlays')||0),bestCombo:Number(localStorage.getItem('kredoBestCombo')||0),lastBonus:localStorage.getItem('kredoLastBonus')||'',clearStage:Number(localStorage.getItem('kredoClearStage')||0)};
+function readInitialStateValue(field,legacyKey){try{const scoped=localStorage.getItem(stateStoragePrefix()+field);if(scoped!==null)return Math.max(0,Number(scoped)||0);return Math.max(0,Number(localStorage.getItem(legacyKey)||0));}catch(e){return 0}}
+let state={totalPoints:readInitialStateValue('totalPoints','kredoTotalPoints'),plays:readInitialStateValue('plays','kredoPlays'),bestCombo:readInitialStateValue('bestCombo','kredoBestCombo'),lastBonus:(()=>{try{return localStorage.getItem(stateStoragePrefix()+'lastBonus')||localStorage.getItem('kredoLastBonus')||''}catch(e){return ''}})(),clearStage:readInitialStateValue('clearStage','kredoClearStage')};
 function stateStoragePrefix(){const id=currentUser?.id||getLocalAccount()?.id||'guest';return 'kredoState:'+id+':';}
 function loadState(){const p=stateStoragePrefix();state={totalPoints:Number(localStorage.getItem(p+'totalPoints')||0),plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||'',clearStage:Number(localStorage.getItem(p+'clearStage')||0)};}
 function saveState(){const p=stateStoragePrefix();localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');localStorage.setItem(p+'clearStage',String(state.clearStage||0));}
