@@ -539,7 +539,7 @@ body{display:flex;justify-content:center}
   <section id="pointExchange" class="screen exchange-screen">
     <div class="topbar"><div class="brand"><span class="brand-mark">P</span>ポイント交換</div><div class="menu" onclick="openMyPage()" style="cursor:pointer">✕</div></div>
     <div class="exchange-head"><div class="exchange-kicker">POINT REWARD</div><div class="exchange-title">ポイントを交換</div><div class="exchange-sub">クエストで貯めたポイントを、抱月カフェの特典などと交換できます。</div></div>
-    <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong><button type="button" onclick="diagnosePointBalance()" style="display:block;margin-top:7px;padding:0;border:0;background:transparent;color:#557483;font-size:11px;text-decoration:underline;cursor:pointer">ポイント表示が合わない場合</button></div><div class="coin">P</div></div>
+    <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong><button type="button" onclick="window.__diagnosePointBalanceSafe()" style="display:block;margin-top:7px;padding:0;border:0;background:transparent;color:#557483;font-size:11px;text-decoration:underline;cursor:pointer">ポイント表示が合わない場合</button></div><div class="coin">P</div></div>
     <div class="exchange-body">
       <div class="exchange-section-title">交換できる特典</div>
       <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div><div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" onclick="__pointExchangeClick('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div></div>
@@ -603,6 +603,21 @@ body{display:flex;justify-content:center}
         return Math.max(0,total-spent);
       }catch(e){return 0}
     }
+
+    // The diagnostic shares the same resilient modal path and always surfaces errors.
+    window.__diagnosePointBalanceSafe=async function(){
+      try{
+        if(typeof diagnosePointBalance==='function'){
+          await diagnosePointBalance();
+          return;
+        }
+        pointExchangeModal('ポイント表示の診断','診断機能を読み込めませんでした。画面を再読み込みしてください。','alert');
+      }catch(error){
+        const message=String(error&&error.message?error.message:error||'不明なエラー');
+        try{pointExchangeModal('診断でエラーが発生しました','診断処理でエラーが発生しました。<br>'+message.replace(/[&<>\"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]}),'alert');}
+        catch(fallbackError){window.alert('診断でエラーが発生しました\\n'+message)}
+      }
+    };
 
     window.__openPointExchangeSafe=function(){
       try{
@@ -1807,7 +1822,7 @@ async function diagnosePointBalance(){
   else if(typeof pointExchangeModal==='function')pointExchangeModal('ポイント表示の診断',msg,'alert');
   else window.alert(msg.replace(/<br>/g,'\n').replace(/<[^>]*>/g,''));
 }
-function openPointExchange(){show('pointExchange')}let exchangeBusy=false;function closeExchangeModal(){const m=document.getElementById('exchangeModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true')}function showExchangeModal(title,message,mode,onConfirm){const m=document.getElementById('exchangeModal');if(!m)return;if(m.parentElement!==document.body)document.body.appendChild(m);const ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');document.getElementById('exchangeModalTitle').textContent=title;document.getElementById('exchangeModalMessage').innerHTML=message;ok.style.display=mode==='confirm'?'inline-flex':'none';cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.onclick=closeExchangeModal;ok.onclick=()=>{closeExchangeModal();if(onConfirm)onConfirm()};m.hidden=false;m.setAttribute('aria-hidden','false')}function exchangeReward(id,cost,name){if(exchangeBusy)return;const p=spendablePoints();if(p<cost){showExchangeModal('ポイントが足りません','現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');return}showExchangeModal('交換しますか？','「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',()=>doExchangeReward(id,cost,name))}function doExchangeReward(id,cost,name){
+function openPointExchange(){show('pointExchange')}let exchangeBusy=false;function closeExchangeModal(){const m=document.getElementById('exchangeModal');if(!m)return;m.hidden=true;m.style.display='none';m.setAttribute('aria-hidden','true')}function showExchangeModal(title,message,mode,onConfirm){const m=document.getElementById('exchangeModal');if(!m){window.alert(String(title)+'\\n\\n'+String(message).replace(/<br\\s*\\/?\s*>/gi,'\\n').replace(/<[^>]*>/g,''));return}if(m.parentElement!==document.body)document.body.appendChild(m);const titleEl=document.getElementById('exchangeModalTitle'),msgEl=document.getElementById('exchangeModalMessage'),ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');if(titleEl)titleEl.textContent=title;if(msgEl)msgEl.innerHTML=message;if(ok){ok.style.display=mode==='confirm'?'inline-flex':'none';ok.onclick=()=>{closeExchangeModal();if(onConfirm)onConfirm()}}if(cancel){cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.onclick=closeExchangeModal}m.hidden=false;m.removeAttribute('hidden');m.style.display='flex';m.setAttribute('aria-hidden','false')}function exchangeReward(id,cost,name){if(exchangeBusy)return;const p=spendablePoints();if(p<cost){showExchangeModal('ポイントが足りません','現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');return}showExchangeModal('交換しますか？','「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',()=>doExchangeReward(id,cost,name))}function doExchangeReward(id,cost,name){
   if(exchangeBusy)return;
   const p=spendablePoints();
   if(p<cost){
