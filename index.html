@@ -1712,11 +1712,7 @@ async function refreshPointExchangeBalance(){
 
   try{
     // Reconcile the active account's cached balance with server-backed sources.
-    const uid=(currentUser?.id||getLocalAccount()?.id||'guest');
-    const localKey='kredoState:'+uid+':totalPoints';
-    const storedTotal=localStorage.getItem(localKey);
-    const localTotal=storedTotal===null?0:Math.max(0,Number(storedTotal)||0);
-    state.totalPoints=Math.max(localTotal,Math.max(0,Number(state.totalPoints)||0));
+    state.totalPoints=Math.max(0,resolveCachedLifetimePoints(),Math.max(0,Number(state.totalPoints)||0));
 
     let serverTotal=0;
     let hasProfileBalance=false;
@@ -1784,15 +1780,30 @@ function customizationKey(){return'kredoCustomization:'+(currentUser?.id||getLoc
 function deepMergeCustomization(base,x){x=x&&typeof x==='object'?x:{};return{avatar:{...base.avatar,...(x.avatar||{})},roomTheme:x.roomTheme||base.roomTheme,roomWallpaper:x.roomWallpaper||base.roomWallpaper,roomFloor:x.roomFloor||base.roomFloor,roomItems:Array.isArray(x.roomItems)?x.roomItems:base.roomItems.slice(),ownedItems:{...base.ownedItems,...(x.ownedItems||{})},spentPoints:Number(x.spentPoints||0)}}
 async function loadCustomization(force=false){const key=customizationKey();if(!force&&customizationLoadedFor===key){renderAvatarUI();renderRoomUI();renderHomeAvatar();renderMyPageAvatar();return}let base=defaultCustomization();try{const local=JSON.parse(localStorage.getItem(key)||'null');if(local)base=deepMergeCustomization(base,local)}catch(e){}if(supabaseClient&&currentUser&&!currentUser.demo){try{const{data,error}=await supabaseClient.from('player_customizations').select('avatar_config,room_theme,room_items,owned_items,spent_points').eq('user_id',currentUser.id).maybeSingle();if(!error&&data)base=deepMergeCustomization(base,{avatar:data.avatar_config||{},roomTheme:data.room_theme||base.roomTheme,roomItems:Array.isArray(data.room_items)?data.room_items:base.roomItems,ownedItems:data.owned_items||base.ownedItems,spentPoints:Number(data.spent_points||0)})}catch(e){console.warn('Customization sync skipped',e)}}customization=base;localStorage.setItem(key,JSON.stringify(customization));customizationLoadedFor=key;renderAvatarUI();renderRoomUI();renderHomeAvatar();renderMyPageAvatar()}
 async function saveCustomization(){localStorage.setItem(customizationKey(),JSON.stringify(customization));if(supabaseClient&&currentUser&&!currentUser.demo){try{const{error}=await supabaseClient.from('player_customizations').upsert({user_id:currentUser.id,avatar_config:customization.avatar,room_theme:customization.roomTheme,room_items:customization.roomItems,owned_items:customization.ownedItems,spent_points:customization.spentPoints,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)console.warn('Customization save skipped',error)}catch(e){console.warn('Customization save skipped',e)}}}
-function spendablePoints(){
-  const uid=(currentUser?.id||getLocalAccount()?.id||'guest');
+function resolveCachedLifetimePoints(){
+  const account=getLocalAccount();
+  const uid=(currentUser?.id||account?.id||'guest');
   const scopedRaw=localStorage.getItem('kredoState:'+uid+':totalPoints');
   const scopedTotal=scopedRaw===null?0:Math.max(0,Number(scopedRaw)||0);
   const memoryTotal=Math.max(0,Number(state.totalPoints)||0);
   let total=Math.max(scopedTotal,memoryTotal);
-  // Legacy builds saved points in one non-account-scoped key. Use it only when
-  // the active account has no non-zero balance in either current source.
-  if(total===0)total=Math.max(0,Number(localStorage.getItem('kredoTotalPoints')||0));
+  if(total===0){
+    total=Math.max(0,Number(localStorage.getItem('kredoTotalPoints')||0));
+  }
+  if(total===0){
+    try{
+      const ranking=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
+      const allowedIds=[];
+      if(currentUser?.id)allowedIds.push(currentUser.id);
+      if(account?.id&&(!currentUser||currentUser.demo||currentUser.id===account.id))allowedIds.push(account.id);
+      const match=Array.isArray(ranking)?ranking.find(x=>allowedIds.includes(x.id)):null;
+      if(match)total=Math.max(0,Number(match.points)||0);
+    }catch(e){}
+  }
+  return total;
+}
+function spendablePoints(){
+  const total=resolveCachedLifetimePoints();
   return Math.max(0,total-Number(customization.spentPoints||0));
 }
 function renderPointsInNewUI(){[['profileLifetimePoints',state.totalPoints],['profileSpendablePoints',spendablePoints()],['avatarLifetimePoints',state.totalPoints],['avatarSpendablePoints',spendablePoints()]].forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.textContent=Number(val||0)+' pt'})}
