@@ -1757,7 +1757,7 @@ async function ensureProfileAfterLogin(){
     return profile;
   }catch(e){
     // A failed profile request must not blank the local balance.
-    state.totalPoints=Math.max(currentAccountCache,previousStateTotal,canMigrateGuestOrDemo?previousRankTotal:0);
+    state.totalPoints=Math.max(currentAccountCache,canMigrateGuestOrDemo?previousStateTotal:0,canMigrateGuestOrDemo?previousRankTotal:0);
     saveState();
     updateProfile();
     renderPointsInNewUI();
