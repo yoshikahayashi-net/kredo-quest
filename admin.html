@@ -166,6 +166,19 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 28px;color:#78909c;font-siz
       </div>
       <p class="mini-note">直近100件を表示します。</p>
     </section>
+
+    <section class="card section-card" id="redemptionSection">
+      <div class="section-head"><div><h2>景品交換履歴</h2><p>誰が・何を・何ポイントで交換したかを、サーバーに記録された履歴から確認できます。</p></div><button type="button" id="reloadRedemptions" class="btn secondary small">履歴を更新</button></div>
+      <div id="redemptionStatus" class="status" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>交換日時</th><th>利用者</th><th>メールアドレス</th><th>景品</th><th>使用pt</th><th>交換後残高</th></tr></thead>
+          <tbody id="redemptionRows"><tr><td colspan="6" class="empty-row">読み込み中…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="mini-note">直近200件を表示します。機能実装前の交換履歴は、端末内だけの記録だったため自動では復元できません。</p>
+    </section>
+
     <div class="security-note">この画面でのポイント付与はサーバー側で管理者権限を再確認し、履歴に記録します。ポイント還元の通知機能は別途実装予定です。</div>
   </section>
 </main>
@@ -240,7 +253,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 28px;color:#78909c;font-siz
     if(!allowed){ showGate('denied'); return; }
     showWorkbench();
     setStatus('globalStatus','管理者として認証済みです。操作内容はサーバー側でも権限確認されます。','success');
-    await Promise.allSettled([loadDashboard(),loadMembers(),loadHistory()]);
+    await Promise.allSettled([loadDashboard(),loadMembers(),loadHistory(),loadRedemptions()]);
   }
   async function loadDashboard(){
     const {data,error} = await client.rpc('kredo_admin_dashboard');
@@ -353,6 +366,36 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 28px;color:#78909c;font-siz
     });
     setStatus('historyStatus','直近 ' + fmtNumber(rows.length) + ' 件を表示しています。','success');
   }
+  async function loadRedemptions(){
+    setStatus('redemptionStatus','景品交換履歴を読み込み中…','info');
+    $('redemptionRows').innerHTML = '<tr><td colspan="6" class="empty-row">読み込み中…</td></tr>';
+    const {data,error} = await client.rpc('kredo_admin_recent_reward_redemptions');
+    if(error){
+      $('redemptionRows').innerHTML = '<tr><td colspan="6" class="empty-row">景品交換履歴を取得できませんでした。</td></tr>';
+      setStatus('redemptionStatus','取得に失敗しました：' + error.message,'error');
+      return;
+    }
+    const rows = Array.isArray(data) ? data : [];
+    const body = $('redemptionRows');
+    body.replaceChildren();
+    if(!rows.length){
+      body.innerHTML = '<tr><td colspan="6" class="empty-row">まだサーバーに記録された景品交換はありません。</td></tr>';
+      setStatus('redemptionStatus','景品交換履歴はまだありません。','info');
+      return;
+    }
+    rows.forEach(function(item){
+      const tr = document.createElement('tr');
+      addCell(tr,fmtDateTime(item.redeemed_at));
+      addCell(tr,item.display_name || '表示名未設定','name-cell');
+      addCell(tr,item.user_email || 'メールアドレスなし','email-cell');
+      addCell(tr,item.reward_name || '景品名なし','name-cell');
+      addCell(tr,'-' + fmtNumber(item.points_spent) + ' pt','audit-delta');
+      addCell(tr,fmtNumber(item.balance_after) + ' pt','points-cell');
+      body.appendChild(tr);
+    });
+    setStatus('redemptionStatus','直近 ' + fmtNumber(rows.length) + ' 件を表示しています。','success');
+  }
+
   async function submitGrant(event){
     event.preventDefault();
     if(!selectedUser){ setStatus('grantStatus','付与対象の利用者を選択してください。','error'); return; }
@@ -447,6 +490,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 28px;color:#78909c;font-siz
     $('grantReason').focus();
   });
   $('reloadHistory').addEventListener('click',loadHistory);
+  $('reloadRedemptions').addEventListener('click',loadRedemptions);
 
   async function boot(){
     if(!client){ showGate('setup','Supabaseクライアントを読み込めませんでした。インターネット接続を確認してください。'); return; }
