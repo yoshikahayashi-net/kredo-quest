@@ -237,6 +237,147 @@ begin
 end;
 $function$;
 
+
+create or replace function public.kredo_redeem_reward(p_reward_id text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_user_id uuid := auth.uid();
+  v_cost integer;
+  v_reward_name text;
+  v_total bigint;
+  v_spent bigint;
+  v_balance bigint;
+  v_redemption_id bigint;
+begin
+  if v_user_id is null then
+    raise exception 'login_required' using errcode = '42501';
+  end if;
+
+  -- 景品IDと価格はサーバー側で固定し、クライアントからの価格改変を防ぎます。
+  case p_reward_id
+    when 'cafe1' then v_cost := 100; v_reward_name := 'ホウゲツカフェから好きな1品券';
+    when 'cafe2' then v_cost := 200; v_reward_name := 'ホウゲツカフェ 2人分';
+    when 'lottery1' then v_cost := 300; v_reward_name := '抽せん確率アップ権 1個';
+    when 'lottery2' then v_cost := 500; v_reward_name := '抽せん確率アップ権 2個';
+    else raise exception 'reward_not_available' using errcode = '22023';
+  end case;
+
+  -- 同じ利用者の同時交換を直列化し、二重消費を防ぎます。
+  select coalesce(p.total_points, 0)::bigint
+    into v_total
+  from public.profiles p
+  where p.id = v_user_id
+  for update;
+
+  if not found then
+    raise exception 'profile_not_found' using errcode = 'P0002';
+  end if;
+
+  select coalesce(pc.spent_points, 0)::bigint
+    into v_spent
+  from public.player_customizations pc
+  where pc.user_id = v_user_id
+  for update;
+
+  if not found then
+    v_spent := 0;
+    insert into public.player_customizations
+      (user_id, avatar_config, room_theme, room_items, owned_items, spent_points, updated_at)
+    values
+      (
+        v_user_id,
+        jsonb_build_object('hairStyle','short','hairColor','black','outfit','work','accessory','none','effect','none'),
+        'basic',
+        jsonb_build_array('desk','chair','plant'),
+        jsonb_build_object('skins',jsonb_build_array(),'furniture',jsonb_build_array('desk','chair','plant')),
+        0,
+        now()
+      )
+    on conflict (user_id) do nothing;
+
+    -- 同じユーザーの別処理が先に行を作った場合も、保存済み残高を読み直します。
+    if not found then
+      select coalesce(pc.spent_points, 0)::bigint
+        into v_spent
+      from public.player_customizations pc
+      where pc.user_id = v_user_id
+      for update;
+    end if;
+  end if;
+
+  v_balance := v_total - v_spent;
+  if v_balance < v_cost then
+    raise exception 'insufficient_points' using errcode = 'P0001';
+  end if;
+
+  update public.player_customizations pc
+     set spent_points = v_spent + v_cost,
+         updated_at = now()
+   where pc.user_id = v_user_id;
+
+  v_balance := v_total - (v_spent + v_cost);
+
+  insert into public.kredo_reward_redemptions
+    (user_id, reward_id, reward_name, points_spent, balance_after)
+  values
+    (v_user_id, p_reward_id, v_reward_name, v_cost, v_balance)
+  returning id into v_redemption_id;
+
+  return jsonb_build_object(
+    'redemption_id', v_redemption_id,
+    'user_id', v_user_id,
+    'reward_id', p_reward_id,
+    'reward_name', v_reward_name,
+    'points_spent', v_cost,
+    'total_points', v_total,
+    'spent_points', v_spent + v_cost,
+    'balance_after', v_balance
+  );
+end;
+$function$;
+
+create or replace function public.kredo_admin_recent_reward_redemptions()
+returns table (
+  redemption_id bigint,
+  user_id uuid,
+  display_name text,
+  user_email text,
+  reward_name text,
+  points_spent integer,
+  balance_after bigint,
+  redeemed_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+begin
+  if auth.uid() is null or not public.kredo_admin_is_authorized() then
+    raise exception 'admin_access_required' using errcode = '42501';
+  end if;
+
+  return query
+    select
+      r.id,
+      r.user_id,
+      coalesce(p.display_name, '')::text,
+      coalesce(u.email, '')::text,
+      r.reward_name,
+      r.points_spent,
+      r.balance_after,
+      r.redeemed_at
+    from public.kredo_reward_redemptions r
+    left join public.profiles p on p.id = r.user_id
+    left join auth.users u on u.id = r.user_id
+    order by r.redeemed_at desc
+    limit 200;
+end;
+$function$;
+
 revoke all on function public.kredo_redeem_reward(text) from public, anon, authenticated;
 revoke all on function public.kredo_admin_recent_reward_redemptions() from public, anon, authenticated;
 revoke all on function public.kredo_admin_is_authorized() from public, anon, authenticated;
