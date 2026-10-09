@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087bb8">
+<title>管理センター｜抱月クレドクエスト</title>
+<style>
+:root{--blue:#168bc9;--blue-dark:#096da8;--sky:#eaf8fd;--ink:#173244;--muted:#6a8290;--line:#d7e6ed;--white:#fff;--green:#24834c;--red:#b42318;--shadow:0 8px 26px rgba(24,91,119,.08)}
+*{box-sizing:border-box}
+body{margin:0;background:#f1f8fb;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;font-size:14px;line-height:1.55}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+a{color:var(--blue-dark)}
+.hidden{display:none!important}
+.site-header{background:linear-gradient(110deg,#168bc9,#0875b2);color:#fff;padding:18px 22px;box-shadow:0 4px 18px rgba(12,102,151,.18)}
+.header-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;font-size:18px}
+.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#fff;color:var(--blue-dark);font-weight:1000;font-size:18px}
+.header-actions{display:flex;align-items:center;gap:12px}
+.header-actions a{color:#fff;text-decoration:none;font-size:12px;font-weight:800}
+.header-btn{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:8px 12px;font-weight:800}
+main{width:min(1180px,calc(100% - 32px));margin:26px auto 52px}
+.page-heading{margin-bottom:20px}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:.16em;color:var(--blue-dark)}
+h1{font-size:27px;line-height:1.3;margin:4px 0 6px}
+.lead{margin:0;color:var(--muted);font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px}
+.auth-card{max-width:480px;margin:34px auto}
+.card-title{font-size:17px;font-weight:900;margin:0 0 5px}
+.card-subtitle{font-size:12px;color:var(--muted);margin:0 0 16px}
+.field{display:grid;gap:6px;margin:14px 0}
+.field label{font-size:12px;font-weight:900}
+.field input,.search-input{width:100%;min-width:0;border:1px solid #bfd6e0;border-radius:11px;padding:11px 12px;background:#fff;color:var(--ink);outline:none}
+.field input:focus,.search-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(22,139,201,.13)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:11px;background:var(--blue);color:#fff;padding:10px 15px;font-weight:900}
+.btn:hover{background:var(--blue-dark)}
+.btn.secondary{background:#eef6f9;color:#31576a;border:1px solid #d7e6ed}
+.btn.secondary:hover{background:#e1f0f6}
+.btn.small{padding:7px 10px;font-size:12px;border-radius:9px}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.status{font-size:12px;line-height:1.55;margin-top:12px;padding:10px 12px;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.status:empty{display:none}
+.status.info{color:#31576a;background:#eef8fc;border:1px solid #d6edf6}
+.status.error{color:#9b241c;background:#fff2f0;border:1px solid #f5cfca}
+.status.success{color:#17633a;background:#effaf2;border:1px solid #ccebd4}
+.security-note{margin-top:16px;padding:12px;border-radius:12px;background:#f7fbfd;color:#58717e;font-size:11px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}
+.stat-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:800}
+.stat-value{font-size:29px;line-height:1.2;font-weight:1000;margin-top:7px;letter-spacing:-.02em}
+.stat-note{font-size:10px;color:#7b929e;margin-top:5px}
+.section-card{margin-top:18px}
+.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.section-head h2{font-size:17px;margin:0;font-weight:950}
+.section-head p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:13px}
+.search-input{max-width:390px;flex:1}
+.table-wrap{width:100%;overflow:auto;border:1px solid #e1ecf1;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+thead{background:#f2f9fc;color:#526d7c}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e8f0f4;vertical-align:middle}
+th{font-weight:900;font-size:11px}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fbfdfe}
+.name-cell{font-weight:900;max-width:190px;white-space:normal}
+.email-cell{color:#527080;max-width:260px;white-space:normal;overflow-wrap:anywhere}
+.points-cell{font-weight:950;font-variant-numeric:tabular-nums}
+.empty-row{text-align:center;color:var(--muted);padding:24px}
+.mini-note{margin-top:10px;font-size:11px;color:var(--muted)}
+.grant-panel{margin-top:16px;background:#f6fbfd;border:1px solid #cfe3ed;border-radius:15px;padding:17px}
+.grant-panel h3{margin:0 0 4px;font-size:16px}
+.grant-user{font-size:12px;color:#547180;margin-bottom:12px;overflow-wrap:anywhere}
+.grant-grid{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px}
+.grant-grid .field{margin:4px 0}
+.audit-delta{font-weight:950;color:var(--green)}
+footer{max-width:1180px;margin:0 auto;padding:0 16px 28px;color:#78909c;font-size:10px;text-align:center}
+@media(max-width:720px){.site-header{padding:14px}.brand{font-size:15px}.header-inner{align-items:flex-start}.header-actions{flex-direction:column;align-items:flex-end;gap:7px}main{width:calc(100% - 20px);margin-top:18px}.card{padding:15px}.stat-grid{grid-template-columns:1fr;gap:9px}.stat-card{padding:13px}.stat-value{font-size:24px}.section-head{flex-direction:column}.grant-grid{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand"><span class="brand-mark">◎</span><span>抱月クレドクエスト <span style="font-size:11px;font-weight:700;opacity:.8">管理センター</span></span></div>
+    <div class="header-actions"><a href="./index.html">ゲームへ戻る ↗</a><button type="button" id="logoutTop" class="header-btn hidden">ログアウト</button></div>
+  </div>
+</header>
+<main>
+  <section id="authGate">
+    <div class="page-heading" style="text-align:center;margin-top:34px">
+      <div class="eyebrow">ADMINISTRATION</div><h1>管理者ログイン</h1><p class="lead">管理者権限を確認してから管理機能を表示します。</p>
+    </div>
+    <div class="card auth-card">
+      <div id="loginBox">
+        <h2 class="card-title">ログイン</h2>
+        <p class="card-subtitle">通常のクレドクエストで登録済みの管理者アカウントを使用してください。</p>
+        <form id="loginForm">
+          <div class="field"><label for="loginEmail">メールアドレス</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="name@example.com"></div>
+          <div class="field"><label for="loginPassword">パスワード</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="パスワード"></div>
+          <button class="btn" id="loginSubmit" type="submit" style="width:100%">ログインして権限を確認</button>
+        </form>
+        <div id="loginStatus" class="status" aria-live="polite"></div>
+      </div>
+      <div id="deniedBox" class="hidden">
+        <h2 class="card-title">管理者権限がありません</h2><p class="card-subtitle">ログインはできましたが、このアカウントは管理者として登録されていません。管理者登録後に再確認してください。</p>
+        <div class="btn-row"><button type="button" id="retryDenied" class="btn">権限を再確認</button><button type="button" class="btn secondary switchAccount">別のアカウントでログイン</button></div>
+      </div>
+      <div id="setupBox" class="hidden">
+        <h2 class="card-title">管理者設定を確認してください</h2><p class="card-subtitle">管理機能の表示を停止しました。管理用SQLが未適用、または権限設定に問題がある可能性があります。</p>
+        <div id="setupDetail" class="status error"></div>
+        <div class="btn-row"><button type="button" id="retrySetup" class="btn">もう一度確認</button><button type="button" class="btn secondary switchAccount">別のアカウントでログイン</button></div>
+        <div class="security-note">リポジトリ内の supabase_admin_setup.sql をSupabaseのSQL Editorで実行し、管理者アカウントを登録してください。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="workbench" class="hidden">
+    <div class="page-heading">
+      <div class="eyebrow">ADMIN DASHBOARD</div><h1>運用ダッシュボード</h1><p class="lead">利用者の状況確認と、運営によるポイント付与を行います。</p>
+    </div>
+    <div id="globalStatus" class="status" aria-live="polite"></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">登録プロフィール</div><div id="statUsers" class="stat-value">—</div><div class="stat-note">profiles に登録されている人数</div></div>
+      <div class="stat-card"><div class="stat-label">クエスト参加記録</div><div id="statAttempts" class="stat-value">—</div><div class="stat-note">quiz_attempts の記録件数</div></div>
+      <div class="stat-card"><div class="stat-label">累計ポイント合計</div><div id="statPoints" class="stat-value">—</div><div class="stat-note">各プロフィールの total_points 合計</div></div>
+    </div>
+
+    <section class="card section-card" id="membersSection">
+      <div class="section-head"><div><h2>利用者・ポイント管理</h2><p>表示名・メールアドレスで検索できます。ポイント付与は理由を記録します。</p></div><button type="button" class="btn secondary small" id="exportCsv">一覧をCSV出力</button></div>
+      <div class="toolbar">
+        <input id="memberSearch" class="search-input" type="search" placeholder="表示名またはメールアドレスで検索">
+        <button type="button" id="searchMembers" class="btn">検索</button>
+        <button type="button" id="reloadMembers" class="btn secondary">再読み込み</button>
+      </div>
+      <div id="memberStatus" class="status" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>表示名</th><th>メールアドレス</th><th>累計ポイント</th><th>参加回数</th><th>登録日</th><th>操作</th></tr></thead>
+          <tbody id="memberRows"><tr><td colspan="6" class="empty-row">読み込み中…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="mini-note" id="memberCountNote">最大200件まで表示します。</p>
+      <div id="grantPanel" class="grant-panel hidden">
+        <h3>ポイントを付与</h3><div id="grantTarget" class="grant-user"></div>
+        <div class="btn-row" style="margin:0 0 10px"><button type="button" id="paperQuizPreset" class="btn secondary small">紙クイズ提出分 +5pt</button></div>
+        <form id="grantForm">
+          <div class="grant-grid">
+            <div class="field"><label for="grantPoints">付与ポイント（1〜5,000）</label><input id="grantPoints" type="number" min="1" max="5000" step="1" required placeholder="5"></div>
+            <div class="field"><label for="grantReason">付与理由（必須）</label><input id="grantReason" type="text" maxlength="160" required placeholder="例：紙クイズ提出"></div>
+          </div>
+          <div class="btn-row"><button type="submit" class="btn" id="grantSubmit">内容を確認して付与</button><button type="button" id="cancelGrant" class="btn secondary">キャンセル</button></div>
+        </form>
+        <div id="grantStatus" class="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="card section-card" id="historySection">
+      <div class="section-head"><div><h2>ポイント付与履歴</h2><p>管理者・対象利用者・付与理由を記録します。</p></div><button type="button" id="reloadHistory" class="btn secondary small">履歴を更新</button></div>
+      <div id="historyStatus" class="status" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>日時</th><th>利用者</th><th>メールアドレス</th><th>付与pt</th><th>付与後累計</th><th>理由</th><th>実行管理者</th></tr></thead>
+          <tbody id="historyRows"><tr><td colspan="7" class="empty-row">読み込み中…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="mini-note">直近100件を表示します。</p>
+    </section>
+
+    <section class="card section-card" id="redemptionSection">
+      <div class="section-head"><div><h2>景品交換履歴</h2><p>誰が・何を・何ポイントで交換したかを、サーバーに記録された履歴から確認できます。</p></div><button type="button" id="reloadRedemptions" class="btn secondary small">履歴を更新</button></div>
+      <div id="redemptionStatus" class="status" aria-live="polite"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>交換日時</th><th>利用者</th><th>メールアドレス</th><th>景品</th><th>使用pt</th><th>交換後残高</th></tr></thead>
+          <tbody id="redemptionRows"><tr><td colspan="6" class="empty-row">読み込み中…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="mini-note">直近200件を表示します。機能実装前の交換履歴は、端末内だけの記録だったため自動では復元できません。</p>
+    </section>
+
+    <div class="security-note">この画面でのポイント付与はサーバー側で管理者権限を再確認し、履歴に記録します。ポイント還元の通知機能は別途実装予定です。</div>
+  </section>
+</main>
+<footer>抱月クレドクエスト 管理センター · Supabaseの管理者権限があるアカウントのみ利用できます。</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  'use strict';
+  const SUPABASE_URL = 'https://kagxugwopysqdfnccujk.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_d1VLDpWMad4ug8qS8sM5Ug_u8_mTr7a';
+  const $ = function(id){ return document.getElementById(id); };
+  let client = null;
+  let sessionUser = null;
+  let memberRows = [];
+  let selectedUser = null;
+
+  if(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY){
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+
+  function setStatus(id, message, type){
+    const el = $(id);
+    if(!el) return;
+    el.textContent = message || '';
+    el.className = 'status' + (message ? ' ' + (type || 'info') : '');
+  }
+  function fmtNumber(value){ return (Number(value) || 0).toLocaleString('ja-JP'); }
+  function fmtDate(value){
+    if(!value) return '—';
+    const d = new Date(value);
+    if(Number.isNaN(d.getTime())) return '—';
+    return new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+  }
+  function fmtDateTime(value){
+    if(!value) return '—';
+    const d = new Date(value);
+    if(Number.isNaN(d.getTime())) return '—';
+    return new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(d);
+  }
+  function showGate(which, message){
+    $('authGate').classList.remove('hidden');
+    $('workbench').classList.add('hidden');
+    $('logoutTop').classList.add('hidden');
+    $('loginBox').classList.toggle('hidden', which !== 'login');
+    $('deniedBox').classList.toggle('hidden', which !== 'denied');
+    $('setupBox').classList.toggle('hidden', which !== 'setup');
+    if(which === 'setup') setStatus('setupDetail', message || '管理者設定SQLを確認してください。', 'error');
+  }
+  function showWorkbench(){
+    $('authGate').classList.add('hidden');
+    $('workbench').classList.remove('hidden');
+    $('logoutTop').classList.remove('hidden');
+  }
+  async function switchAccount(){
+    if(client) await client.auth.signOut();
+    sessionUser = null;
+    $('loginPassword').value = '';
+    setStatus('loginStatus', '', 'info');
+    showGate('login');
+  }
+  async function verifyAdmin(user){
+    if(!client){ showGate('setup','Supabaseクライアントを読み込めませんでした。ネットワーク接続を確認してください。'); return; }
+    sessionUser = user || sessionUser;
+    if(!sessionUser){ showGate('login'); return; }
+    const {data, error} = await client.rpc('kredo_admin_is_authorized');
+    if(error){
+      showGate('setup', '管理者権限を確認できませんでした。\n' + (error.message || 'Supabaseからエラーが返されました。'));
+      return;
+    }
+    const allowed = data === true || (Array.isArray(data) && data.length > 0 && data[0] === true);
+    if(!allowed){ showGate('denied'); return; }
+    showWorkbench();
+    setStatus('globalStatus','管理者として認証済みです。操作内容はサーバー側でも権限確認されます。','success');
+    await Promise.allSettled([loadDashboard(),loadMembers(),loadHistory(),loadRedemptions()]);
+  }
+  async function loadDashboard(){
+    const {data,error} = await client.rpc('kredo_admin_dashboard');
+    if(error){
+      setStatus('globalStatus','集計を取得できませんでした：' + error.message,'error');
+      return;
+    }
+    const d = Array.isArray(data) ? data[0] : data;
+    $('statUsers').textContent = fmtNumber(d && d.users);
+    $('statAttempts').textContent = fmtNumber(d && d.attempts);
+    $('statPoints').textContent = fmtNumber(d && d.total_points);
+  }
+  function addCell(row, text, className){
+    const td = document.createElement('td');
+    td.textContent = text == null || text === '' ? '—' : String(text);
+    if(className) td.className = className;
+    row.appendChild(td);
+    return td;
+  }
+  async function loadMembers(){
+    setStatus('memberStatus','利用者一覧を読み込み中…','info');
+    $('memberRows').innerHTML = '<tr><td colspan="6" class="empty-row">読み込み中…</td></tr>';
+    const search = $('memberSearch').value.trim();
+    const {data,error} = await client.rpc('kredo_admin_list_users',{
+      p_search: search || null,
+      p_limit: 200,
+      p_offset: 0
+    });
+    if(error){
+      memberRows = [];
+      $('memberRows').innerHTML = '<tr><td colspan="6" class="empty-row">利用者一覧を取得できませんでした。</td></tr>';
+      setStatus('memberStatus','取得に失敗しました：' + error.message,'error');
+      $('memberCountNote').textContent = '管理用SQLの適用状況と、profiles / quiz_attempts の権限を確認してください。';
+      return;
+    }
+    memberRows = Array.isArray(data) ? data : [];
+    renderMembers();
+    setStatus('memberStatus',memberRows.length ? '利用者一覧を更新しました。' : '該当する利用者はいません。', memberRows.length ? 'success' : 'info');
+    $('memberCountNote').textContent = '表示件数：' + fmtNumber(memberRows.length) + '件（検索結果は最大200件）';
+  }
+  function renderMembers(){
+    const body = $('memberRows');
+    body.replaceChildren();
+    if(!memberRows.length){
+      body.innerHTML = '<tr><td colspan="6" class="empty-row">該当する利用者はいません。</td></tr>';
+      return;
+    }
+    memberRows.forEach(function(u){
+      const tr = document.createElement('tr');
+      addCell(tr,u.display_name || '表示名未設定','name-cell');
+      addCell(tr,u.email || 'メールアドレスなし','email-cell');
+      addCell(tr,fmtNumber(u.total_points) + ' pt','points-cell');
+      addCell(tr,fmtNumber(u.attempt_count) + ' 回');
+      addCell(tr,fmtDate(u.joined_at));
+      const td = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn small';
+      btn.textContent = 'ポイント付与';
+      btn.disabled = !u.has_profile;
+      btn.title = u.has_profile ? 'この利用者にポイントを付与' : 'プロフィール未作成のため付与できません';
+      btn.addEventListener('click',function(){ openGrantPanel(u); });
+      td.appendChild(btn);
+      tr.appendChild(td);
+      body.appendChild(tr);
+    });
+  }
+  function openGrantPanel(u){
+    selectedUser = u;
+    $('grantTarget').textContent = (u.display_name || '表示名未設定') + ' ｜ ' + (u.email || 'メールアドレスなし') + ' ｜ 現在 ' + fmtNumber(u.total_points) + ' pt';
+    $('grantPoints').value = '';
+    $('grantReason').value = '';
+    setStatus('grantStatus','','info');
+    $('grantPanel').classList.remove('hidden');
+    $('grantPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+    $('grantPoints').focus();
+  }
+  function closeGrantPanel(){
+    selectedUser = null;
+    $('grantPanel').classList.add('hidden');
+    setStatus('grantStatus','','info');
+  }
+  async function loadHistory(){
+    setStatus('historyStatus','付与履歴を読み込み中…','info');
+    $('historyRows').innerHTML = '<tr><td colspan="7" class="empty-row">読み込み中…</td></tr>';
+    const {data,error} = await client.rpc('kredo_admin_recent_point_adjustments');
+    if(error){
+      $('historyRows').innerHTML = '<tr><td colspan="7" class="empty-row">履歴を取得できませんでした。</td></tr>';
+      setStatus('historyStatus','履歴の取得に失敗しました：' + error.message,'error');
+      return;
+    }
+    const rows = Array.isArray(data) ? data : [];
+    const body = $('historyRows');
+    body.replaceChildren();
+    if(!rows.length){
+      body.innerHTML = '<tr><td colspan="7" class="empty-row">まだポイント付与履歴はありません。</td></tr>';
+      setStatus('historyStatus','付与履歴はまだありません。','info');
+      return;
+    }
+    rows.forEach(function(item){
+      const tr = document.createElement('tr');
+      addCell(tr,fmtDateTime(item.created_at));
+      addCell(tr,item.display_name || '表示名未設定','name-cell');
+      addCell(tr,item.user_email || 'メールアドレスなし','email-cell');
+      addCell(tr,'+' + fmtNumber(item.points_added) + ' pt','audit-delta');
+      addCell(tr,fmtNumber(item.balance_after) + ' pt','points-cell');
+      addCell(tr,item.reason || '—');
+      addCell(tr,item.admin_email || '管理者アカウント');
+      body.appendChild(tr);
+    });
+    setStatus('historyStatus','直近 ' + fmtNumber(rows.length) + ' 件を表示しています。','success');
+  }
+  async function loadRedemptions(){
+    setStatus('redemptionStatus','景品交換履歴を読み込み中…','info');
+    $('redemptionRows').innerHTML = '<tr><td colspan="6" class="empty-row">読み込み中…</td></tr>';
+    const {data,error} = await client.rpc('kredo_admin_recent_reward_redemptions');
+    if(error){
+      $('redemptionRows').innerHTML = '<tr><td colspan="6" class="empty-row">景品交換履歴を取得できませんでした。</td></tr>';
+      setStatus('redemptionStatus','取得に失敗しました：' + error.message,'error');
+      return;
+    }
+    const rows = Array.isArray(data) ? data : [];
+    const body = $('redemptionRows');
+    body.replaceChildren();
+    if(!rows.length){
+      body.innerHTML = '<tr><td colspan="6" class="empty-row">まだサーバーに記録された景品交換はありません。</td></tr>';
+      setStatus('redemptionStatus','景品交換履歴はまだありません。','info');
+      return;
+    }
+    rows.forEach(function(item){
+      const tr = document.createElement('tr');
+      addCell(tr,fmtDateTime(item.redeemed_at));
+      addCell(tr,item.display_name || '表示名未設定','name-cell');
+      addCell(tr,item.user_email || 'メールアドレスなし','email-cell');
+      addCell(tr,item.reward_name || '景品名なし','name-cell');
+      addCell(tr,'-' + fmtNumber(item.points_spent) + ' pt','audit-delta');
+      addCell(tr,fmtNumber(item.balance_after) + ' pt','points-cell');
+      body.appendChild(tr);
+    });
+    setStatus('redemptionStatus','直近 ' + fmtNumber(rows.length) + ' 件を表示しています。','success');
+  }
+
+  async function submitGrant(event){
+    event.preventDefault();
+    if(!selectedUser){ setStatus('grantStatus','付与対象の利用者を選択してください。','error'); return; }
+    const points = Number($('grantPoints').value);
+    const reason = $('grantReason').value.trim();
+    if(!Number.isInteger(points) || points < 1 || points > 5000){
+      setStatus('grantStatus','付与ポイントは1〜5,000の整数で入力してください。','error');
+      return;
+    }
+    if(reason.length < 2){
+      setStatus('grantStatus','付与理由を2文字以上で入力してください。','error');
+      return;
+    }
+    const targetName = selectedUser.display_name || selectedUser.email || '選択した利用者';
+    if(!window.confirm(targetName + ' に ' + fmtNumber(points) + ' ptを付与します。\n理由：' + reason + '\n\nこの内容で実行しますか？')) return;
+    $('grantSubmit').disabled = true;
+    setStatus('grantStatus','付与処理を実行しています…','info');
+    try{
+      const {data,error} = await client.rpc('kredo_admin_grant_points',{
+        p_user_id:selectedUser.user_id,
+        p_points:points,
+        p_reason:reason
+      });
+      if(error) throw error;
+      const result = Array.isArray(data) ? data[0] : data;
+      const balance = result && result.balance_after != null ? result.balance_after : '';
+      setStatus('grantStatus','ポイントを付与しました。 +' + fmtNumber(points) + ' pt' + (balance !== '' ? ' ／ 付与後累計 ' + fmtNumber(balance) + ' pt' : ''),'success');
+      await Promise.allSettled([loadDashboard(),loadMembers(),loadHistory()]);
+      selectedUser = null;
+      $('grantPanel').classList.add('hidden');
+      setStatus('globalStatus','ポイント付与を記録しました。','success');
+    }catch(error){
+      setStatus('grantStatus','付与に失敗しました：' + (error.message || '不明なエラー'),'error');
+    }finally{
+      $('grantSubmit').disabled = false;
+    }
+  }
+  function csvEscape(value){
+    const text = value == null ? '' : String(value);
+    return '"' + text.replace(/"/g,'""') + '"';
+  }
+  function exportCsv(){
+    if(!memberRows.length){ setStatus('memberStatus','出力する利用者データがありません。','error'); return; }
+    const rows = [['表示名','メールアドレス','累計ポイント','参加回数','登録日','プロフィール有無']];
+    memberRows.forEach(function(u){
+      rows.push([u.display_name,u.email,u.total_points,u.attempt_count,u.joined_at,u.has_profile ? 'あり' : 'なし']);
+    });
+    const csv = '\uFEFF' + rows.map(function(row){ return row.map(csvEscape).join(','); }).join('\r\n');
+    const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kredo-quest-users-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  $('loginForm').addEventListener('submit',async function(event){
+    event.preventDefault();
+    if(!client){ setStatus('loginStatus','Supabaseを読み込めませんでした。ネットワーク接続を確認してください。','error'); return; }
+    const email = $('loginEmail').value.trim();
+    const password = $('loginPassword').value;
+    $('loginSubmit').disabled = true;
+    setStatus('loginStatus','ログインを確認しています…','info');
+    try{
+      const {data,error} = await client.auth.signInWithPassword({email:email,password:password});
+      if(error) throw error;
+      sessionUser = data.user;
+      setStatus('loginStatus','','info');
+      await verifyAdmin(sessionUser);
+    }catch(error){
+      setStatus('loginStatus','ログインできませんでした：' + (error.message || '入力内容を確認してください。'),'error');
+    }finally{
+      $('loginSubmit').disabled = false;
+    }
+  });
+  $('retryDenied').addEventListener('click',function(){ verifyAdmin(sessionUser); });
+  $('retrySetup').addEventListener('click',function(){ verifyAdmin(sessionUser); });
+  document.querySelectorAll('.switchAccount').forEach(function(button){ button.addEventListener('click',switchAccount); });
+  $('logoutTop').addEventListener('click',switchAccount);
+  $('searchMembers').addEventListener('click',loadMembers);
+  $('reloadMembers').addEventListener('click',loadMembers);
+  $('memberSearch').addEventListener('keydown',function(event){ if(event.key === 'Enter'){ event.preventDefault(); loadMembers(); } });
+  $('exportCsv').addEventListener('click',exportCsv);
+  $('grantForm').addEventListener('submit',submitGrant);
+  $('cancelGrant').addEventListener('click',closeGrantPanel);
+  $('paperQuizPreset').addEventListener('click',function(){
+    $('grantPoints').value = '5';
+    $('grantReason').value = '紙クイズ提出';
+    $('grantReason').focus();
+  });
+  $('reloadHistory').addEventListener('click',loadHistory);
+  $('reloadRedemptions').addEventListener('click',loadRedemptions);
+
+  async function boot(){
+    if(!client){ showGate('setup','Supabaseクライアントを読み込めませんでした。インターネット接続を確認してください。'); return; }
+    try{
+      const {data,error} = await client.auth.getSession();
+      if(error) throw error;
+      if(data && data.session && data.session.user){
+        sessionUser = data.session.user;
+        await verifyAdmin(sessionUser);
+      }else{
+        showGate('login');
+      }
+    }catch(error){
+      showGate('setup',error.message || 'ログイン状態を確認できませんでした。');
+    }
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
