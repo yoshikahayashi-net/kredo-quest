@@ -876,10 +876,10 @@ let questions=[
     "level": "中級",
     "chapter": "Day 1｜クレド全体を理解する",
     "question": "「自分の担当分は終わったから、あとは次の人がなんとかするだろう」という状況で、抱月クレドの考え方として最も近い行動はどれ？",
-    "scene": "次の工程に仕事を渡す場面です。",
+    "scene": "後工程に仕事を渡す場面です。",
     "art": "🔗",
     "choices": [
-      "自分の仕事は終わっているので、そのまま次工程へ渡す",
+      "自分の仕事は終わっているので、そのまま後工程へ渡す",
       "次の人が困らないように、必要な情報や注意点を確認して渡す",
       "次の人の仕事まで全部自分が引き取る",
       "次の人から質問が来たら、そのとき対応する"
@@ -1083,8 +1083,8 @@ let questions=[
   {
     "level": "中級",
     "chapter": "Day 3｜行動からクレドを逆引きする",
-    "question": "自分が作った資料を次工程の同僚が使います。「どこを見ればいいのか分かりにくい」となりそうなので、相手が使いやすいように情報を整理して渡すことにした。この行動により直接的に結びつくのはどれ？",
-    "scene": "次工程の仲間に仕事を渡す場面です。",
+    "question": "自分が作った資料を後工程の同僚が使います。「どこを見ればいいのか分かりにくい」となりそうなので、相手が使いやすいように情報を整理して渡すことにした。この行動により直接的に結びつくのはどれ？",
+    "scene": "後工程の仲間に仕事を渡す場面です。",
     "art": "📄",
     "choices": [
       "顧客本位",
@@ -1227,8 +1227,8 @@ let questions=[
   {
     "level": "中級",
     "chapter": "Day 5｜似ているクレドの違いを見抜く",
-    "question": "自分が作った資料を次の工程の同僚に渡すとき、「この順番で見れば分かるよ」「ここは注意してね」と整理して渡した。この行動により直接的に近いのはどれ？",
-    "scene": "次工程の仲間も「お客様」と考えられる場面です。",
+    "question": "自分が作った資料を後工程の同僚に渡すとき、「この順番で見れば分かるよ」「ここは注意してね」と整理して渡した。この行動により直接的に近いのはどれ？",
+    "scene": "後工程の仲間も「お客様」と考えられる場面です。",
     "art": "📄",
     "choices": [
       "顧客本位",
@@ -1672,21 +1672,26 @@ async function ensureProfileAfterLogin(){
     if(currentUser){loadState();updateProfile()}
   }
 })();
+const QUESTION_BANK_VERSION='2026-10-09-koutei-v1';
 (function restoreQuizData(){
   try{
-    const saved=localStorage.getItem('kredoQuestions');
-    if(saved){
-      const parsed=JSON.parse(saved);
-      // 旧デモ（5問など）が残っている端末は、本番28問へ自動更新。
-      if(Array.isArray(parsed)&&parsed.length>=questions.length)questions=parsed;
-      else{
+    const appliedVersion=localStorage.getItem('kredoQuestionBankVersion');
+    if(appliedVersion!==QUESTION_BANK_VERSION){
+      localStorage.setItem('kredoQuestions',JSON.stringify(questions));
+      localStorage.setItem('kredoQuestionBankVersion',QUESTION_BANK_VERSION);
+    }else{
+      const saved=localStorage.getItem('kredoQuestions');
+      if(saved){
+        const parsed=JSON.parse(saved);
+        if(Array.isArray(parsed)&&parsed.length>=questions.length)questions=parsed;
+        else localStorage.setItem('kredoQuestions',JSON.stringify(questions));
+      }else{
         localStorage.setItem('kredoQuestions',JSON.stringify(questions));
       }
-    }else{
-      localStorage.setItem('kredoQuestions',JSON.stringify(questions));
     }
   }catch(e){
     localStorage.setItem('kredoQuestions',JSON.stringify(questions));
+    localStorage.setItem('kredoQuestionBankVersion',QUESTION_BANK_VERSION);
   }
 })();
 buildDailyQuest();
