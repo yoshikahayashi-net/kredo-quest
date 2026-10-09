@@ -128,7 +128,16 @@
           showMessage('交換できませんでした','この景品は現在交換できません。画面を再読み込みしてください。');
         }else{
           console.error('Reward redemption failed:',error);
-          showMessage('交換に失敗しました','交換を完了できませんでした。ポイントは消費されていません。しばらくしてから再度お試しください。');
+          const diagnostics = [
+            'code: ' + (error.code || 'unknown'),
+            'message: ' + (error.message || 'no message'),
+            error.details ? 'details: ' + error.details : '',
+            error.hint ? 'hint: ' + error.hint : ''
+          ].filter(Boolean).join('\n');
+          showMessage(
+            '交換処理でエラーが発生しました',
+            'ポイントは消費されていません。<br>原因確認用のエラー情報：<br><code style="white-space:pre-wrap;word-break:break-word;">' + escapeHtml(diagnostics) + '</code>'
+          );
         }
         return;
       }
