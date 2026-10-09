@@ -172,11 +172,7 @@
       showMessage('交換できませんでした','景品情報が一致しません。画面を再読み込みしてください。');
       return;
     }
-    const snapshot = typeof window.__syncPointBalanceSafe === 'function' ? window.__syncPointBalanceSafe() : null;
-    if(snapshot && Number(snapshot.available) < reward.cost){
-      showMessage('ポイントが足りません','現在 <strong>' + Number(snapshot.available) + ' pt</strong>です。<br>交換には <strong>' + reward.cost + ' pt</strong>必要です。');
-      return;
-    }
+    // 実際の残高確認は、同時交換も考慮してサーバー側RPCで行います。
     showMessage('交換しますか？','「' + escapeHtml(reward.name) + '」と交換しますか？<br><strong>' + reward.cost + ' pt</strong>を使用します。',function(){});
     const modal = document.getElementById('exchangeModal');
     const ok = document.getElementById('exchangeModalOk');
