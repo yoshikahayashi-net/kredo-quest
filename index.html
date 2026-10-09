@@ -1790,16 +1790,15 @@ function resolveCachedLifetimePoints(){
   if(total===0){
     total=Math.max(0,Number(localStorage.getItem('kredoTotalPoints')||0));
   }
-  if(total===0){
-    try{
-      const ranking=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
-      const allowedIds=[];
-      if(currentUser?.id)allowedIds.push(currentUser.id);
-      if(account?.id&&(!currentUser||currentUser.demo||currentUser.id===account.id))allowedIds.push(account.id);
-      const match=Array.isArray(ranking)?ranking.find(x=>allowedIds.includes(x.id)):null;
-      if(match)total=Math.max(0,Number(match.points)||0);
-    }catch(e){}
-  }
+  try{
+    const ranking=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
+    const allowedIds=[];
+    if(currentUser?.id)allowedIds.push(currentUser.id);
+    if(account?.id&&(!currentUser||currentUser.demo||currentUser.id===account.id))allowedIds.push(account.id);
+    const match=Array.isArray(ranking)?ranking.find(x=>allowedIds.includes(x.id)):null;
+    // The local ranking stores the same account's last known lifetime total.
+    if(match)total=Math.max(total,Math.max(0,Number(match.points)||0));
+  }catch(e){}
   return total;
 }
 function spendablePoints(){
