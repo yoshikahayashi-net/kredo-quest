@@ -1710,23 +1710,35 @@ async function refreshPointExchangeBalance(){
   if(!screen||!screen.classList.contains('active'))return;
 
   try{
-    // Load this account's cached lifetime balance before contacting the server.
+    // Reconcile the active account's cached balance with server-backed sources.
     const uid=(currentUser?.id||getLocalAccount()?.id||'guest');
     const localKey='kredoState:'+uid+':totalPoints';
     const storedTotal=localStorage.getItem(localKey);
     const localTotal=storedTotal===null?0:Math.max(0,Number(storedTotal)||0);
-    const memoryTotal=Math.max(0,Number(state.totalPoints)||0);
-    state.totalPoints=Math.max(localTotal,memoryTotal);
+    state.totalPoints=Math.max(localTotal,Math.max(0,Number(state.totalPoints)||0));
 
+    let serverTotal=0;
+    let hasProfileBalance=false;
     if(supabaseClient&&currentUser&&!currentUser.demo){
       const {data,error}=await supabaseClient.from('profiles').select('total_points').eq('id',currentUser.id).maybeSingle();
       if(!error&&data&&data.total_points!==undefined&&data.total_points!==null){
-        const serverTotal=Math.max(0,Number(data.total_points)||0);
-        // Keep a non-zero cached total if the profile endpoint temporarily/incorrectly returns 0.
-        state.totalPoints=Math.max(state.totalPoints,serverTotal);
-        saveState();
+        serverTotal=Math.max(0,Number(data.total_points)||0);
+        hasProfileBalance=true;
+      }
+
+      // If the profile aggregate is missing/zero, recover the earned total from the user's own quest ledger.
+      if(serverTotal===0){
+        const {data:attempts,error:attemptsError}=await supabaseClient.from('quiz_attempts').select('points').eq('user_id',currentUser.id);
+        if(!attemptsError&&Array.isArray(attempts)){
+          const ledgerTotal=attempts.reduce((sum,row)=>sum+Math.max(0,Number(row.points)||0),0);
+          serverTotal=Math.max(serverTotal,ledgerTotal);
+        }
       }
     }
+
+    // A zero/missing profile total must not wipe a valid cached balance or quest-ledger total.
+    state.totalPoints=Math.max(state.totalPoints,serverTotal);
+    saveState();
     await loadCustomization();
   }catch(e){
     console.warn('Point exchange balance refresh skipped',e);
