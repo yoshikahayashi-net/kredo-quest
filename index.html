@@ -1412,7 +1412,7 @@ async function showResult(){
   let participationRecorded=false;
   let usedServerLedger=false;
 
-  if(supabaseClient&&currentUser){
+  if(supabaseClient&&currentUser&&!currentUser.demo){
     try{
       const {data:rpcData,error:attemptError}=await supabaseClient.rpc('record_quest_attempt',{
         p_quest_date:dailyQuestKey,
