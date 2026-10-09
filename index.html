@@ -1708,11 +1708,22 @@ function pointHistoryKey(){return 'kredoPointHistory:'+(currentUser?.id||getLoca
 async function refreshPointExchangeBalance(){
   const screen=document.getElementById('pointExchange');
   if(!screen||!screen.classList.contains('active'))return;
+
   try{
+    // Load this account's cached lifetime balance before contacting the server.
+    const uid=(currentUser?.id||getLocalAccount()?.id||'guest');
+    const localKey='kredoState:'+uid+':totalPoints';
+    const storedTotal=localStorage.getItem(localKey);
+    const localTotal=storedTotal===null?0:Math.max(0,Number(storedTotal)||0);
+    const memoryTotal=Math.max(0,Number(state.totalPoints)||0);
+    state.totalPoints=Math.max(localTotal,memoryTotal);
+
     if(supabaseClient&&currentUser&&!currentUser.demo){
       const {data,error}=await supabaseClient.from('profiles').select('total_points').eq('id',currentUser.id).maybeSingle();
       if(!error&&data&&data.total_points!==undefined&&data.total_points!==null){
-        state.totalPoints=Math.max(0,Number(data.total_points)||0);
+        const serverTotal=Math.max(0,Number(data.total_points)||0);
+        // Keep a non-zero cached total if the profile endpoint temporarily/incorrectly returns 0.
+        state.totalPoints=Math.max(state.totalPoints,serverTotal);
         saveState();
       }
     }
@@ -1720,6 +1731,7 @@ async function refreshPointExchangeBalance(){
   }catch(e){
     console.warn('Point exchange balance refresh skipped',e);
   }
+
   if(screen.classList.contains('active')){
     renderPointExchange();
     renderPointsInNewUI();
