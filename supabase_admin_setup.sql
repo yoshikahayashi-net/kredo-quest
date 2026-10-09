@@ -87,6 +87,28 @@ create index if not exists kredo_reward_redemptions_user_id_idx
 alter table public.kredo_reward_redemptions enable row level security;
 revoke all on table public.kredo_reward_redemptions from public, anon, authenticated;
 
+
+-- カフェ2人分は一時停止中。RPCから呼び出されても景品交換を拒否します。
+create or replace function public.kredo_block_paused_reward()
+returns trigger
+language plpgsql
+set search_path = ''
+as $function$
+begin
+  if new.reward_id = 'cafe2' then
+    raise exception 'reward_not_available' using errcode = '22023';
+  end if;
+  return new;
+end;
+$function$;
+
+drop trigger if exists block_paused_cafe_two_reward on public.kredo_reward_redemptions;
+create trigger block_paused_cafe_two_reward
+before insert on public.kredo_reward_redemptions
+for each row execute function public.kredo_block_paused_reward();
+
+revoke all on function public.kredo_block_paused_reward() from public, anon, authenticated;
+
 create or replace function public.kredo_admin_is_authorized()
 returns boolean
 language sql
