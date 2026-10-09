@@ -5,6 +5,42 @@
 
 begin;
 
+-- ゲーム本体が利用するカスタマイズ・消費ポイントテーブル。
+-- spent_points は交換RPCのみが更新できるよう、クライアントへの書込権限から除外します。
+create table if not exists public.player_customizations (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  avatar_config jsonb not null default '{"hairStyle":"short","hairColor":"black","outfit":"work","accessory":"none","effect":"none"}'::jsonb,
+  room_theme text not null default 'basic',
+  room_items jsonb not null default '["desk","chair","plant"]'::jsonb,
+  owned_items jsonb not null default '{"skins":[],"furniture":["desk","chair","plant"]}'::jsonb,
+  spent_points bigint not null default 0 check (spent_points >= 0),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.player_customizations enable row level security;
+revoke all on table public.player_customizations from public, anon, authenticated;
+grant select on table public.player_customizations to authenticated;
+grant insert (user_id, avatar_config, room_theme, room_items, owned_items, updated_at)
+  on table public.player_customizations to authenticated;
+grant update (user_id, avatar_config, room_theme, room_items, owned_items, updated_at)
+  on table public.player_customizations to authenticated;
+
+drop policy if exists "Users can read own customization" on public.player_customizations;
+create policy "Users can read own customization"
+  on public.player_customizations for select to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "Users can insert own customization" on public.player_customizations;
+create policy "Users can insert own customization"
+  on public.player_customizations for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own customization" on public.player_customizations;
+create policy "Users can update own customization"
+  on public.player_customizations for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 create table if not exists public.kredo_admins (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
