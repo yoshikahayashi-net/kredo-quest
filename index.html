@@ -614,7 +614,7 @@ body{display:flex;justify-content:center}
         pointExchangeModal('ポイント表示の診断','診断機能を読み込めませんでした。画面を再読み込みしてください。','alert');
       }catch(error){
         const message=String(error&&error.message?error.message:error||'不明なエラー');
-        try{pointExchangeModal('診断でエラーが発生しました','診断処理でエラーが発生しました。<br>'+message.replace(/[&<>\"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]}),'alert');}
+        try{pointExchangeModal('診断でエラーが発生しました','診断処理でエラーが発生しました。<br>'+message.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]}),'alert');}
         catch(fallbackError){window.alert('診断でエラーが発生しました\\n'+message)}
       }
     };
