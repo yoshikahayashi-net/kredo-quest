@@ -539,7 +539,7 @@ body{display:flex;justify-content:center}
   <section id="pointExchange" class="screen exchange-screen">
     <div class="topbar"><div class="brand"><span class="brand-mark">P</span>ポイント交換</div><div class="menu" onclick="openMyPage()" style="cursor:pointer">✕</div></div>
     <div class="exchange-head"><div class="exchange-kicker">POINT REWARD</div><div class="exchange-title">ポイントを交換</div><div class="exchange-sub">クエストで貯めたポイントを、抱月カフェの特典などと交換できます。</div></div>
-    <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong></div><div class="coin">P</div></div>
+    <div class="exchange-balance"><div><small>利用可能ポイント</small><strong id="exchangeSpendablePoints">0 pt</strong><button type="button" onclick="diagnosePointBalance()" style="display:block;margin-top:7px;padding:0;border:0;background:transparent;color:#557483;font-size:11px;text-decoration:underline;cursor:pointer">ポイント表示が合わない場合</button></div><div class="coin">P</div></div>
     <div class="exchange-body">
       <div class="exchange-section-title">交換できる特典</div>
       <div class="exchange-card"><div class="exchange-card-top"><div class="exchange-icon">☕</div><div><h3>ホウゲツカフェから好きな1品券</h3><p>ホウゲツカフェで好きな1品と交換できます。</p></div></div><div class="exchange-price"><strong>100 pt</strong><button type="button" class="exchange-btn" onclick="__pointExchangeClick('cafe1',100,'ホウゲツカフェから好きな1品券')">交換する</button></div></div>
@@ -1754,6 +1754,58 @@ async function refreshPointExchangeBalance(){
     renderPointExchange();
     renderPointsInNewUI();
   }
+}
+async function diagnosePointBalance(){
+  const account=getLocalAccount();
+  const uid=(currentUser?.id||account?.id||'guest');
+  const scopedKey='kredoState:'+uid+':totalPoints';
+  const scopedRaw=localStorage.getItem(scopedKey);
+  const legacyRaw=localStorage.getItem('kredoTotalPoints');
+  const rankedRaw=localStorage.getItem('kredoDemoRanking');
+  let rankingEntries=[];
+  try{rankingEntries=JSON.parse(rankedRaw||'[]');if(!Array.isArray(rankingEntries))rankingEntries=[]}catch(e){rankingEntries=[]}
+  const ids=[currentUser?.id,account?.id].filter(Boolean);
+  const rankMatches=rankingEntries.filter(x=>ids.includes(x.id));
+  const scoped=scopedRaw===null?'なし':String(Math.max(0,Number(scopedRaw)||0));
+  const legacy=legacyRaw===null?'なし':String(Math.max(0,Number(legacyRaw)||0));
+  const total=typeof resolveCachedLifetimePoints==='function'?resolveCachedLifetimePoints():Number(state.totalPoints||0);
+  const spent=Math.max(0,Number(customization?.spentPoints)||0);
+  const available=typeof spendablePoints==='function'?spendablePoints():Math.max(0,total-spent);
+  let profile='未照会',ledger='未照会',profileError='',ledgerError='';
+  if(supabaseClient&&currentUser&&!currentUser.demo){
+    try{
+      const {data,error}=await supabaseClient.from('profiles').select('total_points').eq('id',currentUser.id).maybeSingle();
+      if(error)profileError=error.code||error.message||'取得エラー';
+      else profile=data&&data.total_points!=null?String(Number(data.total_points)||0):'プロフィール行なし';
+    }catch(e){profileError=e?.message||'取得エラー'}
+    try{
+      const {data,error}=await supabaseClient.from('quiz_attempts').select('points').eq('user_id',currentUser.id);
+      if(error)ledgerError=error.code||error.message||'取得エラー';
+      else if(Array.isArray(data))ledger=String(data.reduce((sum,x)=>sum+Math.max(0,Number(x.points)||0),0))+' pt / '+data.length+'件';
+      else ledger='データ形式不明';
+    }catch(e){ledgerError=e?.message||'取得エラー'}
+  }else if(currentUser?.demo||account?.demo){
+    profile='ローカル／デモアカウント（DB未使用）';
+    ledger='ローカル／デモアカウント（DB未使用）';
+  }else{
+    profile='ログイン情報なし';
+    ledger='ログイン情報なし';
+  }
+  const msg=
+    '<strong>画面に出ている値</strong><br>'+
+    'アカウント種別：'+(currentUser&&!currentUser.demo?'Supabaseログイン':(currentUser?.demo||account?.demo?'ローカル／デモ':'未ログイン'))+'<br>'+
+    'アカウント別保存値：'+scoped+'<br>'+
+    '旧保存値：'+legacy+'<br>'+
+    '同じアカウントのローカルランキング：'+(rankMatches.length?rankMatches.map(x=>Math.max(0,Number(x.points)||0)+' pt').join(' / '):'該当なし')+'<br>'+
+    'プロフィールDB：'+escapeHtml(profile)+(profileError?'（'+escapeHtml(profileError)+'）':'')+'<br>'+
+    'クイズ記録DB：'+escapeHtml(ledger)+(ledgerError?'（'+escapeHtml(ledgerError)+'）':'')+'<br>'+
+    '累計として計算された値：'+Math.max(0,Number(total)||0)+' pt<br>'+
+    '使用済みポイント：'+spent+' pt<br>'+
+    '<strong>交換可能ポイントの計算結果：'+Math.max(0,Number(available)||0)+' pt</strong><br><br>'+
+    'この診断は残高を変更しません。';
+  if(typeof showExchangeModal==='function')showExchangeModal('ポイント表示の診断',msg,'alert');
+  else if(typeof pointExchangeModal==='function')pointExchangeModal('ポイント表示の診断',msg,'alert');
+  else window.alert(msg.replace(/<br>/g,'\n').replace(/<[^>]*>/g,''));
 }
 function openPointExchange(){show('pointExchange')}let exchangeBusy=false;function closeExchangeModal(){const m=document.getElementById('exchangeModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true')}function showExchangeModal(title,message,mode,onConfirm){const m=document.getElementById('exchangeModal');if(!m)return;if(m.parentElement!==document.body)document.body.appendChild(m);const ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');document.getElementById('exchangeModalTitle').textContent=title;document.getElementById('exchangeModalMessage').innerHTML=message;ok.style.display=mode==='confirm'?'inline-flex':'none';cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.onclick=closeExchangeModal;ok.onclick=()=>{closeExchangeModal();if(onConfirm)onConfirm()};m.hidden=false;m.setAttribute('aria-hidden','false')}function exchangeReward(id,cost,name){if(exchangeBusy)return;const p=spendablePoints();if(p<cost){showExchangeModal('ポイントが足りません','現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');return}showExchangeModal('交換しますか？','「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',()=>doExchangeReward(id,cost,name))}function doExchangeReward(id,cost,name){
   if(exchangeBusy)return;
