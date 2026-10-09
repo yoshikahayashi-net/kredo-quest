@@ -169,7 +169,7 @@
       showMessage('ポイントが足りません','現在 <strong>' + Number(snapshot.available) + ' pt</strong>です。<br>交換には <strong>' + reward.cost + ' pt</strong>必要です。');
       return;
     }
-    showMessage('交換しますか？','「' + escapeHtml(reward.name) + '」と交換しますか？<br><strong>' + reward.cost + ' pt</strong>を使用します。','confirm');
+    showMessage('交換しますか？','「' + escapeHtml(reward.name) + '」と交換しますか？<br><strong>' + reward.cost + ' pt</strong>を使用します。',function(){});
     const modal = document.getElementById('exchangeModal');
     const ok = document.getElementById('exchangeModalOk');
     const cancel = document.getElementById('exchangeModalCancel');
