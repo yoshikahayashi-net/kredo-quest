@@ -559,12 +559,111 @@ body{display:flex;justify-content:center}
 
   <script>
   /* POINT EXCHANGE SAFE CLICK LAYER
-     交換ボタンのクリック経路を本体ロジックから独立させる。
-     本体側で別のJSエラーが起きても、ダイアログ表示までは止めない。 */
+     残高表示・診断・交換ボタンで同じ保存先と計算を使う。メイン処理が失敗しても動作する。 */
   (function(){
+    function readJson(key,fallback){
+      try{const value=localStorage.getItem(key);return value===null?fallback:JSON.parse(value)}catch(e){return fallback}
+    }
+    function getContext(){
+      const account=readJson('kredoAccount',null);
+      let user=null;
+      try{if(typeof currentUser!=='undefined'&&currentUser)user=currentUser}catch(e){}
+      const uid=(user&&user.id)||(account&&account.id)||'guest';
+      return {account:account,user:user,uid:uid,accountId:(account&&account.id)||'guest'};
+    }
+    function storedTotal(uid){
+      const raw=localStorage.getItem('kredoState:'+uid+':totalPoints');
+      return raw===null?0:Math.max(0,Number(raw)||0);
+    }
+    function safePointSnapshot(){
+      const context=getContext();
+      const uid=context.uid;
+      const accountId=context.accountId;
+      const account=context.account;
+      const user=context.user;
+      let total=storedTotal(uid);
+      let sourceUid=uid;
+      let customizationRaw=localStorage.getItem('kredoCustomization:'+uid);
+      let customization=readJson('kredoCustomization:'+uid,{})||{};
+      const ranking=readJson('kredoDemoRanking',[]);
+      const rows=Array.isArray(ranking)?ranking:[];
+      const rankFor=function(id){
+        const row=rows.find(function(item){return item&&item.id===id});
+        return row?Math.max(0,Number(row.points)||0):0;
+      };
+
+      // If demo points were earned before account registration, carry them to the signed-in account once.
+      if(user&&user.id&&account&&account.demo&&accountId!==uid){
+        const demoTotal=Math.max(storedTotal(accountId),rankFor(accountId));
+        if(total===0&&demoTotal>0){
+          total=demoTotal;
+          localStorage.setItem('kredoState:'+uid+':totalPoints',String(total));
+          sourceUid=uid;
+          if(customizationRaw===null){
+            customization=readJson('kredoCustomization:'+accountId,{})||{};
+            localStorage.setItem('kredoCustomization:'+uid,JSON.stringify(customization));
+            customizationRaw=localStorage.getItem('kredoCustomization:'+uid);
+          }
+        }
+      }
+
+      total=Math.max(total,rankFor(uid));
+      if((!user||user.demo||uid===accountId)&&accountId!==uid){
+        const demoTotal=Math.max(storedTotal(accountId),rankFor(accountId));
+        if(total===0&&demoTotal>0){total=demoTotal;sourceUid=accountId}
+      }
+      if(total===0){
+        const legacy=Math.max(0,Number(localStorage.getItem('kredoTotalPoints')||0));
+        if(legacy>0){
+          total=legacy;
+          localStorage.setItem('kredoState:'+uid+':totalPoints',String(total));
+        }
+      }
+
+      // Use in-memory points only when the main app confirms it belongs to this account.
+      try{
+        if(typeof state!=='undefined'&&typeof stateOwnerKey!=='undefined'&&stateOwnerKey==='kredoState:'+uid+':'){
+          total=Math.max(total,Math.max(0,Number(state.totalPoints)||0));
+        }
+      }catch(e){}
+
+      if(sourceUid!==uid&&total>0){
+        localStorage.setItem('kredoState:'+uid+':totalPoints',String(total));
+        sourceUid=uid;
+      }
+      customization=readJson('kredoCustomization:'+sourceUid,customization)||{};
+      let spent=Math.max(0,Number(customization.spentPoints)||0);
+      try{
+        if(typeof customizationLoadedFor!=='undefined'&&customizationLoadedFor==='kredoCustomization:'+uid&&typeof window.customization!=='undefined'){
+          spent=Math.max(spent,Math.max(0,Number(window.customization.spentPoints)||0));
+        }
+      }catch(e){}
+      const available=Math.max(0,total-spent);
+      return {uid:uid,sourceUid:sourceUid,total:total,spent:spent,available:available,account:account,user:user,ranking:rows};
+    }
+    function syncSafePointDisplay(){
+      try{
+        const snapshot=safePointSnapshot();
+        const values={
+          exchangeSpendablePoints:snapshot.available,
+          profileLifetimePoints:snapshot.total,
+          profileSpendablePoints:snapshot.available,
+          avatarLifetimePoints:snapshot.total,
+          avatarSpendablePoints:snapshot.available,
+          profilePoints:snapshot.total
+        };
+        Object.keys(values).forEach(function(id){
+          const element=document.getElementById(id);
+          if(element)element.textContent=values[id]+' pt';
+        });
+        return snapshot;
+      }catch(e){return {uid:'不明',total:0,spent:0,available:0,error:String(e&&e.message?e.message:e)}}
+    }
+    function safeSpendablePoints(){return syncSafePointDisplay().available}
+    function esc(value){return String(value==null?'':value).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
     function pointExchangeModal(title,message,mode,onConfirm){
       const m=document.getElementById('exchangeModal');
-      if(!m){ window.alert(title+'\\n\\n'+message.replace(/<[^>]*>/g,'')); return; }
+      if(!m){window.alert(String(title)+'\n\n'+String(message).replace(/<[^>]*>/g,''));return}
       const titleEl=document.getElementById('exchangeModalTitle');
       const msgEl=document.getElementById('exchangeModalMessage');
       const ok=document.getElementById('exchangeModalOk');
@@ -583,136 +682,81 @@ body{display:flex;justify-content:center}
         cancel.onclick=function(){m.hidden=true;m.setAttribute('aria-hidden','true');m.style.display='none'};
       }
       document.body.appendChild(m);
-      m.hidden=false;
-      m.removeAttribute('hidden');
-      m.style.display='flex';
-      m.setAttribute('aria-hidden','false');
+      m.hidden=false;m.removeAttribute('hidden');m.style.display='flex';m.setAttribute('aria-hidden','false');
     }
 
-    function safeSpendablePoints(){
-      try{ if(typeof spendablePoints==='function') return Math.max(0,Number(spendablePoints()||0)); }catch(e){}
-      try{
-        const a=JSON.parse(localStorage.getItem('kredoAccount')||'null');
-        const id=a&&a.id?a.id:'guest';
-        const total=Number(localStorage.getItem('kredoState:'+id+':totalPoints')||localStorage.getItem('kredoTotalPoints')||0);
-        let spent=0;
-        try{
-          const c=JSON.parse(localStorage.getItem('kredoCustomization:'+id)||'null');
-          spent=Number(c&&c.spentPoints||0);
-        }catch(e){}
-        return Math.max(0,total-spent);
-      }catch(e){return 0}
-    }
-
-    // Independent local-storage diagnostics: does not depend on the main app's state or modal code.
+    window.__syncPointBalanceSafe=syncSafePointDisplay;
     window.__diagnosePointBalanceSafe=function(){
       try{
-        let account=null;
-        try{account=JSON.parse(localStorage.getItem('kredoAccount')||'null')}catch(e){}
-        let activeId=(account&&account.id)||'guest';
-        try{if(typeof currentUser!=='undefined'&&currentUser&&currentUser.id)activeId=currentUser.id}catch(e){}
+        const snapshot=syncSafePointDisplay();
+        const context=getContext();
         const keys=[];
         for(let i=0;i<localStorage.length;i++){
           const key=localStorage.key(i);
           if(key&&/^kredoState:.+:totalPoints$/.test(key)){
-            keys.push({key:key,value:Math.max(0,Number(localStorage.getItem(key))||0)});
+            keys.push(key.replace('kredoState:','').replace(':totalPoints','')+'：'+Math.max(0,Number(localStorage.getItem(key))||0)+' pt');
           }
         }
-        const scopedKey='kredoState:'+activeId+':totalPoints';
-        const scopedRaw=localStorage.getItem(scopedKey);
-        const legacyRaw=localStorage.getItem('kredoTotalPoints');
-        const activeTotal=scopedRaw===null?'未保存':String(Math.max(0,Number(scopedRaw)||0))+' pt';
-        const legacyTotal=legacyRaw===null?'未保存':String(Math.max(0,Number(legacyRaw)||0))+' pt';
-        const allSaved=keys.length?keys.map(x=>x.key.replace('kredoState:','').replace(':totalPoints','')+'：'+x.value+' pt').join('<br>'):'アカウント別ポイント保存値なし';
-        let ranking='読み取り不可';
-        try{
-          const data=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
-          ranking=Array.isArray(data)?(data.filter(x=>x&&(x.id===activeId||x.id===(account&&account.id))).map(x=>String(x.name||x.displayName||'ローカル記録')+'：'+Math.max(0,Number(x.points)||0)+' pt').join('<br>')||'該当記録なし'):'形式不一致';
-        }catch(e){}
-        let customization={};
-        try{customization=JSON.parse(localStorage.getItem('kredoCustomization:'+activeId)||'{}')||{}}catch(e){}
-        let memory='メイン画面の状態を取得できません';
-        try{if(typeof state!=='undefined')memory=Math.max(0,Number(state.totalPoints)||0)+' pt'}catch(e){}
-        const spent=Math.max(0,Number(customization.spentPoints)||0);
-        const msg='<strong>ポイント保存状況（読み取りのみ）</strong><br>'+
-          '現在参照中のアカウント：'+String(activeId).replace(/[&<>]/g,'')+'<br>'+
-          'アカウント別保存値：'+activeTotal+'<br>'+
-          '旧形式の保存値：'+legacyTotal+'<br>'+
-          '画面メモリ上の累計：'+memory+'<br>'+
-          '使用済みポイント：'+spent+' pt<br>'+
-          '<strong>保存されているアカウント別ポイント</strong><br>'+allSaved+'<br>'+
-          '<strong>ローカルランキング記録</strong><br>'+ranking+'<br><br>'+
-          'この診断はデータを変更しません。';
-        pointExchangeModal('ポイント表示の診断',msg,'alert');
+        const ranking=snapshot.ranking.filter(function(x){return x&&(x.id===snapshot.uid||x.id===context.accountId)}).map(function(x){return String(x.name||x.displayName||'ローカル記録')+'：'+Math.max(0,Number(x.points)||0)+' pt'});
+        const lines=[
+          'ポイント診断（読み取りのみ）',
+          '表示に使うアカウントID：'+snapshot.uid,
+          '元データのアカウントID：'+snapshot.sourceUid,
+          'アカウント種別：'+(snapshot.user?(snapshot.user.demo?'デモ':'ログイン'):(context.account?'ローカル':'未ログイン')),
+          'アカウント別累計：'+snapshot.total+' pt',
+          '消費済み：'+snapshot.spent+' pt',
+          '交換可能：'+snapshot.available+' pt',
+          '保存値一覧：'+(keys.join(' / ')||'なし'),
+          'ローカルランキング：'+(ranking.join(' / ')||'該当なし'),
+          '旧保存値：'+(localStorage.getItem('kredoTotalPoints')===null?'なし':localStorage.getItem('kredoTotalPoints')+' pt'),
+          snapshot.error?'診断エラー：'+snapshot.error:''
+        ].filter(Boolean);
+        window.alert(lines.join('\n'));
       }catch(error){
-        window.alert('診断画面でエラーが発生しました。\n'+String(error&&error.message?error.message:error));
+        window.alert('ポイント診断でエラーが発生しました。\n'+String(error&&error.message?error.message:error));
       }
     };
 
     window.__openPointExchangeSafe=function(){
-      try{
-        if(typeof show==='function' && document.getElementById('pointExchange')){show('pointExchange');return;}
-      }catch(e){}
-      document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});
-      const target=document.getElementById('pointExchange');
-      if(target)target.classList.add('active');
-      window.scrollTo(0,0);
+      try{if(typeof show==='function'&&document.getElementById('pointExchange'))show('pointExchange')}
+      catch(e){
+        document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});
+        const target=document.getElementById('pointExchange');
+        if(target)target.classList.add('active');
+        window.scrollTo(0,0);
+      }
+      syncSafePointDisplay();
     };
 
     window.__safeCompletePointExchange=function(id,cost,name){
-      const account=JSON.parse(localStorage.getItem('kredoAccount')||'null');
-      const uid=(typeof currentUser!=='undefined'&&currentUser&&currentUser.id)||(account&&account.id)||'guest';
-      const key='kredoCustomization:'+uid;
-      let c={};
-      try{c=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){c={};}
-      const currentSpent=Number(c.spentPoints||0);
-      const scopedRaw=localStorage.getItem('kredoState:'+uid+':totalPoints');
-      const scopedTotal=scopedRaw===null?0:Math.max(0,Number(scopedRaw)||0);
-      const memoryTotal=Math.max(0,Number(state.totalPoints)||0);
-      let total=Math.max(scopedTotal,memoryTotal);
-      if(total===0)total=Math.max(0,Number(localStorage.getItem('kredoTotalPoints')||0));
-      const available=Math.max(0,total-currentSpent);
-
-      if(available<cost){
-        pointExchangeModal(
-          'ポイントが足りません',
-          '現在 <strong>'+available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。',
-          'alert'
-        );
+      const snapshot=syncSafePointDisplay();
+      if(snapshot.available<cost){
+        pointExchangeModal('ポイントが足りません','現在 <strong>'+snapshot.available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
         return;
       }
-
-      c.spentPoints=currentSpent+cost;
-      localStorage.setItem(key,JSON.stringify(c));
-      try{if(typeof customization!=='undefined')customization.spentPoints=c.spentPoints;}catch(e){}
-      try{if(typeof addPointHistory==='function')addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now());}catch(e){}
-      try{if(typeof renderPointExchange==='function')renderPointExchange();}catch(e){}
-      try{if(typeof renderPointHistory==='function')renderPointHistory();}catch(e){}
-      try{if(typeof renderPointsInNewUI==='function')renderPointsInNewUI();}catch(e){}
-      pointExchangeModal(
-        '交換しました',
-        '「'+name+'」と交換しました。<br><strong>'+cost+' pt</strong>を使用しました。',
-        'alert'
-      );
+      const key='kredoCustomization:'+snapshot.uid;
+      const customization=readJson(key,{})||{};
+      customization.spentPoints=Math.max(0,Number(customization.spentPoints)||0)+cost;
+      localStorage.setItem(key,JSON.stringify(customization));
+      try{if(typeof window.customization!=='undefined')window.customization.spentPoints=customization.spentPoints}catch(e){}
+      try{if(typeof addPointHistory==='function')addPointHistory('spend',name,cost,'特典交換','exchange-'+id+'-'+Date.now())}catch(e){}
+      try{if(typeof renderPointExchange==='function')renderPointExchange()}catch(e){}
+      try{if(typeof renderPointHistory==='function')renderPointHistory()}catch(e){}
+      syncSafePointDisplay();
+      pointExchangeModal('交換しました','「'+esc(name)+'」と交換しました。<br><strong>'+cost+' pt</strong>を使用しました。','alert');
     };
 
     window.__pointExchangeClick=function(id,cost,name){
-      const p=safeSpendablePoints();
-      if(p<cost){
-        pointExchangeModal(
-          'ポイントが足りません',
-          '現在 <strong>'+p+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。',
-          'alert'
-        );
+      const snapshot=syncSafePointDisplay();
+      if(snapshot.available<cost){
+        pointExchangeModal('ポイントが足りません','現在 <strong>'+snapshot.available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
         return;
       }
-      pointExchangeModal(
-        '交換しますか？',
-        '「'+name+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。',
-        'confirm',
-        function(){window.__safeCompletePointExchange(id,cost,name);}
-      );
-    };;
+      pointExchangeModal('交換しますか？','「'+esc(name)+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',function(){window.__safeCompletePointExchange(id,cost,name)});
+    };
+
+    document.addEventListener('DOMContentLoaded',function(){syncSafePointDisplay()});
+    window.addEventListener('load',function(){syncSafePointDisplay()});
   })();
   </script>
 
