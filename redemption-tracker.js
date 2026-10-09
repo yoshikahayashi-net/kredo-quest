@@ -25,7 +25,7 @@
     const cancel = document.getElementById('exchangeModalCancel');
     if(!modal || !titleEl || !messageEl || !ok || !cancel){
       window.alert(title + '\n\n' + String(message).replace(/<[^>]*>/g,''));
-      if(action) action();
+      if(typeof action === 'function') action();
       return;
     }
     titleEl.textContent = title;
@@ -36,7 +36,7 @@
       modal.hidden = true;
       modal.style.display = 'none';
       modal.setAttribute('aria-hidden','true');
-      if(action) action();
+      if(typeof action === 'function') action();
     };
     cancel.textContent = action ? 'あとで' : '閉じる';
     cancel.onclick = function(){
@@ -83,7 +83,15 @@
     }
     const customKey = 'kredoCustomization:' + userId;
     let custom = {};
-    try { custom = JSON.parse(localStorage.getItem(customKey) || '{}') || {}; } catch(e){}
+    try {
+      if(typeof customization !== 'undefined' && typeof customizationLoadedFor !== 'undefined' && customizationLoadedFor === customKey){
+        custom = JSON.parse(JSON.stringify(customization));
+      }else{
+        custom = JSON.parse(localStorage.getItem(customKey) || '{}') || {};
+      }
+    } catch(e){
+      try { custom = JSON.parse(localStorage.getItem(customKey) || '{}') || {}; } catch(ignore){}
+    }
     custom.spentPoints = Number(result.spent_points) || 0;
     localStorage.setItem(customKey, JSON.stringify(custom));
     try{
