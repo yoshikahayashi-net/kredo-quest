@@ -1426,14 +1426,14 @@ function buildDailyQuest(){
 
   // 日付ごとに別の並びを作る。同じ日は同じセット、翌日は自動的に別セット。
   let shuffled=seededShuffle(pool,seed);
-  let normalCount=Math.min(pool.length,4+(seed%2)); // 通常4〜5問＋固定BOSS＝5〜6問
+  const normalCount=Math.min(pool.length,5); // 通常5問固定＋BOSS
 
   // 問題数に余裕がある場合は、前日と同じセットにならないようにする。
   if(pool.length>normalCount){
     const prevKey=new Date(today.getFullYear(),today.getMonth(),today.getDate()-1);
     const prevDate=prevKey.getFullYear()+'-'+String(prevKey.getMonth()+1).padStart(2,'0')+'-'+String(prevKey.getDate()).padStart(2,'0');
     const prevSeed=dateSeed(prevDate);
-    const prevCount=Math.min(pool.length,4+(prevSeed%2));
+    const prevCount=Math.min(pool.length,5);
     const prevSet=seededShuffle(pool,prevSeed).slice(0,prevCount).map(q=>q.question).sort().join('|');
     let todaySet=shuffled.slice(0,normalCount).map(q=>q.question).sort().join('|');
 
