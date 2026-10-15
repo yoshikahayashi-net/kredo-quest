@@ -66,7 +66,7 @@
       if(sizes) link.sizes = sizes;
     }
     upsertLink('link[rel="manifest"]','manifest','./manifest.webmanifest');
-    upsertLink('link[rel="icon"],link[rel="shortcut icon"]','icon','./icons/kredo-quest-icon.svg','image/svg+xml','any');
+    upsertLink('link[rel="icon"],link[rel="shortcut icon"]','icon','./icons/kredo-quest-192.png','image/png','192x192');
     upsertLink('link[rel="apple-touch-icon"]','apple-touch-icon','./icons/kredo-quest-192.png','image/png','192x192');
 
     function upsertMeta(name, content){
