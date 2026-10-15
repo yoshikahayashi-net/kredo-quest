@@ -179,7 +179,7 @@
       modal.addEventListener('click',function(event){
         if(event.target === modal){
           modal.hidden = true;
-          modal.style.display = 'none';
+          modal.style.setProperty('display','none','important');
           modal.setAttribute('aria-hidden','true');
           if(modal.__kredoPreviousFocus && typeof modal.__kredoPreviousFocus.focus === 'function') modal.__kredoPreviousFocus.focus();
         }
@@ -187,7 +187,7 @@
       modal.addEventListener('keydown',function(event){
         if(event.key === 'Escape' && !modal.hidden){
           modal.hidden = true;
-          modal.style.display = 'none';
+          modal.style.setProperty('display','none','important');
           modal.setAttribute('aria-hidden','true');
           if(modal.__kredoPreviousFocus && typeof modal.__kredoPreviousFocus.focus === 'function') modal.__kredoPreviousFocus.focus();
         }
@@ -214,19 +214,22 @@
     ok.textContent = action ? 'ログイン画面へ' : '閉じる';
     ok.onclick = function(){
       modal.hidden = true;
-      modal.style.display = 'none';
+      modal.style.setProperty('display','none','important');
       modal.setAttribute('aria-hidden','true');
       if(typeof action === 'function') action();
     };
     cancel.textContent = action ? 'あとで' : '閉じる';
     cancel.onclick = function(){
       modal.hidden = true;
-      modal.style.display = 'none';
+      modal.style.setProperty('display','none','important');
       modal.setAttribute('aria-hidden','true');
       if(modal.__kredoPreviousFocus && typeof modal.__kredoPreviousFocus.focus === 'function') modal.__kredoPreviousFocus.focus();
     };
+    modal.classList.remove('hidden');
     modal.hidden = false;
-    modal.style.display = 'flex';
+    modal.removeAttribute('hidden');
+    modal.style.setProperty('display','flex','important');
+    modal.style.setProperty('z-index','2147483000','important');
     modal.setAttribute('aria-hidden','false');
     const dialog = modal.querySelector('[role="dialog"]');
     if(dialog) dialog.focus({preventScroll:true});
@@ -415,13 +418,13 @@
       ok.style.display = 'inline-flex';
       ok.textContent = 'はい、交換する';
       ok.onclick = function(){
-        modal.hidden = true; modal.style.display = 'none'; modal.setAttribute('aria-hidden','true');
+        modal.hidden = true; modal.style.setProperty('display','none','important'); modal.setAttribute('aria-hidden','true');
         completeRedemption(id,cost,name);
       };
     }
     if(cancel){
       cancel.textContent = 'いいえ';
-      cancel.onclick = function(){ modal.hidden = true; modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); };
+      cancel.onclick = function(){ modal.hidden = true; modal.style.setProperty('display','none','important'); modal.setAttribute('aria-hidden','true'); };
     }
   };
 })();
