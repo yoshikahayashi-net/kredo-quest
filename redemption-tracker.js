@@ -56,17 +56,158 @@
     try { return (typeof supabaseClient !== 'undefined') ? supabaseClient : null; }
     catch(e){ return null; }
   }
+  function ensurePwaMetadata(){
+    if(!document.head) return;
+    function upsertLink(selector, rel, href, type, sizes){
+      let link = document.head.querySelector(selector);
+      if(!link){ link = document.createElement('link'); link.rel = rel; document.head.appendChild(link); }
+      link.href = href;
+      if(type) link.type = type;
+      if(sizes) link.sizes = sizes;
+    }
+    upsertLink('link[rel="manifest"]','manifest','./manifest.webmanifest');
+    upsertLink('link[rel="icon"],link[rel="shortcut icon"]','icon','./icons/kredo-quest-icon.svg','image/svg+xml','any');
+    upsertLink('link[rel="apple-touch-icon"]','apple-touch-icon','./icons/kredo-quest-192.png','image/png','192x192');
+
+    function upsertMeta(name, content){
+      let meta = document.head.querySelector('meta[name="' + name + '"]');
+      if(!meta){ meta = document.createElement('meta'); meta.name = name; document.head.appendChild(meta); }
+      meta.content = content;
+    }
+    upsertMeta('theme-color','#082d69');
+    upsertMeta('apple-mobile-web-app-capable','yes');
+    upsertMeta('apple-mobile-web-app-title','クレドクエスト');
+  }
+
+  function ensureExchangeModal(){
+    if(!document.body) return null;
+    let modal = document.getElementById('exchangeModal');
+    const markup = '<div class="kredo-exchange-dialog" role="dialog" aria-modal="true" aria-labelledby="exchangeModalTitle" tabindex="-1">' +
+      '<h2 id="exchangeModalTitle"></h2><div id="exchangeModalMessage"></div>' +
+      '<div class="kredo-exchange-actions"><button type="button" id="exchangeModalCancel"></button><button type="button" id="exchangeModalOk"></button></div></div>';
+
+    if(!modal){
+      modal = document.createElement('div');
+      modal.id = 'exchangeModal';
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden','true');
+      modal.innerHTML = markup;
+    }
+    let titleEl = modal.querySelector('#exchangeModalTitle');
+    let messageEl = modal.querySelector('#exchangeModalMessage');
+    let ok = modal.querySelector('#exchangeModalOk');
+    let cancel = modal.querySelector('#exchangeModalCancel');
+    if(!titleEl || !messageEl || !ok || !cancel){
+      modal.innerHTML = markup;
+      titleEl = modal.querySelector('#exchangeModalTitle');
+      messageEl = modal.querySelector('#exchangeModalMessage');
+      ok = modal.querySelector('#exchangeModalOk');
+      cancel = modal.querySelector('#exchangeModalCancel');
+    }
+    if(!modal.querySelector('[role="dialog"]')){
+      const dialog = modal.firstElementChild;
+      if(dialog) {
+        dialog.setAttribute('role','dialog');
+        dialog.setAttribute('aria-modal','true');
+        dialog.setAttribute('aria-labelledby','exchangeModalTitle');
+        dialog.setAttribute('tabindex','-1');
+      }
+    }
+
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.zIndex = '2147483000';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.padding = '18px';
+    modal.style.boxSizing = 'border-box';
+    modal.style.background = 'rgba(5, 20, 49, .72)';
+    modal.style.backdropFilter = 'blur(5px)';
+    modal.style.overflowY = 'auto';
+    modal.style.display = modal.hidden ? 'none' : 'flex';
+    modal.style.webkitOverflowScrolling = 'touch';
+
+    const dialog = modal.querySelector('[role="dialog"]') || modal.firstElementChild;
+    if(dialog){
+      dialog.style.width = 'min(420px, 100%)';
+      dialog.style.maxWidth = '100%';
+      dialog.style.maxHeight = 'min(84vh, 720px)';
+      dialog.style.overflowY = 'auto';
+      dialog.style.boxSizing = 'border-box';
+      dialog.style.margin = 'auto';
+      dialog.style.padding = '24px';
+      dialog.style.borderRadius = '22px';
+      dialog.style.background = '#ffffff';
+      dialog.style.color = '#173244';
+      dialog.style.boxShadow = '0 24px 72px rgba(0, 15, 43, .32)';
+      dialog.style.fontFamily = 'inherit';
+    }
+    titleEl.style.margin = '0 0 12px';
+    titleEl.style.fontSize = '1.22rem';
+    titleEl.style.lineHeight = '1.45';
+    titleEl.style.fontWeight = '800';
+    messageEl.style.lineHeight = '1.75';
+    messageEl.style.overflowWrap = 'anywhere';
+    messageEl.style.marginBottom = '22px';
+
+    const actions = ok.parentElement;
+    if(actions){
+      actions.style.display = 'flex';
+      actions.style.justifyContent = 'flex-end';
+      actions.style.flexWrap = 'wrap';
+      actions.style.gap = '10px';
+      actions.style.marginTop = '8px';
+    }
+    [ok,cancel].forEach(function(button){
+      button.type = 'button';
+      button.style.minHeight = '44px';
+      button.style.padding = '10px 17px';
+      button.style.border = '0';
+      button.style.borderRadius = '12px';
+      button.style.font = 'inherit';
+      button.style.fontWeight = '700';
+      button.style.cursor = 'pointer';
+      button.style.flex = '0 1 auto';
+    });
+    ok.style.background = '#087bb8';
+    ok.style.color = '#ffffff';
+    cancel.style.background = '#edf3f7';
+    cancel.style.color = '#173244';
+
+    if(modal.parentElement !== document.body) document.body.appendChild(modal);
+    if(modal.dataset.kredoDialogBound !== 'true'){
+      modal.addEventListener('click',function(event){
+        if(event.target === modal){
+          modal.hidden = true;
+          modal.style.display = 'none';
+          modal.setAttribute('aria-hidden','true');
+          if(modal.__kredoPreviousFocus && typeof modal.__kredoPreviousFocus.focus === 'function') modal.__kredoPreviousFocus.focus();
+        }
+      });
+      modal.addEventListener('keydown',function(event){
+        if(event.key === 'Escape' && !modal.hidden){
+          modal.hidden = true;
+          modal.style.display = 'none';
+          modal.setAttribute('aria-hidden','true');
+          if(modal.__kredoPreviousFocus && typeof modal.__kredoPreviousFocus.focus === 'function') modal.__kredoPreviousFocus.focus();
+        }
+      });
+      modal.dataset.kredoDialogBound = 'true';
+    }
+    return modal;
+  }
+
   function showMessage(title, message, action){
-    const modal = document.getElementById('exchangeModal');
-    const titleEl = document.getElementById('exchangeModalTitle');
-    const messageEl = document.getElementById('exchangeModalMessage');
-    const ok = document.getElementById('exchangeModalOk');
-    const cancel = document.getElementById('exchangeModalCancel');
-    if(!modal || !titleEl || !messageEl || !ok || !cancel){
+    const modal = ensureExchangeModal();
+    if(!modal){
       window.alert(title + '\n\n' + String(message).replace(/<[^>]*>/g,''));
-      if(typeof action === 'function') action();
       return;
     }
+    const titleEl = modal.querySelector('#exchangeModalTitle');
+    const messageEl = modal.querySelector('#exchangeModalMessage');
+    const ok = modal.querySelector('#exchangeModalOk');
+    const cancel = modal.querySelector('#exchangeModalCancel');
+    modal.__kredoPreviousFocus = document.activeElement;
     titleEl.textContent = title;
     messageEl.innerHTML = message;
     ok.style.display = action ? 'inline-flex' : 'none';
@@ -82,11 +223,15 @@
       modal.hidden = true;
       modal.style.display = 'none';
       modal.setAttribute('aria-hidden','true');
+      if(modal.__kredoPreviousFocus && typeof modal.__kredoPreviousFocus.focus === 'function') modal.__kredoPreviousFocus.focus();
     };
-    document.body.appendChild(modal);
     modal.hidden = false;
     modal.style.display = 'flex';
     modal.setAttribute('aria-hidden','false');
+    const dialog = modal.querySelector('[role="dialog"]');
+    if(dialog) dialog.focus({preventScroll:true});
+    if(action) ok.focus({preventScroll:true});
+    else cancel.focus({preventScroll:true});
   }
   function loginRequired(){
     showMessage(
@@ -139,6 +284,33 @@
       }
     }catch(e){}
   }
+  function cachedAvailablePoints(userId){
+    try{
+      const rawTotal = localStorage.getItem('kredoState:' + userId + ':totalPoints');
+      if(rawTotal == null || !Number.isFinite(Number(rawTotal))) return null;
+      let spent = 0;
+      try{
+        const custom = JSON.parse(localStorage.getItem('kredoCustomization:' + userId) || '{}');
+        spent = Number(custom && custom.spentPoints) || 0;
+      }catch(e){}
+      return Math.max(0,Number(rawTotal) - spent);
+    }catch(e){ return null; }
+  }
+
+  async function readCurrentAvailablePoints(db, userId){
+    try{
+      const profileResult = await db.from('profiles').select('total_points').eq('id',userId).maybeSingle();
+      if(profileResult.error || !profileResult.data) throw new Error('profile balance unavailable');
+      const customResult = await db.from('player_customizations').select('spent_points').eq('user_id',userId).maybeSingle();
+      if(customResult.error) throw customResult.error;
+      const total = Number(profileResult.data.total_points) || 0;
+      const spent = Number(customResult.data && customResult.data.spent_points) || 0;
+      return Math.max(0,total-spent);
+    }catch(e){
+      return cachedAvailablePoints(userId);
+    }
+  }
+
   async function completeRedemption(id, displayedCost, displayedName){
     const user = currentAuthUser();
     const db = supabase();
@@ -160,7 +332,11 @@
       if(error){
         const message = String(error.message || '');
         if(message.includes('insufficient_points')){
-          showMessage('ポイントが足りません','サーバー上の利用可能ポイントが不足しています。残高を更新してから、もう一度確認してください。');
+          const balance = await readCurrentAvailablePoints(db,user.id);
+          const currentText = balance == null
+            ? '現在のポイント残高を取得できませんでした。'
+            : '現在 <strong>' + balance.toLocaleString('ja-JP') + ' pt</strong> です。';
+          showMessage('ポイントが足りません',currentText + '<br>交換には <strong>' + reward.cost.toLocaleString('ja-JP') + ' pt</strong> 必要です。<br>ポイントを貯めてから、もう一度お試しください。');
         }else if(message.includes('login_required') || message.includes('JWT')){
           showMessage('ログインの有効期限が切れました','もう一度ログインしてから交換してください。',function(){if(typeof openAccount === 'function') openAccount();});
         }else if(message.includes('reward_not_available')){
@@ -200,7 +376,7 @@
       );
     }catch(error){
       console.error('Reward redemption unexpected error:',error);
-      showMessage('交換に失敗しました','交換を完了できませんでした。ポイントは消費されていません。ログイン状態と通信状況を確認して、再度お試しください。');
+      showMessage('交換結果を確認できませんでした','通信状況により交換結果を確認できませんでした。二重交換を防ぐため、画面を再読み込みし、ポイント残高と交換履歴を確認してください。');
     }finally{
       busy = false;
       buttons.forEach(function(button){button.disabled = false;});
@@ -208,8 +384,12 @@
   }
 
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', watchForPausedCafeTwoReward, {once:true});
+    document.addEventListener('DOMContentLoaded', function(){
+      ensurePwaMetadata();
+      watchForPausedCafeTwoReward();
+    }, {once:true});
   } else {
+    ensurePwaMetadata();
     watchForPausedCafeTwoReward();
   }
 

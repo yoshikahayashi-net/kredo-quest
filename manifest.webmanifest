@@ -1,0 +1,26 @@
+{
+  "name": "抱月クレドクエスト",
+  "short_name": "クレドクエスト",
+  "description": "抱月クレドを楽しく学ぶ社内向けクイズゲーム",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08204e",
+  "theme_color": "#082d69",
+  "icons": [
+    {
+      "src": "./icons/kredo-quest-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/kredo-quest-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
