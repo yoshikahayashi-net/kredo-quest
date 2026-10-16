@@ -140,5 +140,15 @@
     "accessory": "not_provided",
     "effect": "temporary_css_preview"
   },
-  "current_fallback": "The original character crop embedded in avatar-room/index.html remains visible unchanged until all required separated layers are available and validated."
+  "current_fallback": "The original character crop embedded in avatar-room/index.html remains visible unchanged until all required separated layers are available and validated.",
+  "base_character_preview": {
+    "path": "avatar/base/character-v9.webp",
+    "format": "WebP with alpha",
+    "width": 150,
+    "height": 200,
+    "status": "transparent_full_body_preview_candidate",
+    "usage": "standalone avatar preview only; not layered customization parts",
+    "source": "original supplied character screenshot",
+    "notes": "Background mask removed without redrawing the character. Small residue around the right hand and between the legs remains a quality-check item. Keep original embedded JPEG as a runtime fallback."
+  }
 }
