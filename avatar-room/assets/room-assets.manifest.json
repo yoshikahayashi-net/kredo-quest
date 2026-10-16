@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "selector_thumbnails_added",
+  "source": "User-provided クレドクエスト アバターカスタマイズ画面.png",
+  "note": "Images are cropped from the concept UI for selection cards. They are not production room backgrounds or placeable full-size furniture sprites.",
+  "themes": [
+    {
+      "id": "basic",
+      "label": "ベーシック",
+      "path": "room/themes/basic.webp",
+      "role": "theme_selector_thumbnail"
+    },
+    {
+      "id": "nature",
+      "label": "森・自然",
+      "path": "room/themes/nature.webp",
+      "role": "theme_selector_thumbnail"
+    },
+    {
+      "id": "workshop",
+      "label": "工房",
+      "path": "room/themes/workshop.webp",
+      "role": "theme_selector_thumbnail"
+    },
+    {
+      "id": "future",
+      "label": "未来・テック",
+      "path": "room/themes/future.webp",
+      "role": "theme_selector_thumbnail"
+    },
+    {
+      "id": "credo",
+      "label": "クレドスペシャル",
+      "path": "room/themes/credo.webp",
+      "role": "theme_selector_thumbnail"
+    }
+  ],
+  "furniture": [
+    {
+      "id": "desk",
+      "label": "デスク",
+      "path": "room/furniture/desk.webp",
+      "role": "catalog_thumbnail"
+    },
+    {
+      "id": "chair",
+      "label": "チェア",
+      "path": "room/furniture/chair.webp",
+      "role": "catalog_thumbnail"
+    },
+    {
+      "id": "plant",
+      "label": "観葉植物",
+      "path": "room/furniture/plant.webp",
+      "role": "catalog_thumbnail"
+    },
+    {
+      "id": "bookshelf",
+      "label": "本棚",
+      "path": "room/furniture/bookshelf.webp",
+      "role": "catalog_thumbnail"
+    },
+    {
+      "id": "poster",
+      "label": "ポスター",
+      "path": "room/furniture/poster.webp",
+      "role": "catalog_thumbnail"
+    }
+  ],
+  "futureProductionAssets": [
+    "backgrounds/{theme}.webp",
+    "furniture/{itemId}.png with transparent background and consistent alignment"
+  ]
+}
