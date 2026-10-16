@@ -42,7 +42,9 @@ main{padding:17px 13px 25px}.eyebrow{font-size:10px;font-weight:900;letter-spaci
 .shelf-book{position:absolute;z-index:2;font-size:17px;right:4.3%;top:16%}
 .wall-star{position:absolute;z-index:1;left:9%;top:17%;font-size:18px;color:#ffffffd9}
 .room-item{position:absolute;z-index:3;transform:translate(-50%,-50%);width:55px;height:53px;border:1px solid #ffffffd9;border-radius:14px;background:#ffffffd9;box-shadow:0 4px 10px #365a7333;display:grid;place-items:center;font-size:29px;line-height:1;user-select:none;touch-action:none}
-.room-item.selected{outline:3px solid #168bcb;outline-offset:1px;background:#effaff;box-shadow:0 0 0 5px #ffffffa0,0 6px 12px #285f823a}
+.room-item img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.room-item.sprite-item{border-color:transparent;background:transparent;box-shadow:none;border-radius:5px;padding:0}
+.room-item.sprite-item.selected{outline:3px solid #168bce;outline-offset:2px;background:#ffffff20;box-shadow:0 0 0 5px #ffffff70}
 .room-item .item-number{position:absolute;right:-4px;top:-5px;background:#168bcb;color:#fff;font-size:8px;font-weight:900;min-width:15px;height:15px;border-radius:50%;display:grid;place-items:center}
 .room-hint{position:absolute;z-index:4;left:9px;bottom:9px;background:#ffffffdb;color:#4b7087;border:1px solid #ffffff;border-radius:9px;font-size:9px;font-weight:800;padding:6px 8px;pointer-events:none}
 .room-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:10px;color:#6d899b;padding:9px 3px 0}.room-meta strong{color:#33789e}
@@ -135,13 +137,13 @@ const themes=[
 ];
 const catalog=[
  {id:"sofa",name:"ソファ",group:"furniture",icon:"🛋️"},
- {id:"desk",name:"デスク",group:"furniture",icon:"🪑",image:"assets/room/furniture/desk.webp"},
- {id:"chair",name:"チェア",group:"furniture",icon:"🪑",image:"assets/room/furniture/chair.webp"},
+ {id:"desk",name:"デスク",group:"furniture",icon:"🪑",image:"assets/room/furniture/desk.webp",sprite:"assets/room/sprites/desk.webp"},
+ {id:"chair",name:"チェア",group:"furniture",icon:"🪑",image:"assets/room/furniture/chair.webp",sprite:"assets/room/sprites/chair.webp"},
  {id:"bed",name:"ベッド",group:"furniture",icon:"🛏️"},
- {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚",image:"assets/room/furniture/bookshelf.webp"},
+ {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚",image:"assets/room/furniture/bookshelf.webp",sprite:"assets/room/sprites/bookshelf.webp"},
  {id:"plant",name:"観葉植物",group:"small",icon:"🪴",image:"assets/room/furniture/plant.webp"},
  {id:"lamp",name:"ライト",group:"small",icon:"💡"},
- {id:"poster",name:"ポスター",group:"small",icon:"🖼️",image:"assets/room/furniture/poster.webp"},
+ {id:"poster",name:"ポスター",group:"small",icon:"🖼️",image:"assets/room/furniture/poster.webp",sprite:"assets/room/sprites/poster.webp"},
  {id:"cushion",name:"クッション",group:"small",icon:"🧸"},
  {id:"fish",name:"水槽",group:"small",icon:"🐠"}
 ];
@@ -202,8 +204,9 @@ function renderStageTheme(){
 function renderPlacedItems(){
  const root=$("placedItems");root.innerHTML="";
  state.items.forEach((item,index)=>{
-  const info=itemInfo(item.type),button=document.createElement("button");button.type="button";button.id="placed-"+item.id;button.className="room-item"+(selectedItemId===item.id?" selected":"");button.style.left=item.x+"%";button.style.top=item.y+"%";button.dataset.itemId=item.id;button.setAttribute("aria-label",info.name+"。タップで選択、ドラッグで移動");
-  button.innerHTML=info.icon+'<span class="item-number">'+(index+1)+'</span>';
+  const info=itemInfo(item.type),button=document.createElement("button");button.type="button";button.id="placed-"+item.id;button.className="room-item"+(info.sprite?" sprite-item":"")+(selectedItemId===item.id?" selected":"");button.style.left=item.x+"%";button.style.top=item.y+"%";button.dataset.itemId=item.id;button.setAttribute("aria-label",info.name+"。タップで選択、ドラッグで移動");
+  const artwork=info.sprite?'<img src="'+info.sprite+'" alt="" draggable="false" loading="lazy">':info.icon;
+  button.innerHTML=artwork+'<span class="item-number">'+(index+1)+'</span>';
   button.addEventListener("click",()=>{selectedItemId=item.id;renderPlacedItems();updateSelection();});
   root.appendChild(button);
  });
