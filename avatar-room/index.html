@@ -113,7 +113,7 @@ footer strong{color:#3d7e9f}
   <section class="custom-card" aria-labelledby="customizeTitle">
     <div class="card-head">
       <div class="card-head-row"><h2 id="customizeTitle">スタイルを選ぶ</h2><span class="state-label" id="saveState">未保存の変更なし</span></div>
-      <p>カテゴリを選び、好みの項目をタップしてください。現在は設定データとエフェクト表示を先に実装しています。</p>
+      <p>カテゴリを選び、好みの項目をタップしてください。現在は設定データとエフェクト表示を先に実装しています。公式の部位別素材が未接続のため、髪型や服装の画像自体はまだ切り替わりません。</p>
     </div>
     <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="カスタマイズ項目"></div>
     <div class="option-area">
@@ -135,12 +135,14 @@ footer strong{color:#3d7e9f}
 (function(){
 "use strict";
 const STORAGE_KEY="kredo-quest-avatar-lab-v1";
-const defaults={faceShape:"oval",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue"};
+const defaults={hairStyle:"short",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue"};
 const categories={
- faceShape:{label:"顔型",icon:"◉",summary:"顔型",items:[
-  {id:"round",name:"やわらか丸型",desc:"やわらかな輪郭",icon:"◯"},
-  {id:"oval",name:"スタンダード",desc:"バランスのよい輪郭",icon:"◉"},
-  {id:"sharp",name:"シャープ",desc:"すっきりした輪郭",icon:"◇"}
+ hairStyle:{label:"髪型",icon:"✂️",summary:"髪型",items:[
+  {id:"short",name:"ショート",desc:"すっきりした髪型",icon:"💇🏻"},
+  {id:"standard",name:"スタンダード",desc:"参考イメージに近い形",icon:"👩🏻"},
+  {id:"long",name:"ロング",desc:"長めのシルエット",icon:"🧑🏻"},
+  {id:"twin",name:"ツイン",desc:"左右にまとめた髪型",icon:"🎀"},
+  {id:"wavy",name:"ウェーブ",desc:"動きのある髪型",icon:"〰️"}
  ]},
  hairColor:{label:"髪色",icon:"🎨",summary:"髪色",items:[
   {id:"brown",name:"ブラウン",desc:"やわらかい茶色",color:"#8c5b46"},
@@ -171,7 +173,7 @@ const categoryKeys=Object.keys(categories);
 const $=id=>document.getElementById(id);
 let draft=readSaved()||Object.assign({},defaults);
 let saved=Object.assign({},draft);
-let activeCategory="faceShape";
+let activeCategory="hairStyle";
 let toastTimer=0;
 function copyConfig(c){return Object.assign({},c);}
 function readSaved(){
