@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#168bcb">
+<title>クレドクエスト｜マイルーム設定ラボ（独立試作）</title>
+<style>
+:root{--blue:#168bcb;--blue2:#0877bb;--navy:#153e61;--ink:#16384e;--muted:#698397;--line:#d5e9f5;--gold:#ffd84f;--shadow:0 7px 22px rgba(32,112,158,.10)}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#dff4ff 0%,#f2fbff 38%,#e9f7ff 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;color:var(--ink)}
+button,a{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #ffca3a;outline-offset:2px}
+.app{max-width:460px;min-height:100vh;margin:0 auto;background:rgba(255,255,255,.72);box-shadow:0 0 32px rgba(45,131,172,.10);overflow:hidden}
+.topbar{min-height:64px;padding:10px 13px;display:flex;align-items:center;gap:9px;color:#fff;background:linear-gradient(115deg,#27a9ef 0%,#147dca 65%,#106eb8 100%);box-shadow:0 3px 10px #167cbe22}
+.back{width:34px;height:34px;display:grid;place-items:center;color:#fff;text-decoration:none;font-size:24px;border-radius:10px;background:#ffffff20;flex:none}
+.brand-mark{width:36px;height:36px;border:2px solid #ffe38a;border-radius:50%;display:grid;place-items:center;color:#ffe38a;font-size:22px;flex:none}
+.brand-copy{min-width:0;flex:1}.brand-title{font-size:14px;font-weight:900}.brand-sub{font-size:9px;font-weight:800;letter-spacing:.13em;opacity:.86;margin-top:3px}
+.dev-pill{font-size:9px;font-weight:900;color:#155c8e;background:#e2f7ff;border:1px solid #ffffff90;border-radius:999px;padding:6px 7px;white-space:nowrap}
+main{padding:17px 13px 25px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.14em;color:#1989c8}h1{font-size:22px;line-height:1.25;letter-spacing:-.03em;margin:5px 0 7px;color:#153b59}
+.intro{font-size:12px;line-height:1.75;color:#607d90;margin:0 0 14px}
+.notice{display:flex;gap:8px;align-items:flex-start;padding:10px 11px;border:1px solid #bde4f8;background:#f0faff;border-radius:13px;color:#38677f;font-size:10px;line-height:1.65;margin-bottom:13px}
+.notice strong{color:#176fa6}.room-card{padding:11px;border:1px solid #c7e5f5;border-radius:18px;background:linear-gradient(160deg,#f6fcff,#e9f7ff);box-shadow:var(--shadow);margin-bottom:13px}
+.card-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:1px 2px 9px}.card-heading strong{font-size:12px}.card-heading span{font-size:9px;font-weight:900;color:#528eaf;letter-spacing:.08em}
+.room-stage{height:310px;max-height:72vw;min-height:270px;position:relative;overflow:hidden;border:2px solid #fff;border-radius:13px;background:linear-gradient(180deg,var(--wallA,#d9eff9) 0%,var(--wallB,#f4fbff) 70%,var(--floor,#d6a879) 70%,var(--floor,#d6a879) 100%);box-shadow:inset 0 0 0 1px #b6d9eb;touch-action:none;isolation:isolate}
+.room-stage:before{content:"";position:absolute;left:0;right:0;bottom:29%;height:1px;background:#98bacb66;z-index:0}
+.room-stage:after{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;background:#986e4c55;z-index:0}
+.room-stage.theme-basic{--wallA:#c5eafd;--wallB:#f5fcff;--floor:#dcb489;--trim:#80c7e8}
+.room-stage.theme-nature{--wallA:#c9ebda;--wallB:#f3fff7;--floor:#c8a879;--trim:#7ab99d}
+.room-stage.theme-workshop{--wallA:#e7d4b7;--wallB:#fffaf0;--floor:#997454;--trim:#b98a58}
+.room-stage.theme-future{--wallA:#b3caff;--wallB:#edf2ff;--floor:#7b87b3;--trim:#8dafff}
+.room-stage.theme-credo{--wallA:#abdffb;--wallB:#eefaff;--floor:#e5c68b;--trim:#55b6e8}
+.window-frame{position:absolute;left:27%;top:8%;width:47%;height:38%;border:7px solid #fff;border-radius:4px;background:linear-gradient(180deg,#84d7ff,#d8f7ff 72%,#83c89e 73%,#55a982);box-shadow:0 2px 7px #315f7930;z-index:1}
+.window-frame:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:5px;transform:translateX(-50%);background:#fff}
+.window-frame:after{content:"";position:absolute;left:0;right:0;top:55%;height:5px;background:#fff}
+.sun{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff3ae;right:13%;top:12%;box-shadow:0 0 18px #fff8}
+.mountain{position:absolute;bottom:0;width:65%;height:43%;background:#76b9ab;clip-path:polygon(0 100%,50% 0,100% 100%);left:-9%}
+.mountain.m2{left:45%;width:75%;height:36%;background:#4f9f8c}
+.rug{position:absolute;left:21%;bottom:5%;width:58%;height:24%;border-radius:50%;background:radial-gradient(ellipse,#f7dca9 0%,#eacb8d 68%,#d6b579 70%,#d6b579 73%,transparent 74%);opacity:.92;z-index:1}
+.shelf{position:absolute;right:3%;top:9%;width:18%;height:47%;border:4px solid #b8895b;border-bottom-width:7px;background:#dfb983;box-shadow:inset 0 -7px #a97548;z-index:1}
+.shelf:before,.shelf:after{content:"";position:absolute;left:0;right:0;height:4px;background:#b8895b}
+.shelf:before{top:31%}.shelf:after{top:64%}
+.shelf-book{position:absolute;z-index:2;font-size:17px;right:4.3%;top:16%}
+.wall-star{position:absolute;z-index:1;left:9%;top:17%;font-size:18px;color:#ffffffd9}
+.room-item{position:absolute;z-index:3;transform:translate(-50%,-50%);width:55px;height:53px;border:1px solid #ffffffd9;border-radius:14px;background:#ffffffd9;box-shadow:0 4px 10px #365a7333;display:grid;place-items:center;font-size:29px;line-height:1;user-select:none;touch-action:none}
+.room-item.selected{outline:3px solid #168bcb;outline-offset:1px;background:#effaff;box-shadow:0 0 0 5px #ffffffa0,0 6px 12px #285f823a}
+.room-item .item-number{position:absolute;right:-4px;top:-5px;background:#168bcb;color:#fff;font-size:8px;font-weight:900;min-width:15px;height:15px;border-radius:50%;display:grid;place-items:center}
+.room-hint{position:absolute;z-index:4;left:9px;bottom:9px;background:#ffffffdb;color:#4b7087;border:1px solid #ffffff;border-radius:9px;font-size:9px;font-weight:800;padding:6px 8px;pointer-events:none}
+.room-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:10px;color:#6d899b;padding:9px 3px 0}.room-meta strong{color:#33789e}
+.panel{border:1px solid #d1e6f3;border-radius:17px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:13px}
+.panel-head{padding:13px 13px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px}.panel-head h2{font-size:14px;margin:0;color:#164261}.panel-head span{font-size:9px;color:#7b94a5}
+.theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 11px 13px}
+.theme-button{border:1px solid #d5e8f4;background:#f8fcff;border-radius:12px;text-align:left;padding:8px 7px;min-width:0;color:#345e78}.theme-button[aria-pressed="true"]{border:2px solid #168bce;background:#edf9ff;padding:7px 6px;box-shadow:0 3px 9px #168bce1e}
+.theme-preview{display:block;height:37px;border:2px solid #fff;border-radius:8px;margin-bottom:6px;box-shadow:0 0 0 1px #d9eaf4;background:linear-gradient(180deg,#c9eaff 0 70%,#dcb489 70%)}.theme-nature-swatch{background:linear-gradient(180deg,#c9ebda 0 70%,#c8a879 70%)}.theme-workshop-swatch{background:linear-gradient(180deg,#e7d4b7 0 70%,#997454 70%)}.theme-future-swatch{background:linear-gradient(180deg,#b3caff 0 70%,#7b87b3 70%)}.theme-credo-swatch{background:linear-gradient(180deg,#abdffb 0 70%,#e5c68b 70%)}
+.theme-button b{display:block;font-size:10px;line-height:1.3}.theme-button small{display:block;font-size:8px;line-height:1.45;color:#7c96a6;margin-top:3px}
+.item-tabs{display:flex;gap:6px;padding:0 12px 11px}.item-tab{flex:1;border:1px solid #d4e8f4;border-radius:10px;background:#f4faff;color:#658398;padding:8px 4px;font-size:10px;font-weight:900}.item-tab[aria-pressed="true"]{background:#168bce;color:#fff;border-color:#168bce}
+.catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 11px 12px}
+.catalog-item{border:1px solid #d5e8f4;border-radius:11px;background:#fff;padding:9px 5px 8px;text-align:center;min-width:0;color:#345b74}.catalog-item[aria-pressed="true"]{border:2px solid #168bce;background:#effaff;padding:8px 4px 7px}
+.catalog-emoji{display:block;font-size:24px;margin-bottom:5px}.catalog-item b{font-size:10px;display:block}.catalog-item small{display:block;font-size:8px;color:#8198a8;margin-top:3px}
+.panel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;border-top:1px solid #eef5f9;background:#fbfdff}
+.btn{min-height:42px;border-radius:11px;border:1px solid #d5e8f4;font-size:11px;font-weight:900;padding:9px;background:#f5fbff;color:#52758c;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center}
+.btn.primary{background:linear-gradient(180deg,#36b7f4,#1685cb);border-color:#1685cb;color:#fff;box-shadow:0 4px 10px #168bce30}
+.btn.warn{background:#fff8e5;border-color:#f5e2a9;color:#916c15}
+.selection-row{padding:0 13px 13px;font-size:10px;color:#6b889b;line-height:1.6}.selection-row strong{color:#2c7397}
+.bottom-nav{display:grid;grid-template-columns:1fr 1fr;border:1px solid #cfe6f3;border-radius:13px;background:#fff;overflow:hidden;margin-top:13px}.bottom-nav a{display:flex;align-items:center;justify-content:center;text-align:center;gap:7px;padding:11px 5px;color:#47728a;text-decoration:none;font-size:10px;font-weight:900}.bottom-nav a.active{background:#eaf8ff;color:#087bbd}.bottom-nav a+a{border-left:1px solid #e0eef7}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,18px);opacity:0;pointer-events:none;z-index:10;max-width:calc(100vw - 28px);padding:11px 15px;background:#173e5b;color:#fff;border-radius:13px;box-shadow:0 8px 24px #0b3c5c30;font-size:12px;font-weight:800;line-height:1.5;transition:opacity .18s,transform .18s}.toast.show{opacity:1;transform:translate(-50%,0)}
+footer{padding:15px 15px 21px;border-top:1px solid #d9edf8;background:#f7fcff;text-align:center;color:#7b98a8;font-size:9px;line-height:1.7}footer strong{color:#3d7e9f}
+@media(min-width:420px){main{padding:20px 15px 28px}.room-stage{height:330px;max-height:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <a class="back" href="index.html" aria-label="アバター設定へ戻る">‹</a>
+  <div class="brand-mark" aria-hidden="true">✦</div>
+  <div class="brand-copy"><div class="brand-title">クレドクエスト</div><div class="brand-sub">MY ROOM LAB · STANDALONE TEST</div></div>
+  <span class="dev-pill">本体未接続</span>
+</header>
+<main>
+  <div class="eyebrow">MY ROOM</div>
+  <h1>マイルーム</h1>
+  <p class="intro">テーマを選んで、家具や小物を自分好みに配置しよう。置いたアイテムはドラッグして動かせます。</p>
+  <div class="notice"><span aria-hidden="true">ℹ️</span><div><strong>独立した試作エリアです。</strong><br>アイテム配置と保存はこのブラウザ内で動作します。本体アカウント・所持ポイント・交換機能には接続していません。</div></div>
+
+  <section class="room-card" aria-labelledby="roomPreviewTitle">
+    <div class="card-heading"><strong id="roomPreviewTitle">ルームプレビュー</strong><span id="roomThemeLabel">BASIC ROOM</span></div>
+    <div id="roomStage" class="room-stage theme-basic" aria-label="家具を配置する部屋">
+      <div class="window-frame" aria-hidden="true"><span class="sun"></span><span class="mountain"></span><span class="mountain m2"></span></div>
+      <div class="shelf" aria-hidden="true"></div><span class="shelf-book" aria-hidden="true">📚</span><span class="wall-star" aria-hidden="true">✦</span>
+      <div class="rug" aria-hidden="true"></div>
+      <div id="placedItems"></div>
+      <div class="room-hint">家具をタップして選択 · ドラッグで移動</div>
+    </div>
+    <div class="room-meta"><span><strong id="itemCount">3個</strong> 配置中</span><span id="selectedLabel">アイテムを選択してください</span></div>
+  </section>
+
+  <section class="panel" aria-labelledby="themeTitle">
+    <div class="panel-head"><h2 id="themeTitle">部屋のテーマ</h2><span>テーマで雰囲気が変化</span></div>
+    <div class="theme-grid" id="themeGrid"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="catalogTitle">
+    <div class="panel-head"><h2 id="catalogTitle">家具・小物を配置</h2><span>まずはテスト用アイテム</span></div>
+    <div class="item-tabs" id="itemTabs" role="tablist" aria-label="アイテムの種類"></div>
+    <div class="catalog-grid" id="catalogGrid"></div>
+    <div class="panel-actions">
+      <button class="btn primary" id="addButton" type="button">＋ 選択したアイテムを置く</button>
+      <button class="btn warn" id="removeButton" type="button">選択中を片付ける</button>
+    </div>
+    <div class="selection-row" id="selectionInfo" aria-live="polite">配置したアイテムをタップすると、選択・片付けができます。</div>
+  </section>
+  <section class="panel" aria-label="保存操作">
+    <div class="panel-head"><h2>ルームを保存</h2><span id="saveState">未保存の変更なし</span></div>
+    <div class="panel-actions">
+      <button class="btn" id="undoButton" type="button">保存状態に戻す</button>
+      <button class="btn primary" id="saveButton" type="button">レイアウトを保存</button>
+    </div>
+  </section>
+  <div class="bottom-nav"><a href="index.html">✦ アバター設定</a><a href="myroom.html" class="active">⌂ マイルーム</a></div>
+  <p class="selection-row">仮のアイコン素材で、テーマ変更・配置・移動・削除・保存を先に検証します。正式な家具画像と背景素材は、別途素材を整理してから差し替えます。</p>
+</main>
+<footer><strong>クレドクエスト｜独立試作</strong><br>ブラウザ内保存のみ · 本体・Supabase・ポイントとは未接続</footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+"use strict";
+const STORAGE_KEY="kredo-quest-room-lab-v1";
+const themes=[
+ {id:"basic",name:"ベーシック",desc:"明るくシンプル",label:"BASIC ROOM"},
+ {id:"nature",name:"森・自然",desc:"緑に囲まれた部屋",label:"NATURE ROOM"},
+ {id:"workshop",name:"工房",desc:"木目と作業スペース",label:"WORKSHOP"},
+ {id:"future",name:"未来・テック",desc:"クールな近未来",label:"FUTURE TECH"},
+ {id:"credo",name:"クレドスペシャル",desc:"青空と光の部屋",label:"CREDO SPECIAL"}
+];
+const catalog=[
+ {id:"sofa",name:"ソファ",group:"furniture",icon:"🛋️"},
+ {id:"desk",name:"デスク",group:"furniture",icon:"🪑"},
+ {id:"bed",name:"ベッド",group:"furniture",icon:"🛏️"},
+ {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚"},
+ {id:"plant",name:"観葉植物",group:"small",icon:"🪴"},
+ {id:"lamp",name:"ライト",group:"small",icon:"💡"},
+ {id:"poster",name:"ポスター",group:"small",icon:"🖼️"},
+ {id:"cushion",name:"クッション",group:"small",icon:"🧸"},
+ {id:"fish",name:"水槽",group:"small",icon:"🐠"}
+];
+const defaultItems=[
+ {id:"room-item-1",type:"sofa",x:49,y:68},
+ {id:"room-item-2",type:"plant",x:15,y:65},
+ {id:"room-item-3",type:"lamp",x:80,y:55}
+];
+const $=id=>document.getElementById(id);
+function normalizeConfig(raw){
+ const validTheme=themes.some(t=>t.id===raw?.theme)?raw.theme:"basic";
+ let items=[];
+ if(Array.isArray(raw?.items))items=raw.items.filter(i=>i&&typeof i.id==="string"&&catalog.some(c=>c.id===i.type)).map(i=>({id:i.id,type:i.type,x:clamp(Number(i.x)||50,8,92),y:clamp(Number(i.y)||58,20,83)})).slice(0,40);
+ else items=defaultItems.map(i=>Object.assign({},i));
+ return {theme:validTheme,items:items};
+}
+function clamp(value,min,max){return Math.max(min,Math.min(max,value));}
+function copyState(s){return {theme:s.theme,items:s.items.map(i=>Object.assign({},i))};}
+function readSaved(){try{const raw=localStorage.getItem(STORAGE_KEY);return raw?normalizeConfig(JSON.parse(raw)):null;}catch(e){return null;}}
+let state=readSaved()||normalizeConfig({theme:"basic",items:defaultItems});
+let saved=copyState(state);
+let selectedCategory="furniture",selectedType="sofa",selectedItemId=null,sequence=4,draggingId=null,toastTimer=0;
+function itemInfo(type){return catalog.find(i=>i.id===type)||catalog[0];}
+function hasChanges(){return JSON.stringify(state)!==JSON.stringify(saved);}
+function showToast(text){const el=$("toast");el.textContent=text;el.classList.add("show");if(toastTimer)window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>el.classList.remove("show"),2300);}
+function renderThemes(){
+ const grid=$("themeGrid");grid.innerHTML="";
+ themes.forEach(theme=>{
+  const b=document.createElement("button");b.type="button";b.className="theme-button";b.setAttribute("aria-pressed",String(state.theme===theme.id));
+  const swatchClass=theme.id==="basic"?"theme-preview":("theme-preview "+({"nature":"theme-nature-swatch","workshop":"theme-workshop-swatch","future":"theme-future-swatch","credo":"theme-credo-swatch"}[theme.id]));
+  b.innerHTML='<span class="'+swatchClass+'"></span><b>'+theme.name+'</b><small>'+theme.desc+'</small>';
+  b.addEventListener("click",()=>{state.theme=theme.id;renderThemes();renderStageTheme();updateSaveState();showToast(theme.name+"に変更しました");});
+  grid.appendChild(b);
+ });
+}
+function renderCategoryTabs(){
+ const tabs=[{id:"furniture",name:"家具"},{id:"small",name:"小物"},{id:"all",name:"すべて"}];
+ const root=$("itemTabs");root.innerHTML="";
+ tabs.forEach(tab=>{
+  const b=document.createElement("button");b.type="button";b.className="item-tab";b.setAttribute("aria-pressed",String(selectedCategory===tab.id));b.textContent=tab.name;
+  b.addEventListener("click",()=>{selectedCategory=tab.id;renderCategoryTabs();renderCatalog();});
+  root.appendChild(b);
+ });
+}
+function renderCatalog(){
+ const grid=$("catalogGrid");grid.innerHTML="";
+ catalog.filter(item=>selectedCategory==="all"||item.group===selectedCategory).forEach(item=>{
+  const b=document.createElement("button");b.type="button";b.className="catalog-item";b.setAttribute("aria-pressed",String(selectedType===item.id));
+  b.innerHTML='<span class="catalog-emoji" aria-hidden="true">'+item.icon+'</span><b>'+item.name+'</b><small>'+((item.group==="furniture")?"家具":"小物")+'</small>';
+  b.addEventListener("click",()=>{selectedType=item.id;renderCatalog();$("selectionInfo").textContent=item.name+"を選択中。「選択したアイテムを置く」で配置できます。";});
+  grid.appendChild(b);
+ });
+}
+function renderStageTheme(){
+ const stage=$("roomStage");stage.classList.remove("theme-basic","theme-nature","theme-workshop","theme-future","theme-credo");stage.classList.add("theme-"+state.theme);
+ const theme=themes.find(t=>t.id===state.theme)||themes[0];$("roomThemeLabel").textContent=theme.label;
+}
+function renderPlacedItems(){
+ const root=$("placedItems");root.innerHTML="";
+ state.items.forEach((item,index)=>{
+  const info=itemInfo(item.type),button=document.createElement("button");button.type="button";button.id="placed-"+item.id;button.className="room-item"+(selectedItemId===item.id?" selected":"");button.style.left=item.x+"%";button.style.top=item.y+"%";button.dataset.itemId=item.id;button.setAttribute("aria-label",info.name+"。タップで選択、ドラッグで移動");
+  button.innerHTML=info.icon+'<span class="item-number">'+(index+1)+'</span>';
+  button.addEventListener("click",()=>{selectedItemId=item.id;renderPlacedItems();updateSelection();});
+  root.appendChild(button);
+ });
+ $("itemCount").textContent=state.items.length+"個";
+ updateSelection();
+}
+function updateSelection(){
+ const item=state.items.find(i=>i.id===selectedItemId);
+ if(!item){$("selectedLabel").textContent="アイテムを選択してください";$("selectionInfo").textContent="配置したアイテムをタップすると、選択・片付けができます。";return;}
+ const info=itemInfo(item.type);$("selectedLabel").textContent=info.name+"を選択中";$("selectionInfo").textContent=info.name+"を選択中です。ドラッグで位置を調整するか、「選択中を片付ける」で削除できます。";
+}
+function updateSaveState(){const changed=hasChanges();$("saveState").textContent=changed?"未保存の変更あり":"未保存の変更なし";$("saveState").style.color=changed?"#8a6712":"#477f9e";$("saveState").style.background=changed?"#fff6d7":"transparent";$("saveButton").textContent=changed?"レイアウトを保存":"保存済み";}
+$("addButton").addEventListener("click",()=>{
+ if(state.items.length>=40){showToast("配置できるアイテムは40個までです");return;}
+ const positions=[{x:32,y:67},{x:68,y:67},{x:50,y:48},{x:22,y:48},{x:78,y:46},{x:42,y:78},{x:61,y:78}];
+ const pos=positions[(state.items.length)%positions.length];
+ const newItem={id:"room-item-"+Date.now()+"-"+sequence++,type:selectedType,x:pos.x,y:pos.y};
+ state.items.push(newItem);selectedItemId=newItem.id;renderPlacedItems();updateSaveState();showToast(itemInfo(selectedType).name+"を配置しました");
+});
+$("removeButton").addEventListener("click",()=>{
+ if(!selectedItemId){showToast("先に部屋のアイテムを選択してください");return;}
+ state.items=state.items.filter(i=>i.id!==selectedItemId);selectedItemId=null;renderPlacedItems();updateSaveState();showToast("アイテムを片付けました");
+});
+$("saveButton").addEventListener("click",()=>{
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));saved=copyState(state);updateSaveState();showToast("レイアウトをこのブラウザに保存しました");}
+ catch(e){showToast("保存できませんでした。ブラウザの保存設定をご確認ください");}
+});
+$("undoButton").addEventListener("click",()=>{state=copyState(saved);selectedItemId=null;renderThemes();renderStageTheme();renderPlacedItems();updateSaveState();showToast("最後に保存した状態に戻しました");});
+const stage=$("roomStage");
+stage.addEventListener("pointerdown",event=>{
+ const button=event.target.closest(".room-item");if(!button)return;
+ draggingId=button.dataset.itemId;selectedItemId=draggingId;
+ const item=state.items.find(i=>i.id===draggingId);if(item){const r=stage.getBoundingClientRect();button.setPointerCapture?.(event.pointerId);event.preventDefault();updateSelection();}
+});
+stage.addEventListener("pointermove",event=>{
+ if(!draggingId)return;
+ const item=state.items.find(i=>i.id===draggingId);if(!item)return;
+ const r=stage.getBoundingClientRect();if(!r.width||!r.height)return;
+ item.x=clamp(((event.clientX-r.left)/r.width)*100,8,92);item.y=clamp(((event.clientY-r.top)/r.height)*100,20,83);
+ const button=$("placed-"+draggingId);if(button){button.style.left=item.x+"%";button.style.top=item.y+"%";}
+ updateSaveState();
+});
+function stopDragging(){draggingId=null;}
+stage.addEventListener("pointerup",stopDragging);stage.addEventListener("pointercancel",stopDragging);stage.addEventListener("lostpointercapture",stopDragging);
+renderThemes();renderCategoryTabs();renderCatalog();renderStageTheme();renderPlacedItems();updateSaveState();
+})();
+</script>
+</body>
+</html>
