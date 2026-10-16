@@ -65,7 +65,7 @@ h1{font-size:22px;line-height:1.25;letter-spacing:-.03em;margin:5px 0 7px;color:
 .option:active{transform:scale(.98)}
 .option[aria-pressed="true"]{border:2px solid #168bce;padding:9px 7px;background:#edf9ff;box-shadow:0 3px 10px #168bce1d}
 .option[aria-pressed="true"]:after{content:"✓";position:absolute;right:7px;top:6px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#168bce;color:#fff;font-size:10px;font-weight:900}
-.option-art{height:31px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:6px}
+.option-art{height:48px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:6px}.option-art img{display:block;max-width:100%;max-height:47px;object-fit:contain;image-rendering:auto}
 .option-art .swatch{width:25px;height:25px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #d7e6ef}
 .option-name{display:block;font-size:10px;font-weight:900;line-height:1.35;overflow-wrap:anywhere}
 .option-desc{display:block;font-size:9px;color:#8198a8;line-height:1.4;margin-top:3px}
@@ -138,32 +138,41 @@ footer strong{color:#3d7e9f}
 (function(){
 "use strict";
 const STORAGE_KEY="kredo-quest-avatar-lab-v1";
-const defaults={hairStyle:"short",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue"};
+const defaults={hairStyle:"short",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue",expression:"neutral"};
 const categories={
  hairStyle:{label:"髪型",icon:"✂️",summary:"髪型",items:[
-  {id:"short",name:"ショート",desc:"すっきりした髪型",icon:"💇🏻"},
-  {id:"standard",name:"スタンダード",desc:"参考イメージに近い形",icon:"👩🏻"},
-  {id:"long",name:"ロング",desc:"長めのシルエット",icon:"🧑🏻"},
-  {id:"twin",name:"ツイン",desc:"左右にまとめた髪型",icon:"🎀"},
-  {id:"wavy",name:"ウェーブ",desc:"動きのある髪型",icon:"〰️"}
+  {id:"short",name:"ショート",desc:"元画像から切り出した髪型見本",image:"assets/catalog/hair/short.webp"},
+  {id:"medium",name:"ミディアム",desc:"元画像から切り出した髪型見本",image:"assets/catalog/hair/medium.webp"},
+  {id:"long",name:"ロング",desc:"元画像から切り出した髪型見本",image:"assets/catalog/hair/long.webp"}
  ]},
  hairColor:{label:"髪色",icon:"🎨",summary:"髪色",items:[
-  {id:"brown",name:"ブラウン",desc:"やわらかい茶色",color:"#8c5b46"},
-  {id:"black",name:"ブラック",desc:"落ち着いた黒",color:"#303847"},
+  {id:"brown",name:"ブラウン",desc:"元の見本に近い茶色",color:"#8c5b46"},
+  {id:"black",name:"ブラック",desc:"落ち着いた黒",color:"#303847",image:"assets/catalog/hair/black.webp"},
   {id:"ash",name:"アッシュ",desc:"クールな灰色",color:"#a5aab9"},
+  {id:"blonde",name:"ブロンド",desc:"明るい金色",color:"#dcb86c",image:"assets/catalog/hair/blonde.webp"},
   {id:"rose",name:"ローズ",desc:"やさしいピンク",color:"#d98baa"}
  ]},
  outfit:{label:"服装",icon:"👕",summary:"服装",items:[
-  {id:"work",name:"ワークスタイル",desc:"お仕事スタイル",icon:"🧥"},
-  {id:"casual",name:"カジュアル",desc:"気軽な普段着",icon:"👕"},
-  {id:"outdoor",name:"アウトドア",desc:"冒険にぴったり",icon:"🥾"},
-  {id:"formal",name:"フォーマル",desc:"きちんとした装い",icon:"🎽"}
+  {id:"work",name:"ワークスタイル",desc:"元画像から切り出した服装見本",image:"assets/catalog/outfit/work.webp"},
+  {id:"casual",name:"カジュアル",desc:"元画像から切り出した服装見本",image:"assets/catalog/outfit/casual.webp"},
+  {id:"outdoor",name:"自然・アウトドア",desc:"元画像から切り出した服装見本",image:"assets/catalog/outfit/nature.webp"},
+  {id:"formal",name:"ネイビー",desc:"元画像から切り出した服装見本",image:"assets/catalog/outfit/navy.webp"},
+  {id:"yellow",name:"イエロー",desc:"元画像から切り出した服装見本",image:"assets/catalog/outfit/yellow.webp"}
  ]},
  accessory:{label:"アクセサリー",icon:"⭐",summary:"アクセ",items:[
-  {id:"cap",name:"キャップ",desc:"定番の帽子",icon:"🧢"},
-  {id:"glasses",name:"メガネ",desc:"知的な印象",icon:"👓"},
-  {id:"star",name:"スター",desc:"星のアクセント",icon:"⭐"},
-  {id:"none",name:"なし",desc:"すっきりシンプル",icon:"○"}
+  {id:"cap",name:"キャップ",desc:"元画像から切り出した見本",image:"assets/catalog/accessory/cap.webp"},
+  {id:"glasses",name:"メガネ",desc:"元画像から切り出した見本",image:"assets/catalog/accessory/glasses.webp"},
+  {id:"flower",name:"フラワー",desc:"元画像から切り出した見本",image:"assets/catalog/accessory/flower.webp"},
+  {id:"headphones",name:"ヘッドホン",desc:"元画像から切り出した見本",image:"assets/catalog/accessory/headphones.webp"},
+  {id:"backpack",name:"バックパック",desc:"元画像から切り出した見本",image:"assets/catalog/accessory/backpack.webp"},
+  {id:"none",name:"なし",desc:"何もつけない",icon:"○"}
+ ]},
+ expression:{label:"表情",icon:"☺️",summary:"表情",items:[
+  {id:"neutral",name:"通常",desc:"元画像から切り出した表情見本",image:"assets/catalog/expression/neutral.webp"},
+  {id:"smile",name:"笑顔",desc:"元画像から切り出した表情見本",image:"assets/catalog/expression/smile.webp"},
+  {id:"blush",name:"照れ",desc:"元画像から切り出した表情見本",image:"assets/catalog/expression/blush.webp"},
+  {id:"soft",name:"やさしい",desc:"元画像から切り出した表情見本",image:"assets/catalog/expression/soft.webp"},
+  {id:"surprised",name:"びっくり",desc:"元画像から切り出した表情見本",image:"assets/catalog/expression/surprised.webp"}
  ]},
  effect:{label:"エフェクト",icon:"✨",summary:"エフェクト",items:[
   {id:"none",name:"なし",desc:"自然な表示",icon:"○"},
@@ -270,7 +279,8 @@ function renderOptions(){
   button.className="option";
   button.setAttribute("aria-pressed",String(draft[activeCategory]===item.id));
   let art="";
-  if(item.color)art='<span class="swatch" style="background:'+item.color+'"></span>';
+  if(item.image)art='<img src="'+item.image+'" alt="" loading="lazy" draggable="false">';
+  else if(item.color)art='<span class="swatch" style="background:'+item.color+'"></span>';
   else art=item.icon||"✦";
   button.innerHTML='<span class="option-art" aria-hidden="true">'+art+'</span><span class="option-name">'+item.name+'</span><span class="option-desc">'+item.desc+'</span>';
   button.addEventListener("click",function(){
