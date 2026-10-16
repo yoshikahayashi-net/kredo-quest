@@ -50,12 +50,12 @@ main{padding:17px 13px 25px}.eyebrow{font-size:10px;font-weight:900;letter-spaci
 .panel-head{padding:13px 13px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px}.panel-head h2{font-size:14px;margin:0;color:#164261}.panel-head span{font-size:9px;color:#7b94a5}
 .theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 11px 13px}
 .theme-button{border:1px solid #d5e8f4;background:#f8fcff;border-radius:12px;text-align:left;padding:8px 7px;min-width:0;color:#345e78}.theme-button[aria-pressed="true"]{border:2px solid #168bce;background:#edf9ff;padding:7px 6px;box-shadow:0 3px 9px #168bce1e}
-.theme-preview{display:block;height:37px;border:2px solid #fff;border-radius:8px;margin-bottom:6px;box-shadow:0 0 0 1px #d9eaf4;background:linear-gradient(180deg,#c9eaff 0 70%,#dcb489 70%)}.theme-nature-swatch{background:linear-gradient(180deg,#c9ebda 0 70%,#c8a879 70%)}.theme-workshop-swatch{background:linear-gradient(180deg,#e7d4b7 0 70%,#997454 70%)}.theme-future-swatch{background:linear-gradient(180deg,#b3caff 0 70%,#7b87b3 70%)}.theme-credo-swatch{background:linear-gradient(180deg,#abdffb 0 70%,#e5c68b 70%)}
+.theme-preview{display:block;width:100%;height:58px;object-fit:cover;border:2px solid #fff;border-radius:8px;margin-bottom:6px;box-shadow:0 0 0 1px #d9eaf4;background:#e9f6fc}.theme-nature-swatch{background:linear-gradient(180deg,#c9ebda 0 70%,#c8a879 70%)}.theme-workshop-swatch{background:linear-gradient(180deg,#e7d4b7 0 70%,#997454 70%)}.theme-future-swatch{background:linear-gradient(180deg,#b3caff 0 70%,#7b87b3 70%)}.theme-credo-swatch{background:linear-gradient(180deg,#abdffb 0 70%,#e5c68b 70%)}
 .theme-button b{display:block;font-size:10px;line-height:1.3}.theme-button small{display:block;font-size:8px;line-height:1.45;color:#7c96a6;margin-top:3px}
 .item-tabs{display:flex;gap:6px;padding:0 12px 11px}.item-tab{flex:1;border:1px solid #d4e8f4;border-radius:10px;background:#f4faff;color:#658398;padding:8px 4px;font-size:10px;font-weight:900}.item-tab[aria-pressed="true"]{background:#168bce;color:#fff;border-color:#168bce}
 .catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 11px 12px}
 .catalog-item{border:1px solid #d5e8f4;border-radius:11px;background:#fff;padding:9px 5px 8px;text-align:center;min-width:0;color:#345b74}.catalog-item[aria-pressed="true"]{border:2px solid #168bce;background:#effaff;padding:8px 4px 7px}
-.catalog-emoji{display:block;font-size:24px;margin-bottom:5px}.catalog-item b{font-size:10px;display:block}.catalog-item small{display:block;font-size:8px;color:#8198a8;margin-top:3px}
+.catalog-emoji{display:flex;align-items:center;justify-content:center;height:42px;font-size:24px;margin-bottom:5px}.catalog-emoji img{display:block;max-width:100%;width:100%;height:42px;object-fit:contain;border-radius:6px}.catalog-item b{font-size:10px;display:block}.catalog-item small{display:block;font-size:8px;color:#8198a8;margin-top:3px}
 .panel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;border-top:1px solid #eef5f9;background:#fbfdff}
 .btn{min-height:42px;border-radius:11px;border:1px solid #d5e8f4;font-size:11px;font-weight:900;padding:9px;background:#f5fbff;color:#52758c;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center}
 .btn.primary{background:linear-gradient(180deg,#36b7f4,#1685cb);border-color:#1685cb;color:#fff;box-shadow:0 4px 10px #168bce30}
@@ -127,20 +127,21 @@ footer{padding:15px 15px 21px;border-top:1px solid #d9edf8;background:#f7fcff;te
 "use strict";
 const STORAGE_KEY="kredo-quest-room-lab-v1";
 const themes=[
- {id:"basic",name:"ベーシック",desc:"明るくシンプル",label:"BASIC ROOM"},
- {id:"nature",name:"森・自然",desc:"緑に囲まれた部屋",label:"NATURE ROOM"},
- {id:"workshop",name:"工房",desc:"木目と作業スペース",label:"WORKSHOP"},
- {id:"future",name:"未来・テック",desc:"クールな近未来",label:"FUTURE TECH"},
- {id:"credo",name:"クレドスペシャル",desc:"青空と光の部屋",label:"CREDO SPECIAL"}
+ {id:"basic",name:"ベーシック",desc:"明るくシンプル",label:"BASIC ROOM",image:"assets/room/themes/basic.webp"},
+ {id:"nature",name:"森・自然",desc:"緑に囲まれた部屋",label:"NATURE ROOM",image:"assets/room/themes/nature.webp"},
+ {id:"workshop",name:"工房",desc:"木目と作業スペース",label:"WORKSHOP",image:"assets/room/themes/workshop.webp"},
+ {id:"future",name:"未来・テック",desc:"クールな近未来",label:"FUTURE TECH",image:"assets/room/themes/future.webp"},
+ {id:"credo",name:"クレドスペシャル",desc:"青空と光の部屋",label:"CREDO SPECIAL",image:"assets/room/themes/credo.webp"}
 ];
 const catalog=[
  {id:"sofa",name:"ソファ",group:"furniture",icon:"🛋️"},
- {id:"desk",name:"デスク",group:"furniture",icon:"🪑"},
+ {id:"desk",name:"デスク",group:"furniture",icon:"🪑",image:"assets/room/furniture/desk.webp"},
+ {id:"chair",name:"チェア",group:"furniture",icon:"🪑",image:"assets/room/furniture/chair.webp"},
  {id:"bed",name:"ベッド",group:"furniture",icon:"🛏️"},
- {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚"},
- {id:"plant",name:"観葉植物",group:"small",icon:"🪴"},
+ {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚",image:"assets/room/furniture/bookshelf.webp"},
+ {id:"plant",name:"観葉植物",group:"small",icon:"🪴",image:"assets/room/furniture/plant.webp"},
  {id:"lamp",name:"ライト",group:"small",icon:"💡"},
- {id:"poster",name:"ポスター",group:"small",icon:"🖼️"},
+ {id:"poster",name:"ポスター",group:"small",icon:"🖼️",image:"assets/room/furniture/poster.webp"},
  {id:"cushion",name:"クッション",group:"small",icon:"🧸"},
  {id:"fish",name:"水槽",group:"small",icon:"🐠"}
 ];
@@ -170,8 +171,7 @@ function renderThemes(){
  const grid=$("themeGrid");grid.innerHTML="";
  themes.forEach(theme=>{
   const b=document.createElement("button");b.type="button";b.className="theme-button";b.setAttribute("aria-pressed",String(state.theme===theme.id));
-  const swatchClass=theme.id==="basic"?"theme-preview":("theme-preview "+({"nature":"theme-nature-swatch","workshop":"theme-workshop-swatch","future":"theme-future-swatch","credo":"theme-credo-swatch"}[theme.id]));
-  b.innerHTML='<span class="'+swatchClass+'"></span><b>'+theme.name+'</b><small>'+theme.desc+'</small>';
+  b.innerHTML='<img class="theme-preview" src="'+theme.image+'" alt="" loading="lazy" draggable="false"><b>'+theme.name+'</b><small>'+theme.desc+'</small>';
   b.addEventListener("click",()=>{state.theme=theme.id;renderThemes();renderStageTheme();updateSaveState();showToast(theme.name+"に変更しました");});
   grid.appendChild(b);
  });
@@ -189,7 +189,8 @@ function renderCatalog(){
  const grid=$("catalogGrid");grid.innerHTML="";
  catalog.filter(item=>selectedCategory==="all"||item.group===selectedCategory).forEach(item=>{
   const b=document.createElement("button");b.type="button";b.className="catalog-item";b.setAttribute("aria-pressed",String(selectedType===item.id));
-  b.innerHTML='<span class="catalog-emoji" aria-hidden="true">'+item.icon+'</span><b>'+item.name+'</b><small>'+((item.group==="furniture")?"家具":"小物")+'</small>';
+  const art=item.image?'<img src="'+item.image+'" alt="" loading="lazy" draggable="false">':item.icon;
+  b.innerHTML='<span class="catalog-emoji" aria-hidden="true">'+art+'</span><b>'+item.name+'</b><small>'+((item.group==="furniture")?"家具":"小物")+'</small>';
   b.addEventListener("click",()=>{selectedType=item.id;renderCatalog();$("selectionInfo").textContent=item.name+"を選択中。「選択したアイテムを置く」で配置できます。";});
   grid.appendChild(b);
  });
