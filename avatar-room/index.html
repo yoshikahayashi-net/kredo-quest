@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#168bcb">
+<title>クレドクエスト｜アバター設定ラボ（独立試作）</title>
+<style>
+:root{--blue:#168bcb;--blue2:#0877bb;--navy:#153e61;--sky:#eaf8ff;--ink:#16384e;--muted:#698397;--line:#d5e9f5;--gold:#ffd84f;--card:#fff;--shadow:0 7px 22px rgba(32,112,158,.10)}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#dff4ff 0%,#f2fbff 38%,#e9f7ff 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;color:var(--ink)}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #ffca3a;outline-offset:2px}
+.app{max-width:460px;min-height:100vh;margin:0 auto;background:rgba(255,255,255,.72);box-shadow:0 0 32px rgba(45,131,172,.10);overflow:hidden}
+.topbar{min-height:64px;padding:10px 15px;display:flex;align-items:center;gap:10px;color:#fff;background:linear-gradient(115deg,#27a9ef 0%,#147dca 65%,#106eb8 100%);box-shadow:0 3px 10px #167cbe22}
+.brand-mark{width:39px;height:39px;border:2px solid #ffe38a;border-radius:50%;display:grid;place-items:center;color:#ffe38a;font-size:24px;flex:none;text-shadow:0 1px 2px #165c8a}
+.brand-copy{min-width:0;flex:1}
+.brand-title{font-size:15px;font-weight:900;letter-spacing:.02em}
+.brand-sub{font-size:9px;font-weight:800;letter-spacing:.16em;opacity:.86;margin-top:2px}
+.dev-pill{font-size:10px;font-weight:900;color:#155c8e;background:#e2f7ff;border:1px solid #ffffff90;border-radius:999px;padding:6px 8px;white-space:nowrap}
+main{padding:17px 13px 26px}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:.14em;color:#1989c8}
+h1{font-size:22px;line-height:1.25;letter-spacing:-.03em;margin:5px 0 7px;color:#153b59}
+.intro{font-size:12px;line-height:1.75;color:#607d90;margin:0 0 15px}
+.notice{display:flex;gap:9px;align-items:flex-start;padding:11px 12px;border:1px solid #bde4f8;background:#f0faff;border-radius:13px;color:#38677f;font-size:11px;line-height:1.65;margin-bottom:14px}
+.notice-icon{font-size:17px;line-height:1.2;flex:none}
+.notice strong{color:#176fa6}
+.stage-card{padding:13px;border:1px solid #c7e5f5;border-radius:19px;background:linear-gradient(160deg,#f6fcff,#e9f7ff);box-shadow:var(--shadow);margin-bottom:13px}
+.stage-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.stage-heading strong{font-size:12px}
+.stage-heading span{font-size:9px;font-weight:900;letter-spacing:.09em;color:#4d91b5}
+.avatar-stage{position:relative;min-height:220px;overflow:hidden;border-radius:15px;border:1px solid #d1eaf7;background:radial-gradient(ellipse at 50% 80%,#d6f8ff 0%,#e7f7ff 42%,#b7e4ff 100%);display:flex;align-items:center;justify-content:center;isolation:isolate}
+.avatar-stage:before{content:"";position:absolute;left:-14%;right:-14%;height:90px;bottom:-40px;border:2px solid #7ed2f3;border-radius:50%;box-shadow:0 0 0 11px #fff8,0 0 0 22px #8ce0f344;z-index:-1}
+.avatar-stage:after{content:"";position:absolute;width:155px;height:155px;border-radius:50%;border:1px solid #fff9;box-shadow:0 0 0 9px #ffffff33;z-index:-1}
+.avatar-stage.effect-blue:after{box-shadow:0 0 0 9px #ffffff35,0 0 26px 7px #52c8ff55}
+.avatar-stage.effect-gold:after{border-color:#ffdc70;box-shadow:0 0 0 9px #ffe59c55,0 0 30px 8px #ffcb4266}
+.avatar-stage.effect-pink:after{border-color:#f3a8d0;box-shadow:0 0 0 9px #f8c9e655,0 0 30px 8px #ef8db866}
+.avatar-stage.effect-none:after{border-color:#fff9;box-shadow:0 0 0 9px #ffffff28}
+.avatar-img{display:block;width:98px;height:174px;object-fit:cover;border-radius:9px;box-shadow:0 7px 17px #225f8330;z-index:1}
+.stage-label{position:absolute;left:10px;top:10px;font-size:9px;letter-spacing:.08em;font-weight:900;color:#4b87a7;background:#ffffffc9;border:1px solid #ffffff;border-radius:999px;padding:5px 8px}
+.effect-tag{position:absolute;right:10px;top:10px;border-radius:999px;border:1px solid #ffffff;background:#ffffffd9;color:#307da5;font-size:10px;font-weight:900;padding:5px 8px}
+.sparkle{position:absolute;color:#ffffff;font-size:17px;text-shadow:0 1px 4px #58acd4;z-index:0}
+.sparkle.one{left:17%;top:28%}.sparkle.two{right:18%;top:45%;font-size:13px}.sparkle.three{left:24%;bottom:20%;font-size:12px}
+.stage-caption{font-size:10px;color:#69879a;line-height:1.6;text-align:center;margin:8px 4px 0}
+.summary{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:11px}
+.summary-label{width:100%;font-size:10px;color:#6b889b;font-weight:800;margin-bottom:1px}
+.summary-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid #cce5f4;background:#fff;border-radius:999px;color:#31617c;padding:5px 8px;font-size:10px;font-weight:800}
+.summary-chip b{color:#1686c4}
+.custom-card{border:1px solid #d1e6f3;border-radius:18px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
+.card-head{padding:14px 14px 10px}
+.card-head-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-head h2{font-size:15px;margin:0;color:#164261}
+.card-head p{font-size:10px;color:#7b94a5;margin:5px 0 0;line-height:1.6}
+.state-label{font-size:9px;background:#e8f8ff;color:#1b83bd;padding:5px 7px;border-radius:999px;white-space:nowrap;font-weight:900}
+.category-tabs{display:flex;gap:6px;overflow-x:auto;padding:0 12px 12px;scrollbar-width:thin}
+.category-tab{min-width:74px;flex:1;border:1px solid #d5e9f5;background:#f5fbff;border-radius:11px;color:#658398;padding:9px 6px 8px;font-size:10px;font-weight:900;line-height:1.3}
+.category-tab .tab-ico{display:block;font-size:17px;margin-bottom:5px}
+.category-tab[aria-selected="true"]{background:linear-gradient(180deg,#2caaf0,#137dc5);color:#fff;border-color:#1689d0;box-shadow:0 3px 9px #1487cf33}
+.option-area{padding:12px 13px 15px;background:linear-gradient(180deg,#f6fcff,#fff);border-top:1px solid #edf6fb}
+.option-intro{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 1px 10px}
+.option-intro strong{font-size:11px;color:#345e78}
+.option-intro span{font-size:9px;color:#88a0b0}
+.option-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.option{min-width:0;text-align:left;border:1px solid #d4e7f2;background:#fff;border-radius:13px;padding:10px 8px;min-height:92px;color:#31566e;position:relative;transition:transform .12s,border-color .12s,box-shadow .12s}
+.option:active{transform:scale(.98)}
+.option[aria-pressed="true"]{border:2px solid #168bce;padding:9px 7px;background:#edf9ff;box-shadow:0 3px 10px #168bce1d}
+.option[aria-pressed="true"]:after{content:"✓";position:absolute;right:7px;top:6px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#168bce;color:#fff;font-size:10px;font-weight:900}
+.option-art{height:31px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:6px}
+.option-art .swatch{width:25px;height:25px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #d7e6ef}
+.option-name{display:block;font-size:10px;font-weight:900;line-height:1.35;overflow-wrap:anywhere}
+.option-desc{display:block;font-size:9px;color:#8198a8;line-height:1.4;margin-top:3px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:13px;border-top:1px solid #eef5f9}
+.btn{min-height:43px;border-radius:12px;border:1px solid #d5e8f4;font-size:11px;font-weight:900;padding:10px;background:#f5fbff;color:#52758c}
+.btn.primary{background:linear-gradient(180deg,#36b7f4,#1685cb);border-color:#1685cb;color:#fff;box-shadow:0 4px 10px #168bce30}
+.bottom-note{margin:13px 2px 0;font-size:10px;line-height:1.7;color:#7791a2}
+.bottom-note strong{color:#38769a}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,18px);opacity:0;pointer-events:none;z-index:10;max-width:calc(100vw - 28px);padding:11px 15px;background:#173e5b;color:#fff;border-radius:13px;box-shadow:0 8px 24px #0b3c5c30;font-size:12px;font-weight:800;line-height:1.5;transition:opacity .18s,transform .18s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+footer{padding:15px 15px 21px;border-top:1px solid #d9edf8;background:#f7fcff;text-align:center;color:#7b98a8;font-size:9px;line-height:1.7}
+footer strong{color:#3d7e9f}
+@media(min-width:420px){main{padding:20px 15px 28px}.avatar-stage{min-height:238px}.avatar-img{width:103px;height:183px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand-mark" aria-hidden="true">✦</div>
+  <div class="brand-copy"><div class="brand-title">クレドクエスト</div><div class="brand-sub">AVATAR LAB · STANDALONE TEST</div></div>
+  <span class="dev-pill">本体未接続</span>
+</header>
+<main>
+  <div class="eyebrow">MY CHARACTER</div>
+  <h1>アバターをカスタマイズ</h1>
+  <p class="intro">自分だけのスタイルを選んでみよう。選択内容を保存し、次に開いたときも確認できます。</p>
+  <div class="notice" role="note">
+    <span class="notice-icon" aria-hidden="true">ℹ️</span>
+    <div><strong>独立した試作エリアです。</strong><br>選択と保存はこのブラウザ内で動作します。クエスト本体・ポイント・アカウント情報には接続していません。</div>
+  </div>
+
+  <section class="stage-card" aria-labelledby="previewTitle">
+    <div class="stage-heading"><strong id="previewTitle">プレビュー</strong><span>YOUR STYLE</span></div>
+    <div id="avatarStage" class="avatar-stage effect-blue">
+      <span class="stage-label">REFERENCE CHARACTER</span>
+      <span id="effectTag" class="effect-tag">ブルーの光</span>
+      <span class="sparkle one" aria-hidden="true">✦</span><span class="sparkle two" aria-hidden="true">✧</span><span class="sparkle three" aria-hidden="true">✦</span>
+      <img class="avatar-img" alt="デザイン参考用キャラクター画像。元画像のキャラクター部分を切り出して表示しています。" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQDAwQEBAQFBwsHBwYGBw4KCggLEA4RERAOEA8SFBoWEhMYEw8QFh8XGBsbHR0dERYgIh8cIhocHRz/2wBDAQUFBQcGBw0HBw0cEhASHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBz/wgARCACxAHgDASIAAhEBAxEB/8QAHAAAAQUBAQEAAAAAAAAAAAAABgADBAUHAgEI/8QAGgEAAwEBAQEAAAAAAAAAAAAAAgMEAQAFBv/aAAwDAQACEAMQAAABCykbJ/p/A331e/N+343FphJshkurMZivws62sYslypHNbbEPCfXd8ukNdo30XjaPHmhvznuTL+LLBj/rOcjuk58JV7M1FnBW+3dzj5Y0Ig2hMoQ7jTmCH3Nz7PNI2jVuNYy5r6+wZldMcmJfXxizwDF64zsHJLUUoUWzbvGbHxrWsDIrqJXui/mY3VKMv7pSlZ1xHGAcy2KRtzd21QVX5tjw5zhBWfbfiHMuqznRZLxkQ1KQHCR/09yxrHvoWjwwsXJiB6jtJUwu+dcZvHPHphm4fvEMW4dp43lSn/UbGRSUP10dzvTnTUJ42nz9rlcMlp5kTjOt9sUqu2zkWZSSE/fELFFIUEGQ/TOE7CBXCXjFerxZk1qpssY10wjVL+cvoTDcZsOK7Fm4sKTgbLkMyYx4EnL1DniO6WYvEJWPPXCX1DPnlsDg/fsAYzmBuDpuJI9RTvUSHuY7irZjMnl8PS4XaQcdsRX1PEiPZD29Dsh4IyTcMRCwuCNkyPcs96yTWtW14oZzT04gbbN98y2RKKe5X59Zddwe4Vz0wtovRucV1kEYL+th1rw2EIki0RPqAl03CSS+lkpUxVNgkac6kJL9DsuSZL89bikNJZQJbDeJJdf/xAArEAACAgECBQMEAwEBAAAAAAACAwEEBQARBhASExQVIjMhMjQ1ICMxQUL/2gAIAQEAAQUC1w5+65lIrFlo8mVavFZIYcVsQLH6Wq2BhMFrbltrbXDsbZrlcuDTDw22pEeiNZUm7gqmLcc42Raq97VO7NjUc+H/ANzqzZXTRSQwmB9/I4EgvMoJmM5TQA8T0iKxbQ+wBCwNeBbjWBw51S1cb5eUrzuSvjYwErt8TdzRvJ8uvlIvrG2eyQiDZHWE4i8aAKDHp0wemNYo+8tJdE2MmjHVbuTdlGS2Bg2G09+SZ6p7ENHp2nhOyb6Wmx/W9nbrYPb0excXSTcbZyL4We4oHRBBEqtvrxwhVmitOvGXLQ4c8p1GgnG19H9pLhi8dfijReydvZEyP9tLHQcWAU/JrKGicCxia1F6BKYshYkF78jn22rI1KyrB2W3rSSlDAkjJddOS9VFHD1e491gJm4+iyoqMhmHWqxFMuEzKv1ePoo9vFAF6Je7K7uLWKq18BhuOpqyKsjgGvyXDGNmhdUhVYc8s24cMC5V3NV59TTaFYAPSGin2lsYZnEro5HFXhrkqqYsrY5FAmADzUAKXrp14qkHlbiqeUw+CQtPIvt0QAyOMq6+xfxbseGLzDcWyjm6N2YjXjDuICpdrL11ijChkUb82Tsvq52aibi7ePxWKU56L04TopKutyfqGEUnOW8Zj04pG/8ABnxRHPI2/Bo1qzMrdyWIIbPD6ztsRw52nqNuPyAzBj/Bnx8+KcgmEcJ0elPFzFBYwaRAomRnLLOo7HsCA/gz4+Q6zM2XZPG0PDxucc6xmMTWKsMUl+RxTsdGv2lv31vy9UrBrqFiNb/XqiNZPrrcUKyXipqLRbyqPbdlwb14C4eNadidT7jjUfTTPjk/pv8AXWXrJt1r9CuNfG3gSD8qXUWavxK8p2qWLUhGp3nW2obMcmfF/wA7cHoCE9WEDYVnaTF45O0alTbDEe4iDrBFQas/TX/sg5M+OB1vs5YAvlxQozxaPt4fVD8wmI7teOuxMfU49vUO20cmfHETpyeoa5Jczp1nLa6uOhS5jhlSU4y32jyfDAB6ntozFY7eQe3I/s6YiLPVcr1wGvrpKdcUV5nHqx/tw1btYt1Ezy3DC4DIdudWU91bpsi2NijR/YXW7QdHjVxERZYZvnjazS8fiNscyERYrsBtShikox1yXgBdcEYLOeryNH8avyC/KR+ys/7xT+tqfjYb/J/GZrB/qB+On9rNf//EACYRAAICAQMDBAMBAAAAAAAAAAABAhEDEiExECJBBBMyM0JhgXH/2gAIAQEAAQUC1w5+65lIrFlo8mVavFZIYcVsQLH6Wq2BhMFrbltrbXDsbZrlcuDTDw22pEeiNZUm7gqmLcc42Raq97VO7NjUc+H/ANzqzZXTRSQwmB9/I4EgvMoJmM5TQA8T0iKxbQ+wBCwNeBbjWBw51S1cb5eUrzuSvjYwErt8TdzRvJ8uvlIvrG2eyQiDZHWE4i8aAKDHp0wemNYo+8tJdE2MmjHVbuTdlGS2Bg2G09+SZ6p7ENHp2nhOyb6Wmx/W9nbrYPb0excXSTcbZyL4We4oHRBBEqtvrxwhVmitOvGXLQ4c8p1GgnG19H9pLhi8dfijReydvZEyP9tLHQcWAU/JrKGicCxia1F6BKYshYkF78jn22rI1KyrB2W3rSSlDAkjJddOS9VFHD1e491gJm4+iyoqMhmHWqxFMuEzKv1ePoo9vFAF6Je7K7uLWKq18BhuOpqyKsjgGvyXDGNmhdUhVYc8s24cMC5V3NV59TTaFYAPSGin2lsYZnEro5HFXhrkqqYsrY5FAmADzUAKXrp14qkHlbiqeUw+CQtPIvt0QAyOMq6+xfxbseGLzDcWyjm6N2YjXjDuICpdrL11ijChkUb82Tsvq52aibi7ePxWKU56L04TopKutyfqGEUnOW8Zj04pG/8ABnxRHPI2/Bo1qzMrdyWIIbPD6ztsRw52nqNuPyAzBj/Bnx8+KcgmEcJ0elPFzFBYwaRAomRnLLOo7HsCA/gz4+Q6zM2XZPG0PDxucc6xmMTWKsMUl+RxTsdGv2lv31vy9UrBrqFiNb/XqiNZPrrcUKyXipqLRbyqPbdlwb14C4eNadidT7jjUfTTPjk/pv8AXWXrJt1r9CuNfG3gSD8qXUWavxK8p2qWLUhGp3nW2obMcmfF/wA7cHoCE9WEDYVnaTF45O0alTbDEe4iDrBFQas/TX/sg5M+OB1vs5YAvlxQozxaPt4fVD8wmI7teOuxMfU49vUO20cmfHETpyeoa5Jczp1nLa6uOhS5jhlSU4y32jyfDAB6ntozFY7eQe3I/s6YiLPVcr1wGvrpKdcUV5nHqx/tw1btYt1Ezy3DC4DIdudWU91bpsi2NijR/YXW7QdHjVxERZYZvnjazS8fiNscyERYrsBtShikox1yXgBdcEYLOeryNH8avyC/KR+ys/7xT+tqfjYb/J/GZrB/qB+On9rNf//EACYRAAICAQMDBAMBAAAAAAAAAAABAhEDEiExECJBBBMyM0JhgXH/2gAIAQEAAQUC1w5+65lIrFlo8mVavFZIYcVsQLH6Wq2BhMFrbltrbXDsbZrlcuDTDw22pEeiNZUm7gqmLcc42Raq97VO7NjUc+H/ANzqzZXTRSQwmB9/I4EgvMoJmM5TQA8T0iKxbQ+wBCwNeBbjWBw51S1cb5eUrzuSvjYwErt8TdzRvJ8uvlIvrG2eyQiDZHWE4i8aAKDHp0wemNYo+8tJdE2MmjHVbuTdlGS2Bg2G09+SZ6p7ENHp2nhOyb6Wmx/W9nbrYPb0excXSTcbZyL4We4oHRBBEqtvrxwhVmitOvGXLQ4c8p1GgnG19H9pLhi8dfijReydvZEyP9tLHQcWAU/JrKGicCxia1F6BKYshYkF78jn22rI1KyrB2W3rSSlDAkjJddOS9VFHD1e491gJm4+iyoqMhmHWqxFMuEzKv1ePoo9vFAF6Je7K7uLWKq18BhuOpqyKsjgGvyXDGNmhdUhVYc8s24cMC5V3NV59TTaFYAPSGin2lsYZnEro5HFXhrkqqYsrY5FAmADzUAKXrp14qkHlbiqeUw+CQtPIvt0QAyOMq6+xfxbseGLzDcWyjm6N2YjXjDuICpdrL11ijChkUb82Tsvq52aibi7ePxWKU56L04TopKutyfqGEUnOW8Zj04pG/8ABnxRHPI2/Bo1qzMrdyWIIbPD6ztsRw52nqNuPyAzBj/Bnx8+KcgmEcJ0elPFzFBYwaRAomRnLLOo7HsCA/gz4+Q6zM2XZPG0PDxucc6xmMTWKsMUl+RxTsdGv2lv31vy9UrBrqFiNb/XqiNZPrrcUKyXipqLRbyqPbdlwb14C4eNadidT7jjUfTTPjk/pv8AXWXrJt1r9CuNfG3gSD8qXUWavxK8p2qWLUhGp3nW2obMcmfF/wA7cHoCE9WEDYVnaTF45O0alTbDEe4iDrBFQas/TX/sg5M+OB1vs5YAvlxQozxaPt4fVD8wmI7teOuxMfU49vUO20cmfHETpyeoa5Jczp1nLa6uOhS5jhlSU4y32jyfDAB6ntozFY7eQe3I/s6YiLPVcr1wGvrpKdcUV5nHqx/tw1btYt1Ezy3DC4DIdudWU91bpsi2NijR/YXW7QdHjVxERZYZvnjazS8fiNscyERYrsBtShikox1yXgBdcEYLOeryNH8avyC/KR+ys/7xT+tqfjYb/J/GZrB/qB+On9rNf//EACYRAAICAQMDBAMBAAAAAAAAAAABAhEDEiExECJBBBMyM0JhgXH/2gAIAQEAAQUC1w5+65lIrFlo8mVavFZIYcVsQLH6Wq2BhMFrbltrbXDsbZrlcuDTDw22pEeiNZUm7gqmLcc42Raq97VO7NjUc+H/ANzqzZXTRSQwmB9/I4EgvMoJmM5TQA8T0iKxbQ+wBCwNeBbjWBw51S1cb5eUrzuSvjYwErt8TdzRvJ8uvlIvrG2eyQiDZHWE4i8aAKDHp0wemNYo+8tJdE2MmjHVbuTdlGS2Bg2G09+SZ6p7ENHp2nhOyb6Wmx/W9nbrYPb0excXSTcbZyL4We4oHRBBEqtvrxwhVmitOvGXLQ4c8p1GgnG19H9pLhi8dfijReydvZEyP9tLHQcWAU/JrKGicCxia1F6BKYshYkF78jn22rI1KyrB2W3rSSlDAkjJddOS9VFHD1e491gJm4+iyoqMhmHWqxFMuEzKv1ePoo9vFAF6Je7K7uLWKq18BhuOpqyKsjgGvyXDGNmhdUhVYc8s24cMC5V3NV59TTaFYAPSGin2lsYZnEro5HFXhrkqqYsrY5FAmADzUAKXrp14qkHlbiqeUw+CQtPIvt0QAyOMq6+xfxbseGLzDcWyjm6N2YjXjDuICpdrL11ijChkUb82Tsvq52aibi7ePxWKU56L04TopKutyfqGEUnOW8Zj04pG/8ABnxRHPI2/Bo1qzMrdyWIIbPD6ztsRw52nqNuPyAzBj/Bnx8+KcgmEcJ0elPFzFBYwaRAomRnLLOo7HsCA/gz4+Q6zM2XZPG0PDxucc6xmMTWKsMUl+RxTsdGv2lv31vy9UrBrqFiNb/XqiNZPrrcUKyXipqLRbyqPbdlwb14C4eNadidT7jjUfTTPjk/pv8AXWXrJt1r9CuNfG3gSD8qXUWavxK8p2qWLUhGp3nW2obMcmfF/wA7cHoCE9WEDYVnaTF45O0alTbDEe4iDrBFQas/TX/sg5M+OB1vs5YAvlxQozxaPt4fVD8wmI7teOuxMfU49vUO20cmfHETpyeoa5Jczp1nLa6uOhS5jhlSU4y32jyfDAB6ntozFY7eQe3I/s6YiLPVcr1wGvrpKdcUV5nHqx/tw1btYt1Ezy3DC4DIdudWU91bpsi2NijR/YXW7QdHjVxERZYZvnjazS8fiNscyERYrsBtShikox1yXgBdcEYLOeryNH8avyC/KR+ys/7xT+tqfjYb/J/GZrB/qB+On9rNf//EACYRAAICAQMDBAMBAAAAAAAAAAABAhEDEiExECJBBBMyM0JhgXH/2gAIAQEAAQUC1w5+65lIrFlo8mVavFZIYcVsQLH6Wq2BhMFrbltrbXDsbZrlcuDTDw22pEeiNZUm7gqmLcc42Raq97VO7NjUc+H/ANzqzZXTRSQwmB9/I4EgvMoJmM5TQA8T0iKxbQ+wBCwNeBbjWBw51S1cb5eUrzuSvjYwErt8TdzRvJ8uvlIvrG2eyQiDZHWE4i8aAKDHp0wemNYo+8tJdE2MmjHVbuTdlGS2Bg2G09+SZ6p7ENHp2nhOyb6Wmx/W9nbrYPb0excXSTcbZyL4We4oHRBBEqtvrxwhVmitOvGXLQ4c8p1GgnG19H9pLhi8dfijReydvZEyP9tLHQcWAU/JrKGicCxia1F6BKYshYkF78jn22rI1KyrB2W3rSSlDAkjJddOS9VFHD1e491gJm4+iyoqMhmHWqxFMuEzKv1ePoo9vFAF6Je7K7uLWKq18BhuOpqyKsjgGvyXDGNmhdUhVYc8s24cMC5V3NV59TTaFYAPSGin2lsYZnEro5HFXhrkqqYsrY5FAmADzUAKXrp14qkHlbiqeUw+CQtPIvt0QAyOMq6+xfxbseGLzDcWyjm6N2YjXjDuICpdrL11ijChkUb82Tsvq52aibi7ePxWKU56L04TopKutyfqGEUnOW8Zj04pG/8ABnxRHPI2/Bo1qzMrdyWIIbPD6ztsRw52nqNuPyAzBj/Bnx8+KcgmEcJ0elPFzFBYwaRAomRnLLOo7HsCA/gz4+Q6zM2XZPG0PDxucc6xmMTWKsMUl+RxTsdGv2lv31vy9UrBrqFiNb/XqiNZPrrcUKyXipqLRbyqPbdlwb14C4eNadidT7jjUfTTPjk/pv8AXWXrJt1r9CuNfG3gSD8qXUWavxK8p2qWLUhGp3nW2obMcmfF/wA7cHoCE9WEDYVnaTF45O0alTbDEe4iDrBFQas/TX/sg5M+OB1vs5YAvlxQozxaPt4fVD8wmI7teOuxMfU49vUO20cmfHETpyeoa5Jczp1nLa6uOhS5jhlSU4y32jyfDAB6ntozFY7eQe3I/s6YiLPVcr1wGvrpKdcUV5nHqx/tw1btYt1Ezy3DC4DIdudWU91bpsi2NijR/YXW7QdHjVxERZYZvnjazS8fiNscyERYrsBtShikox1yXgBdcEYLOeryNH8avyC/KR+ys/7xT+tqfjYb/J/GZrB/qB+On9rNf//2Q==">
+    </div>
+    <p class="stage-caption">参考キャラクターを表示中。キャラクター画像そのものには加工を加えていません。</p>
+    <div class="summary" id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="custom-card" aria-labelledby="customizeTitle">
+    <div class="card-head">
+      <div class="card-head-row"><h2 id="customizeTitle">スタイルを選ぶ</h2><span class="state-label" id="saveState">未保存の変更なし</span></div>
+      <p>カテゴリを選び、好みの項目をタップしてください。現在は設定データとエフェクト表示を先に実装しています。</p>
+    </div>
+    <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="カスタマイズ項目"></div>
+    <div class="option-area">
+      <div class="option-intro"><strong id="categoryHeading">髪型</strong><span>タップして選択</span></div>
+      <div class="option-grid" id="optionGrid"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="undoButton" type="button">保存状態に戻す</button>
+      <button class="btn primary" id="saveButton" type="button">設定を保存</button>
+    </div>
+  </section>
+  <p class="bottom-note"><strong>次工程：</strong>マイルームのテーマ選択・家具配置を独立画面として実装。その後、キャラクターの部位別素材を接続し、見た目にも選択内容が反映されるようにします。</p>
+</main>
+<footer><strong>クレドクエスト｜独立試作</strong><br>ブラウザ内保存のみ · 本体・Supabase・ポイントとは未接続</footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+"use strict";
+const STORAGE_KEY="kredo-quest-avatar-lab-v1";
+const defaults={hairStyle:"short",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue"};
+const categories={
+ hairStyle:{label:"髪型",icon:"✂️",summary:"髪型",items:[
+  {id:"short",name:"ショート",desc:"軽やかなスタイル",icon:"💇🏻"},
+  {id:"bob",name:"ボブ",desc:"まとまりのある形",icon:"👩🏻"},
+  {id:"long",name:"ロング",desc:"長めのシルエット",icon:"🧑🏻"}
+ ]},
+ hairColor:{label:"髪色",icon:"🎨",summary:"髪色",items:[
+  {id:"brown",name:"ブラウン",desc:"やわらかい茶色",color:"#8c5b46"},
+  {id:"black",name:"ブラック",desc:"落ち着いた黒",color:"#303847"},
+  {id:"ash",name:"アッシュ",desc:"クールな灰色",color:"#a5aab9"},
+  {id:"rose",name:"ローズ",desc:"やさしいピンク",color:"#d98baa"}
+ ]},
+ outfit:{label:"服装",icon:"👕",summary:"服装",items:[
+  {id:"work",name:"ワークスタイル",desc:"お仕事スタイル",icon:"🧥"},
+  {id:"casual",name:"カジュアル",desc:"気軽な普段着",icon:"👕"},
+  {id:"outdoor",name:"アウトドア",desc:"冒険にぴったり",icon:"🥾"},
+  {id:"formal",name:"フォーマル",desc:"きちんとした装い",icon:"🎽"}
+ ]},
+ accessory:{label:"アクセサリー",icon:"⭐",summary:"アクセ",items:[
+  {id:"cap",name:"キャップ",desc:"定番の帽子",icon:"🧢"},
+  {id:"glasses",name:"メガネ",desc:"知的な印象",icon:"👓"},
+  {id:"star",name:"スター",desc:"星のアクセント",icon:"⭐"},
+  {id:"none",name:"なし",desc:"すっきりシンプル",icon:"○"}
+ ]},
+ effect:{label:"エフェクト",icon:"✨",summary:"エフェクト",items:[
+  {id:"none",name:"なし",desc:"自然な表示",icon:"○"},
+  {id:"blue",name:"ブルーの光",desc:"さわやかな輝き",icon:"💧"},
+  {id:"gold",name:"ゴールド",desc:"特別感のある光",icon:"🌟"},
+  {id:"pink",name:"ピンク",desc:"やさしいきらめき",icon:"💗"}
+ ]}
+};
+const categoryKeys=Object.keys(categories);
+const $=id=>document.getElementById(id);
+let draft=readSaved()||Object.assign({},defaults);
+let saved=Object.assign({},draft);
+let activeCategory="hairStyle";
+let toastTimer=0;
+function copyConfig(c){return Object.assign({},c);}
+function readSaved(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return null;
+  const parsed=JSON.parse(raw);
+  const safe={};
+  categoryKeys.forEach(key=>{
+   const val=parsed&&parsed[key];
+   safe[key]=categories[key].items.some(item=>item.id===val)?val:defaults[key];
+  });
+  return safe;
+ }catch(e){return null;}
+}
+function hasChanges(){
+ return categoryKeys.some(key=>draft[key]!==saved[key]);
+}
+function labelFor(key,id){
+ const item=categories[key].items.find(entry=>entry.id===id);
+ return item?item.name:"未選択";
+}
+function renderTabs(){
+ $("categoryTabs").innerHTML="";
+ categoryKeys.forEach(key=>{
+  const cat=categories[key];
+  const button=document.createElement("button");
+  button.type="button";
+  button.className="category-tab";
+  button.setAttribute("role","tab");
+  button.setAttribute("aria-selected",String(activeCategory===key));
+  button.innerHTML='<span class="tab-ico" aria-hidden="true">'+cat.icon+'</span>'+cat.label;
+  button.addEventListener("click",function(){activeCategory=key;renderTabs();renderOptions();});
+  $("categoryTabs").appendChild(button);
+ });
+}
+function renderOptions(){
+ const cat=categories[activeCategory];
+ $("categoryHeading").textContent=cat.label;
+ const grid=$("optionGrid");
+ grid.innerHTML="";
+ cat.items.forEach(item=>{
+  const button=document.createElement("button");
+  button.type="button";
+  button.className="option";
+  button.setAttribute("aria-pressed",String(draft[activeCategory]===item.id));
+  let art="";
+  if(item.color)art='<span class="swatch" style="background:'+item.color+'"></span>';
+  else art=item.icon||"✦";
+  button.innerHTML='<span class="option-art" aria-hidden="true">'+art+'</span><span class="option-name">'+item.name+'</span><span class="option-desc">'+item.desc+'</span>';
+  button.addEventListener("click",function(){
+   draft[activeCategory]=item.id;
+   renderOptions();renderPreview();updateSaveState();
+   showToast(item.name+"を選択しました");
+  });
+  grid.appendChild(button);
+ });
+}
+function renderPreview(){
+ const stage=$("avatarStage");
+ stage.classList.remove("effect-none","effect-blue","effect-gold","effect-pink");
+ stage.classList.add("effect-"+draft.effect);
+ $("effectTag").textContent=labelFor("effect",draft.effect);
+ const summary=$("summary");
+ summary.innerHTML='<span class="summary-label">現在の選択内容</span>';
+ categoryKeys.forEach(key=>{
+  const chip=document.createElement("span");
+  chip.className="summary-chip";
+  chip.innerHTML='<b>'+categories[key].summary+'</b> '+labelFor(key,draft[key]);
+  summary.appendChild(chip);
+ });
+}
+function updateSaveState(){
+ const changed=hasChanges();
+ $("saveState").textContent=changed?"未保存の変更あり":"未保存の変更なし";
+ $("saveState").style.background=changed?"#fff6d7":"#e8f8ff";
+ $("saveState").style.color=changed?"#8a6712":"#1b83bd";
+ $("saveButton").textContent=changed?"設定を保存":"保存済み";
+}
+function showToast(message){
+ const el=$("toast");
+ el.textContent=message;
+ el.classList.add("show");
+ if(toastTimer)window.clearTimeout(toastTimer);
+ toastTimer=window.setTimeout(()=>el.classList.remove("show"),2300);
+}
+$("saveButton").addEventListener("click",function(){
+ try{
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(draft));
+  saved=copyConfig(draft);
+  updateSaveState();
+  showToast("設定をこのブラウザに保存しました。本体のポイント等は変更していません。");
+ }catch(e){
+  showToast("ブラウザ内に保存できませんでした。プライベートモード等の設定をご確認ください。");
+ }
+});
+$("undoButton").addEventListener("click",function(){
+ draft=copyConfig(saved);
+ renderOptions();renderPreview();updateSaveState();
+ showToast("最後に保存した設定に戻しました");
+});
+renderTabs();renderOptions();renderPreview();updateSaveState();
+})();
+</script>
+</body>
+</html>
