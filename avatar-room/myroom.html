@@ -45,6 +45,16 @@ main{padding:17px 13px 25px}.eyebrow{font-size:10px;font-weight:900;letter-spaci
 .room-item img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
 .room-item.sprite-item{border-color:transparent;background:transparent;box-shadow:none;border-radius:5px;padding:0}
 .room-item.sprite-item.selected{outline:3px solid #168bce;outline-offset:2px;background:#ffffff20;box-shadow:0 0 0 5px #ffffff70}
+.room-item--sofa{width:92px;height:61px}
+.room-item--desk{width:82px;height:61px}
+.room-item--chair{width:49px;height:63px}
+.room-item--bed{width:100px;height:64px}
+.room-item--bookshelf{width:61px;height:78px}
+.room-item--plant{width:49px;height:58px}
+.room-item--lamp{width:38px;height:72px}
+.room-item--poster{width:43px;height:60px}
+.room-item--cushion{width:49px;height:43px}
+.room-item--fish{width:62px;height:62px}
 .room-item .item-number{position:absolute;right:-4px;top:-5px;background:#168bcb;color:#fff;font-size:8px;font-weight:900;min-width:15px;height:15px;border-radius:50%;display:grid;place-items:center}
 .room-hint{position:absolute;z-index:4;left:9px;bottom:9px;background:#ffffffdb;color:#4b7087;border:1px solid #ffffff;border-radius:9px;font-size:9px;font-weight:800;padding:6px 8px;pointer-events:none}
 .room-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:10px;color:#6d899b;padding:9px 3px 0}.room-meta strong{color:#33789e}
@@ -136,16 +146,16 @@ const themes=[
  {id:"credo",name:"クレドスペシャル",desc:"青空と光の部屋",label:"CREDO SPECIAL",image:"assets/room/themes/credo.webp"}
 ];
 const catalog=[
- {id:"sofa",name:"ソファ",group:"furniture",icon:"🛋️"},
- {id:"desk",name:"デスク",group:"furniture",icon:"🪑",image:"assets/room/furniture/desk.webp",sprite:"assets/room/sprites/desk.webp"},
- {id:"chair",name:"チェア",group:"furniture",icon:"🪑",image:"assets/room/furniture/chair.webp",sprite:"assets/room/sprites/chair.webp"},
- {id:"bed",name:"ベッド",group:"furniture",icon:"🛏️"},
- {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚",image:"assets/room/furniture/bookshelf.webp",sprite:"assets/room/sprites/bookshelf.webp"},
- {id:"plant",name:"観葉植物",group:"small",icon:"🪴",image:"assets/room/furniture/plant.webp",sprite:"assets/room/sprites/plant.png"},
- {id:"lamp",name:"ライト",group:"small",icon:"💡"},
- {id:"poster",name:"ポスター",group:"small",icon:"🖼️",image:"assets/room/furniture/poster.webp",sprite:"assets/room/sprites/poster.webp"},
- {id:"cushion",name:"クッション",group:"small",icon:"🧸"},
- {id:"fish",name:"水槽",group:"small",icon:"🐠"}
+ {id:"sofa",name:"ソファ",group:"furniture",icon:"🛋️",image:"assets/room/catalog/sofa.svg",sprite:"assets/room/sprites/sofa.svg",assetKind:"vector-placeholder"},
+ {id:"desk",name:"デスク",group:"furniture",icon:"🪑",image:"assets/room/furniture/desk.webp",sprite:"assets/room/sprites/desk.webp",assetKind:"source-crop"},
+ {id:"chair",name:"チェア",group:"furniture",icon:"🪑",image:"assets/room/furniture/chair.webp",sprite:"assets/room/sprites/chair.webp",assetKind:"source-crop"},
+ {id:"bed",name:"ベッド",group:"furniture",icon:"🛏️",image:"assets/room/catalog/bed.svg",sprite:"assets/room/sprites/bed.svg",assetKind:"vector-placeholder"},
+ {id:"bookshelf",name:"本棚",group:"furniture",icon:"📚",image:"assets/room/furniture/bookshelf.webp",sprite:"assets/room/sprites/bookshelf.webp",assetKind:"source-crop"},
+ {id:"plant",name:"観葉植物",group:"small",icon:"🪴",image:"assets/room/furniture/plant.webp",sprite:"assets/room/sprites/plant.png",assetKind:"source-crop"},
+ {id:"lamp",name:"ライト",group:"small",icon:"💡",image:"assets/room/catalog/lamp.svg",sprite:"assets/room/sprites/lamp.svg",assetKind:"vector-placeholder"},
+ {id:"poster",name:"ポスター",group:"small",icon:"🖼️",image:"assets/room/furniture/poster.webp",sprite:"assets/room/sprites/poster.webp",assetKind:"source-crop"},
+ {id:"cushion",name:"クッション",group:"small",icon:"🧸",image:"assets/room/catalog/cushion.svg",sprite:"assets/room/sprites/cushion.svg",assetKind:"vector-placeholder"},
+ {id:"fish",name:"水槽",group:"small",icon:"🐠",image:"assets/room/catalog/fish.svg",sprite:"assets/room/sprites/fish.svg",assetKind:"vector-placeholder"}
 ];
 const defaultItems=[
  {id:"room-item-1",type:"sofa",x:49,y:68},
@@ -204,7 +214,7 @@ function renderStageTheme(){
 function renderPlacedItems(){
  const root=$("placedItems");root.innerHTML="";
  state.items.forEach((item,index)=>{
-  const info=itemInfo(item.type),button=document.createElement("button");button.type="button";button.id="placed-"+item.id;button.className="room-item"+(info.sprite?" sprite-item":"")+(selectedItemId===item.id?" selected":"");button.style.left=item.x+"%";button.style.top=item.y+"%";button.dataset.itemId=item.id;button.setAttribute("aria-label",info.name+"。タップで選択、ドラッグで移動");
+  const info=itemInfo(item.type),button=document.createElement("button");button.type="button";button.id="placed-"+item.id;button.className="room-item room-item--"+item.type+(info.sprite?" sprite-item":"")+(selectedItemId===item.id?" selected":"");button.style.left=item.x+"%";button.style.top=item.y+"%";button.dataset.itemId=item.id;button.setAttribute("aria-label",info.name+"。タップで選択、ドラッグで移動");
   const artwork=info.sprite?'<img src="'+info.sprite+'" alt="" draggable="false" loading="lazy">':info.icon;
   button.innerHTML=artwork+'<span class="item-number">'+(index+1)+'</span>';
   button.addEventListener("click",()=>{selectedItemId=item.id;renderPlacedItems();updateSelection();});

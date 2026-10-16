@@ -2,7 +2,7 @@
   "schema_version": 1,
   "status": "selector_thumbnails_added",
   "source": "User-provided クレドクエスト アバターカスタマイズ画面.png",
-  "note": "Images are cropped from the concept UI for selection cards. They are not production room backgrounds or placeable full-size furniture sprites.",
+  "note": "Selector cards and placeable sprites are separate files. Five SVG pairs are temporary vector placeholders pending official room art, while five other placed items use source-derived candidates/transparent PNG.",
   "themes": [
     {
       "id": "basic",
@@ -73,18 +73,44 @@
   ],
   "placedSprites": [
     {
+      "id": "sofa",
+      "label": "ソファ",
+      "path": "room/sprites/sofa.svg",
+      "format": "SVG",
+      "role": "placed_item_sprite",
+      "status": "prototype_vector_placeholder"
+    },
+    {
       "id": "desk",
       "label": "デスク",
       "path": "room/sprites/desk.webp",
       "format": "WebP",
-      "role": "placed_item_sprite"
+      "role": "placed_item_sprite",
+      "status": "source_crop_candidate"
     },
     {
       "id": "chair",
       "label": "チェア",
       "path": "room/sprites/chair.webp",
       "format": "WebP",
-      "role": "placed_item_sprite"
+      "role": "placed_item_sprite",
+      "status": "source_crop_candidate"
+    },
+    {
+      "id": "bed",
+      "label": "ベッド",
+      "path": "room/sprites/bed.svg",
+      "format": "SVG",
+      "role": "placed_item_sprite",
+      "status": "prototype_vector_placeholder"
+    },
+    {
+      "id": "bookshelf",
+      "label": "本棚",
+      "path": "room/sprites/bookshelf.webp",
+      "format": "WebP",
+      "role": "placed_item_sprite",
+      "status": "source_crop_candidate"
     },
     {
       "id": "plant",
@@ -92,21 +118,76 @@
       "path": "room/sprites/plant.png",
       "format": "PNG",
       "role": "placed_item_sprite",
-      "alpha": "transparent"
+      "status": "transparent_png"
     },
     {
-      "id": "bookshelf",
-      "label": "本棚",
-      "path": "room/sprites/bookshelf.webp",
-      "format": "WebP",
-      "role": "placed_item_sprite"
+      "id": "lamp",
+      "label": "ライト",
+      "path": "room/sprites/lamp.svg",
+      "format": "SVG",
+      "role": "placed_item_sprite",
+      "status": "prototype_vector_placeholder"
     },
     {
       "id": "poster",
       "label": "ポスター",
       "path": "room/sprites/poster.webp",
       "format": "WebP",
-      "role": "placed_item_sprite"
+      "role": "placed_item_sprite",
+      "status": "source_crop_candidate"
+    },
+    {
+      "id": "cushion",
+      "label": "クッション",
+      "path": "room/sprites/cushion.svg",
+      "format": "SVG",
+      "role": "placed_item_sprite",
+      "status": "prototype_vector_placeholder"
+    },
+    {
+      "id": "fish",
+      "label": "水槽",
+      "path": "room/sprites/fish.svg",
+      "format": "SVG",
+      "role": "placed_item_sprite",
+      "status": "prototype_vector_placeholder"
+    }
+  ],
+  "catalogIllustrations": [
+    {
+      "id": "sofa",
+      "label": "ソファ",
+      "path": "room/catalog/sofa.svg",
+      "role": "catalog_thumbnail",
+      "status": "prototype_vector_placeholder"
+    },
+    {
+      "id": "bed",
+      "label": "ベッド",
+      "path": "room/catalog/bed.svg",
+      "role": "catalog_thumbnail",
+      "status": "prototype_vector_placeholder"
+    },
+    {
+      "id": "lamp",
+      "label": "ライト",
+      "path": "room/catalog/lamp.svg",
+      "role": "catalog_thumbnail",
+      "status": "prototype_vector_placeholder"
+    },
+    {
+      "id": "cushion",
+      "label": "クッション",
+      "path": "room/catalog/cushion.svg",
+      "role": "catalog_thumbnail",
+      "status": "prototype_vector_placeholder"
+    },
+    {
+      "id": "fish",
+      "label": "水槽",
+      "path": "room/catalog/fish.svg",
+      "role": "catalog_thumbnail",
+      "status": "prototype_vector_placeholder"
     }
   ]
 }
