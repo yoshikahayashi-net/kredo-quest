@@ -135,12 +135,12 @@ footer strong{color:#3d7e9f}
 (function(){
 "use strict";
 const STORAGE_KEY="kredo-quest-avatar-lab-v1";
-const defaults={hairStyle:"short",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue"};
+const defaults={faceShape:"oval",hairColor:"brown",outfit:"work",accessory:"cap",effect:"blue"};
 const categories={
- hairStyle:{label:"髪型",icon:"✂️",summary:"髪型",items:[
-  {id:"short",name:"ショート",desc:"軽やかなスタイル",icon:"💇🏻"},
-  {id:"bob",name:"ボブ",desc:"まとまりのある形",icon:"👩🏻"},
-  {id:"long",name:"ロング",desc:"長めのシルエット",icon:"🧑🏻"}
+ faceShape:{label:"顔型",icon:"◉",summary:"顔型",items:[
+  {id:"round",name:"やわらか丸型",desc:"やわらかな輪郭",icon:"◯"},
+  {id:"oval",name:"スタンダード",desc:"バランスのよい輪郭",icon:"◉"},
+  {id:"sharp",name:"シャープ",desc:"すっきりした輪郭",icon:"◇"}
  ]},
  hairColor:{label:"髪色",icon:"🎨",summary:"髪色",items:[
   {id:"brown",name:"ブラウン",desc:"やわらかい茶色",color:"#8c5b46"},
