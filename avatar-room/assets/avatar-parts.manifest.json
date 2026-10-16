@@ -1,14 +1,14 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "awaiting_official_layered_art",
-  "description": "Asset contract for the independent Credo Quest avatar lab. The reference mockups are UI composites, not separated production sprites.",
+  "description": "Asset contract for an independent avatar lab. The catalog thumbnails below are cropped from source UI screenshots and are selectors only; they are not body-layer sprites.",
   "canvas": {
     "width": 512,
     "height": 768,
     "format": "PNG",
     "color_space": "sRGB",
     "background": "transparent",
-    "alignment": "All part images use the same canvas dimensions and character anchor. Do not auto-trim transparent margins."
+    "alignment": "All true character-part images use the same canvas dimensions and anchor; never auto-trim transparent margins."
   },
   "render_order": [
     {
@@ -27,8 +27,18 @@
       "required": true
     },
     {
-      "key": "face",
-      "pattern": "avatar/face/neutral.png",
+      "key": "head",
+      "pattern": "avatar/head/base.png",
+      "required": true
+    },
+    {
+      "key": "eyes",
+      "pattern": "avatar/face/eyes/{expression}-eyes.png",
+      "required": true
+    },
+    {
+      "key": "mouth",
+      "pattern": "avatar/face/mouth/{expression}-mouth.png",
       "required": true
     },
     {
@@ -52,28 +62,37 @@
   "option_ids": {
     "hairStyle": [
       "short",
-      "standard",
-      "long",
-      "twin",
-      "wavy"
+      "medium",
+      "long"
     ],
     "hairColor": [
       "brown",
       "black",
       "ash",
+      "blonde",
       "rose"
     ],
     "outfit": [
       "work",
       "casual",
       "outdoor",
-      "formal"
+      "formal",
+      "yellow"
     ],
     "accessory": [
       "cap",
       "glasses",
-      "star",
+      "flower",
+      "headphones",
+      "backpack",
       "none"
+    ],
+    "expression": [
+      "neutral",
+      "smile",
+      "blush",
+      "soft",
+      "surprised"
     ],
     "effect": [
       "none",
@@ -82,14 +101,44 @@
       "pink"
     ]
   },
+  "selector_thumbnails": {
+    "format": "WebP with alpha",
+    "purpose": "choice cards only",
+    "source": "Cropped and background-transparent parts from supplied avatar customization UI screenshots; not generated character replacements.",
+    "files": [
+      "catalog/hair/short.webp",
+      "catalog/hair/medium.webp",
+      "catalog/hair/long.webp",
+      "catalog/hair/black.webp",
+      "catalog/hair/blonde.webp",
+      "catalog/outfit/work.webp",
+      "catalog/outfit/casual.webp",
+      "catalog/outfit/nature.webp",
+      "catalog/outfit/navy.webp",
+      "catalog/outfit/yellow.webp",
+      "catalog/accessory/cap.webp",
+      "catalog/accessory/glasses.webp",
+      "catalog/accessory/flower.webp",
+      "catalog/accessory/headphones.webp",
+      "catalog/accessory/backpack.webp",
+      "catalog/expression/neutral.webp",
+      "catalog/expression/smile.webp",
+      "catalog/expression/blush.webp",
+      "catalog/expression/soft.webp",
+      "catalog/expression/surprised.webp"
+    ],
+    "caveat": "Hair and expression thumbnails include parts of the face/head because the source UI only contained combined thumbnails. They must never be layered onto the character as if they were separated hair, eyes, or mouth."
+  },
   "status_by_layer": {
-    "body": "not_provided",
-    "face": "not_provided",
     "hairBack": "not_provided",
-    "hairFront": "not_provided",
+    "body": "not_provided",
     "outfit": "not_provided",
+    "head": "not_provided",
+    "eyes": "not_provided",
+    "mouth": "not_provided",
+    "hairFront": "not_provided",
     "accessory": "not_provided",
     "effect": "temporary_css_preview"
   },
-  "current_fallback": "Character crop embedded in avatar-room/index.html; preserved unchanged, not a customizable layered sprite."
+  "current_fallback": "The original character crop embedded in avatar-room/index.html remains visible unchanged until all required separated layers are available and validated."
 }
