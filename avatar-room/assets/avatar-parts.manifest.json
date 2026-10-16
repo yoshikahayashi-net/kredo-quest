@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "status": "awaiting_official_layered_art",
+  "description": "Asset contract for the independent Credo Quest avatar lab. The reference mockups are UI composites, not separated production sprites.",
+  "canvas": {
+    "width": 512,
+    "height": 768,
+    "format": "PNG",
+    "color_space": "sRGB",
+    "background": "transparent",
+    "alignment": "All part images use the same canvas dimensions and character anchor. Do not auto-trim transparent margins."
+  },
+  "render_order": [
+    {
+      "key": "hairBack",
+      "pattern": "avatar/hair/{hairStyle}/{hairColor}-back.png",
+      "required": true
+    },
+    {
+      "key": "body",
+      "pattern": "avatar/body/base.png",
+      "required": true
+    },
+    {
+      "key": "outfit",
+      "pattern": "avatar/outfits/{outfit}.png",
+      "required": true
+    },
+    {
+      "key": "face",
+      "pattern": "avatar/face/neutral.png",
+      "required": true
+    },
+    {
+      "key": "hairFront",
+      "pattern": "avatar/hair/{hairStyle}/{hairColor}-front.png",
+      "required": true
+    },
+    {
+      "key": "accessory",
+      "pattern": "avatar/accessories/{accessory}.png",
+      "required": false,
+      "skip_when": "accessory=none"
+    },
+    {
+      "key": "effect",
+      "pattern": "avatar/effects/{effect}.png",
+      "required": false,
+      "skip_when": "effect=none"
+    }
+  ],
+  "option_ids": {
+    "hairStyle": [
+      "short",
+      "standard",
+      "long",
+      "twin",
+      "wavy"
+    ],
+    "hairColor": [
+      "brown",
+      "black",
+      "ash",
+      "rose"
+    ],
+    "outfit": [
+      "work",
+      "casual",
+      "outdoor",
+      "formal"
+    ],
+    "accessory": [
+      "cap",
+      "glasses",
+      "star",
+      "none"
+    ],
+    "effect": [
+      "none",
+      "blue",
+      "gold",
+      "pink"
+    ]
+  },
+  "status_by_layer": {
+    "body": "not_provided",
+    "face": "not_provided",
+    "hairBack": "not_provided",
+    "hairFront": "not_provided",
+    "outfit": "not_provided",
+    "accessory": "not_provided",
+    "effect": "temporary_css_preview"
+  },
+  "current_fallback": "Character crop embedded in avatar-room/index.html; preserved unchanged, not a customizable layered sprite."
+}
