@@ -202,7 +202,8 @@ function renderCatalog(){
  catalog.filter(item=>selectedCategory==="all"||item.group===selectedCategory).forEach(item=>{
   const b=document.createElement("button");b.type="button";b.className="catalog-item";b.setAttribute("aria-pressed",String(selectedType===item.id));
   const art=item.image?'<img src="'+item.image+'" alt="" loading="lazy" draggable="false">':item.icon;
-  b.innerHTML='<span class="catalog-emoji" aria-hidden="true">'+art+'</span><b>'+item.name+'</b><small>'+((item.group==="furniture")?"家具":"小物")+'</small>';
+  const typeLabel=item.assetKind==="vector-placeholder"?"仮素材":(item.group==="furniture"?"家具":"小物");
+  b.innerHTML='<span class="catalog-emoji" aria-hidden="true">'+art+'</span><b>'+item.name+'</b><small>'+typeLabel+'</small>';
   b.addEventListener("click",()=>{selectedType=item.id;renderCatalog();$("selectionInfo").textContent=item.name+"を選択中。「選択したアイテムを置く」で配置できます。";});
   grid.appendChild(b);
  });
