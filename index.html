@@ -582,7 +582,13 @@ body{display:flex;justify-content:center}
       const account=context.account;
       const user=context.user;
       if(!user||user.demo)return {uid:'guest',sourceUid:'guest',total:0,spent:0,available:0,account:account,user:user,ranking:[]};
-      let total=storedTotal(uid);
+      let remoteAuth=false;
+      try{remoteAuth=Boolean(supabaseClient&&user&&!user.demo&&user.id===uid)}catch(e){}
+      const authoritative=window.__kredoAuthoritativePointBalance;
+      const hasAuthoritative=Boolean(remoteAuth&&authoritative&&authoritative.uid===uid&&Number.isFinite(Number(authoritative.total)));
+      // For Supabase-authenticated users, localStorage is only a cache, never the source of truth.
+      // Until the profile has been fetched, do not expose an old cached balance such as 73 pt.
+      let total=remoteAuth?(hasAuthoritative?Math.max(0,Number(authoritative.total)||0):0):storedTotal(uid);
       let sourceUid=uid;
       let customizationRaw=localStorage.getItem('kredoCustomization:'+uid);
       let customization=readJson('kredoCustomization:'+uid,{})||{};
@@ -591,7 +597,7 @@ body{display:flex;justify-content:center}
       // Local ranking snapshots are presentation data only; never use them as a balance source.
       // Use in-memory points only when the main app confirms it belongs to this account.
       try{
-        if(typeof state!=='undefined'&&typeof stateOwnerKey!=='undefined'&&stateOwnerKey==='kredoState:'+uid+':'){
+        if(!remoteAuth&&typeof state!=='undefined'&&typeof stateOwnerKey!=='undefined'&&stateOwnerKey==='kredoState:'+uid+':'){
           total=Math.max(total,Math.max(0,Number(state.totalPoints)||0));
         }
       }catch(e){}
@@ -608,14 +614,14 @@ body{display:flex;justify-content:center}
         }
       }catch(e){}
       const available=Math.max(0,total-spent);
-      return {uid:uid,sourceUid:sourceUid,total:total,spent:spent,available:available,account:account,user:user,ranking:rows};
+      return {uid:uid,sourceUid:sourceUid,total:total,spent:spent,available:available,account:account,user:user,ranking:rows,pending:Boolean(remoteAuth&&!hasAuthoritative)};
     }
     function syncSafePointDisplay(){
       try{
         const snapshot=safePointSnapshot();
         const guest=!snapshot.user||snapshot.user.demo;
-        const values=guest?{exchangeSpendablePoints:'対象外',profileLifetimePoints:'対象外',profileSpendablePoints:'対象外',avatarLifetimePoints:'対象外',avatarSpendablePoints:'対象外',profilePoints:'対象外'}:{exchangeSpendablePoints:snapshot.available,profileLifetimePoints:snapshot.total,profileSpendablePoints:snapshot.available,avatarLifetimePoints:snapshot.total,avatarSpendablePoints:snapshot.available,profilePoints:snapshot.total};
-        Object.keys(values).forEach(function(id){const element=document.getElementById(id);if(element)element.textContent=guest?values[id]:values[id]+' pt'});
+        const values=guest?{exchangeSpendablePoints:'対象外',profileLifetimePoints:'対象外',profileSpendablePoints:'対象外',avatarLifetimePoints:'対象外',avatarSpendablePoints:'対象外',profilePoints:'対象外'}:snapshot.pending?{exchangeSpendablePoints:'確認中',profileLifetimePoints:'確認中',profileSpendablePoints:'確認中',avatarLifetimePoints:'確認中',avatarSpendablePoints:'確認中',profilePoints:'確認中'}:{exchangeSpendablePoints:snapshot.available,profileLifetimePoints:snapshot.total,profileSpendablePoints:snapshot.available,avatarLifetimePoints:snapshot.total,avatarSpendablePoints:snapshot.available,profilePoints:snapshot.total};
+        Object.keys(values).forEach(function(id){const element=document.getElementById(id);if(element)element.textContent=guest||snapshot.pending?values[id]:values[id]+' pt'});
         return snapshot;
       }catch(e){return {uid:'不明',total:0,spent:0,available:0,error:String(e&&e.message?e.message:e)}}
     }
@@ -1565,7 +1571,7 @@ let stateOwnerKey=stateStoragePrefix();
 function loadState(){const p=stateStoragePrefix();state={totalPoints:isAuthenticatedPlayer()?Number(localStorage.getItem(p+'totalPoints')||0):0,plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||'',clearStage:Number(localStorage.getItem(p+'clearStage')||0)};stateOwnerKey=p;}
 function saveState(){const p=stateStoragePrefix();if(!isAuthenticatedPlayer())state.totalPoints=0;localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');localStorage.setItem(p+'clearStage',String(state.clearStage||0));stateOwnerKey=p;}
 async function syncAttemptCount(){if(!supabaseClient||!currentUser)return;try{const {count,error}=await supabaseClient.from('quiz_attempts').select('id',{count:'exact',head:true}).eq('user_id',currentUser.id);if(!error&&typeof count==='number'){state.plays=count;saveState();updateProfile()}}catch(e){console.error('Attempt count sync error:',e)}}
-function updateProfile(){const snapshot=typeof window.__syncPointBalanceSafe==='function'?window.__syncPointBalanceSafe():null;const totalPoints=snapshot&&Number.isFinite(Number(snapshot.total))?Math.max(0,Number(snapshot.total)||0):(typeof resolveCachedLifetimePoints==='function'?resolveCachedLifetimePoints():Math.max(0,Number(state.totalPoints)||0));document.getElementById('profilePoints').textContent=isAuthenticatedPlayer()?totalPoints+' pt':'対象外';document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';}
+function updateProfile(){const snapshot=typeof window.__syncPointBalanceSafe==='function'?window.__syncPointBalanceSafe():null;const totalPoints=snapshot&&Number.isFinite(Number(snapshot.total))?Math.max(0,Number(snapshot.total)||0):(typeof resolveCachedLifetimePoints==='function'?resolveCachedLifetimePoints():Math.max(0,Number(state.totalPoints)||0));document.getElementById('profilePoints').textContent=!isAuthenticatedPlayer()?'対象外':(snapshot?.pending?'確認中':totalPoints+' pt');document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';}
 
 let editingIndex=-1;
 function renderLibrary(){
@@ -1707,6 +1713,8 @@ async function renderRanking(){document.getElementById('rankingMonth').textConte
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 async function ensureProfileAfterLogin(){
   if(!supabaseClient||!currentUser)return null;
+  window.__kredoPointBalancePendingUid=currentUser.id;
+  window.__syncPointBalanceSafe?.();
 
   // Load only this authenticated user's account-scoped cache.
   // Guest/demo points and the old shared legacy key are never migrated.
@@ -1743,17 +1751,25 @@ async function ensureProfileAfterLogin(){
       profile=existing;
     }
 
-    // profiles.total_points is the account's server-side balance.
-    // Do not add legacy, guest, demo, ranking, or stale browser-wide totals.
-    state.totalPoints=Math.max(0,Number(profile?.total_points)||0);
+    // profiles.total_points is the authoritative account balance.
+    // Replace all stale local values rather than taking their maximum.
+    const profileTotal=Math.max(0,Number(profile?.total_points)||0);
+    window.__kredoAuthoritativePointBalance={uid:currentUser.id,total:profileTotal,verifiedAt:Date.now()};
+    if(window.__kredoPointBalancePendingUid===currentUser.id)delete window.__kredoPointBalancePendingUid;
+    state.totalPoints=profileTotal;
     saveState();
     await syncAttemptCount();
     updateProfile();
     renderPointsInNewUI();
     return profile;
   }catch(e){
-    // Keep only the account-scoped cache if the server cannot be reached.
-    state.totalPoints=cachedAccountTotal;
+    // Do not fall back to an unverified browser cache (it may contain guest points).
+    if(!window.__kredoAuthoritativePointBalance||window.__kredoAuthoritativePointBalance.uid!==currentUser.id){
+      window.__kredoPointBalancePendingUid=currentUser.id;
+      state.totalPoints=0;
+    }else{
+      state.totalPoints=Math.max(0,Number(window.__kredoAuthoritativePointBalance.total)||0);
+    }
     saveState();
     updateProfile();
     renderPointsInNewUI();
@@ -1827,6 +1843,8 @@ async function refreshPointExchangeBalance(){
       if(data&&data.total_points!==undefined&&data.total_points!==null){
         // The authenticated profile is authoritative; discard stale browser-wide totals.
         state.totalPoints=Math.max(0,Number(data.total_points)||0);
+        window.__kredoAuthoritativePointBalance={uid:currentUser.id,total:state.totalPoints,verifiedAt:Date.now()};
+        if(window.__kredoPointBalancePendingUid===currentUser.id)delete window.__kredoPointBalancePendingUid;
         serverBalanceLoaded=true;
       }
     }
@@ -1936,7 +1954,7 @@ function spendablePoints(){
   const total=resolveCachedLifetimePoints();
   return Math.max(0,total-Number(customization.spentPoints||0));
 }
-function renderPointsInNewUI(){if(!isAuthenticatedPlayer()){['profileLifetimePoints','profileSpendablePoints','avatarLifetimePoints','avatarSpendablePoints'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='対象外'});return}const snapshot=typeof window.__syncPointBalanceSafe==='function'?window.__syncPointBalanceSafe():null;const lifetime=snapshot&&Number.isFinite(Number(snapshot.total))?Math.max(0,Number(snapshot.total)||0):(typeof resolveCachedLifetimePoints==='function'?resolveCachedLifetimePoints():Math.max(0,Number(state.totalPoints)||0));const available=snapshot&&Number.isFinite(Number(snapshot.available))?Math.max(0,Number(snapshot.available)||0):spendablePoints();[['profileLifetimePoints',lifetime],['profileSpendablePoints',available],['avatarLifetimePoints',lifetime],['avatarSpendablePoints',available]].forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.textContent=Number(val||0)+' pt'})}
+function renderPointsInNewUI(){if(!isAuthenticatedPlayer()){['profileLifetimePoints','profileSpendablePoints','avatarLifetimePoints','avatarSpendablePoints'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='対象外'});return}const snapshot=typeof window.__syncPointBalanceSafe==='function'?window.__syncPointBalanceSafe():null;if(snapshot?.pending){['profileLifetimePoints','profileSpendablePoints','avatarLifetimePoints','avatarSpendablePoints'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='確認中'});return}const lifetime=snapshot&&Number.isFinite(Number(snapshot.total))?Math.max(0,Number(snapshot.total)||0):(typeof resolveCachedLifetimePoints==='function'?resolveCachedLifetimePoints():Math.max(0,Number(state.totalPoints)||0));const available=snapshot&&Number.isFinite(Number(snapshot.available))?Math.max(0,Number(snapshot.available)||0):spendablePoints();[['profileLifetimePoints',lifetime],['profileSpendablePoints',available],['avatarLifetimePoints',lifetime],['avatarSpendablePoints',available]].forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.textContent=Number(val||0)+' pt'})}
 function avatarSvg(a){const hc={black:'#24313B',brown:'#76513E',ash:'#8A8496',blue:'#395A88',rose:'#B86F83'}[a.hairColor]||'#24313B',oc={work:'#4A90A9',casual:'#7DA6C4',neat:'#6B7AA7',sporty:'#5DBA91',pop:'#D784A4'}[a.outfit]||'#4A90A9';let hair=a.hairStyle==='long'?'<path d="M45 74c0-43 57-56 88-23 14 15 13 55 1 81-9 20-26 29-50 25-26-4-39-25-39-53V74Z" fill="'+hc+'"/><path d="M52 71c13-10 28-15 47-15 24 0 38 8 48 22" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="5"/>':a.hairStyle==='pony'?'<circle cx="147" cy="54" r="17" fill="'+hc+'"/><path d="M52 73c0-42 62-54 88-18 8 12 10 35 4 50-10 24-31 30-61 25-21-4-31-21-31-57Z" fill="'+hc+'"/>':a.hairStyle==='spiky'?'<path d="M47 77 55 46 68 58 84 34 96 53 112 30 118 52 139 39 135 72c-22-16-62-15-88 5Z" fill="'+hc+'"/>':a.hairStyle==='medium'?'<path d="M49 68c0-40 60-51 89-20 10 11 12 28 9 48-4 28-24 39-63 34-25-3-35-23-35-62Z" fill="'+hc+'"/>':'<path d="M54 70c0-40 58-52 87-20 9 10 10 25 7 40-6 28-27 38-59 34-25-3-35-22-35-54Z" fill="'+hc+'"/>';let acc=a.accessory==='glasses'?'<rect x="60" y="87" width="27" height="17" rx="8" fill="rgba(255,255,255,.2)" stroke="#365364" stroke-width="3"/><rect x="94" y="87" width="27" height="17" rx="8" fill="rgba(255,255,255,.2)" stroke="#365364" stroke-width="3"/><path d="M87 95h7" stroke="#365364" stroke-width="3"/>' :a.accessory==='cap'?'<path d="M47 59c8-25 34-38 58-38 24 0 43 12 51 35-37-8-72-7-108 3Z" fill="#F3FAFD" stroke="#5AA5C5" stroke-width="3"/><path d="M97 57c19-4 40-1 58 5" stroke="#3D7995" stroke-width="5" stroke-linecap="round"/>' :a.accessory==='headphone'?'<path d="M49 91V75c0-36 22-57 51-57s51 21 51 57v16" fill="none" stroke="#355D73" stroke-width="8"/><rect x="39" y="84" width="15" height="30" rx="7" fill="#355D73"/><rect x="145" y="84" width="15" height="30" rx="7" fill="#355D73"/>' :a.accessory==='badge'?'<circle cx="122" cy="180" r="10" fill="#FFD63B" stroke="#fff" stroke-width="3"/><text x="122" y="184" text-anchor="middle" font-size="8" font-weight="900" fill="#7A5C00">C</text>':'';let eff=a.effect==='sparkle'?'<text x="20" y="56" font-size="26" fill="#FFE25A">✦</text><text x="159" y="133" font-size="20" fill="#FFE25A">✦</text>':a.effect==='leaf'?'<text x="18" y="140" font-size="25">🍃</text><text x="154" y="64" font-size="22">🍃</text>':a.effect==='star'?'<text x="16" y="58" font-size="23" fill="#FFD84D">★</text><text x="160" y="145" font-size="20" fill="#FFD84D">★</text>':a.effect==='shield'?'<path d="M169 128l16 8v14c0 15-9 24-16 29-7-5-16-14-16-29v-14Z" fill="#D3EEF8" stroke="#4A90A9" stroke-width="3"/>':'';return'<svg class="avatar-svg" viewBox="0 0 200 260" aria-label="プレイヤーアバター">'+eff+'<ellipse cx="100" cy="239" rx="51" ry="10" fill="rgba(33,86,108,.12)"/><path d="M51 176c3-32 20-48 49-48s46 16 49 48v28H51Z" fill="'+oc+'"/><path d="M76 150h48v27H76Z" fill="#F7FBFD" opacity=".94"/><circle cx="100" cy="104" r="45" fill="#FFD8BF"/>'+hair+'<circle cx="84" cy="106" r="4.5" fill="#314654"/><circle cx="116" cy="106" r="4.5" fill="#314654"/><circle cx="82.5" cy="104.5" r="1.6" fill="#fff"/><circle cx="114.5" cy="104.5" r="1.6" fill="#fff"/><path d="M91 121c6 4 12 4 18 0" fill="none" stroke="#A85F59" stroke-width="3" stroke-linecap="round"/>'+acc+'<path d="M62 195h24v28H62Z" fill="#435C69"/><path d="M114 195h24v28H114Z" fill="#435C69"/><rect x="56" y="220" width="35" height="10" rx="5" fill="#2E495A"/><rect x="109" y="220" width="35" height="10" rx="5" fill="#2E495A"/></svg>'}
 function avatarVariant(category,id){const a={...customization.avatar,[category]:id};return avatarSvg(a)}
 function renderAvatarUI(){const p=document.getElementById('avatarPreview');if(p)p.innerHTML=avatarSvg(customization.avatar);renderPointsInNewUI();const cat=document.querySelector('.avatar-category-btn.active')?.dataset.cat||'hairStyle';renderAvatarOptions(cat)}
