@@ -656,6 +656,7 @@ body{display:flex;justify-content:center}
     window.__diagnosePointBalanceSafe=function(){
       try{
         const snapshot=syncSafePointDisplay();
+        if(!snapshot.user||snapshot.user.demo){window.alert('ポイント診断はログイン後に利用できます。');return;}
         const context=getContext();
         const keys=[];
         for(let i=0;i<localStorage.length;i++){
@@ -697,6 +698,7 @@ body{display:flex;justify-content:center}
 
     window.__safeCompletePointExchange=function(id,cost,name){
       const snapshot=syncSafePointDisplay();
+      if(!snapshot.user||snapshot.user.demo){pointExchangeModal('ログインが必要です','ポイント交換はログイン後に利用できます。','alert');return;}
       if(snapshot.available<cost){
         pointExchangeModal('ポイントが足りません','現在 <strong>'+snapshot.available+' pt</strong>です。<br>交換には <strong>'+cost+' pt</strong>必要です。','alert');
         return;
