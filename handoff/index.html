@@ -1408,13 +1408,10 @@ function getLegacyQuestIndices(dateKey){
 }
 function getBalancedQuestIndices(dateKey,previousIndices){
   const seed=dateSeed(dateKey);
-  const assignedIndices=new Set(QUEST_THEME_GROUPS.flatMap(group=>group.indices));
-  const additionalIndices=questions.map((_,index)=>index).filter(index=>!assignedIndices.has(index));
-  const groupDefinitions=additionalIndices.length
-    ? [...QUEST_THEME_GROUPS,{key:'additional',label:'追加問題',indices:additionalIndices}]
-    : QUEST_THEME_GROUPS;
-  const eligibleGroups=groupDefinitions
-    .map((group,groupIndex)=>({groupIndex,indices:group.indices.filter(index=>index<questions.length&&!previousIndices.includes(index))}))
+  // 現行Supabase側の question_indices は 0〜27（28問）に制限されているため、
+  // 本番の28問を対象にテーマ分散する。問題数を増やす場合はDB制約/RPCも同時に拡張する。
+  const eligibleGroups=QUEST_THEME_GROUPS
+    .map((group,groupIndex)=>({groupIndex,indices:group.indices.filter(index=>index<questions.length&&index<=27&&!previousIndices.includes(index))}))
     .filter(group=>group.indices.length>0);
   if(eligibleGroups.length<5)throw new Error('出題テーマの候補が不足しています。');
   const selectedGroups=seededShuffle(eligibleGroups,(seed^0x5f3759df)>>>0).slice(0,5);
