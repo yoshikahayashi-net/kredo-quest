@@ -689,6 +689,7 @@ body{display:flex;justify-content:center}
         if(error)throw error;
         const result=Array.isArray(data)?data[0]:data;
         if(!result||!result.redemption_id)throw new Error('交換結果を確認できませんでした');
+        pointBalanceRefreshSeq++;
         window.__serverPointBalance={userId:snapshot.uid,total:Math.max(0,Number(result.total_points)||snapshot.total),spent:Math.max(0,Number(result.spent_points)||0),loaded:true};
         try{await refreshServerPointBalance()}catch(refreshError){console.warn('Point balance refresh after redemption skipped',refreshError)}
         try{await loadCustomization(true)}catch(e){}
@@ -1700,6 +1701,7 @@ async function showResult(){
       state.lastBonus=dailyQuestKey;
       const balance=window.__serverPointBalance||{};
       if(result.total_points!==undefined&&result.total_points!==null){
+        pointBalanceRefreshSeq++;
         window.__serverPointBalance={userId:currentUser.id,total:Math.max(0,Number(result.total_points)||0),spent:Math.max(0,Number(balance.spent)||0),loaded:true};
         state.totalPoints=window.__serverPointBalance.total;
       }
@@ -1745,6 +1747,7 @@ const DEMO_QUESTIONS = JSON.parse(JSON.stringify(questions));
 function readInitialStateValue(field,legacyKey){try{const scoped=localStorage.getItem(stateStoragePrefix()+field);if(scoped!==null)return Math.max(0,Number(scoped)||0);return field==='totalPoints'?0:Math.max(0,Number(localStorage.getItem(legacyKey)||0));}catch(e){return 0}}
 let state={totalPoints:0,plays:readInitialStateValue('plays','kredoPlays'),bestCombo:readInitialStateValue('bestCombo','kredoBestCombo'),lastBonus:(()=>{try{return localStorage.getItem(stateStoragePrefix()+'lastBonus')||localStorage.getItem('kredoLastBonus')||''}catch(e){return ''}})(),clearStage:readInitialStateValue('clearStage','kredoClearStage')};
 window.__serverPointBalance={userId:null,total:0,spent:0,loaded:false};
+let pointBalanceRefreshSeq=0;
 function isAuthenticatedPlayer(){return Boolean(currentUser?.id&&!currentUser.demo)}
 function stateStoragePrefix(){const id=currentUser?.id||getLocalAccount()?.id||'guest';return 'kredoState:'+id+':';}
 let stateOwnerKey=stateStoragePrefix();
@@ -1929,10 +1932,12 @@ async function refreshServerPointBalance(){
     return null;
   }
   const uid=currentUser.id;
+  const requestSeq=++pointBalanceRefreshSeq;
   const [profileResult,customizationResult]=await Promise.all([
     supabaseClient.from('profiles').select('total_points').eq('id',uid).maybeSingle(),
     supabaseClient.from('player_customizations').select('spent_points').eq('user_id',uid).maybeSingle()
   ]);
+  if(requestSeq!==pointBalanceRefreshSeq || !isAuthenticatedPlayer() || currentUser.id!==uid) return window.__serverPointBalance;
   if(profileResult.error)throw profileResult.error;
   if(!profileResult.data)throw new Error('プロフィール残高を取得できませんでした');
   if(customizationResult.error)throw customizationResult.error;
