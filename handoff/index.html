@@ -1408,7 +1408,12 @@ function getLegacyQuestIndices(dateKey){
 }
 function getBalancedQuestIndices(dateKey,previousIndices){
   const seed=dateSeed(dateKey);
-  const eligibleGroups=QUEST_THEME_GROUPS
+  const assignedIndices=new Set(QUEST_THEME_GROUPS.flatMap(group=>group.indices));
+  const additionalIndices=questions.map((_,index)=>index).filter(index=>!assignedIndices.has(index));
+  const groupDefinitions=additionalIndices.length
+    ? [...QUEST_THEME_GROUPS,{key:'additional',label:'追加問題',indices:additionalIndices}]
+    : QUEST_THEME_GROUPS;
+  const eligibleGroups=groupDefinitions
     .map((group,groupIndex)=>({groupIndex,indices:group.indices.filter(index=>index<questions.length&&!previousIndices.includes(index))}))
     .filter(group=>group.indices.length>0);
   if(eligibleGroups.length<5)throw new Error('出題テーマの候補が不足しています。');
