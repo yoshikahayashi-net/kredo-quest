@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>抱月クレドクエスト｜Prototype v45-clean</title>
+<title>抱月クレドクエスト｜Prototype v50-account-status-layout-fixed</title>
 <style>
+#avatarCustomizer{display:none!important}
+
 :root{
   --blue:#168BCB;
   --blue-dark:#0D6DA6;
@@ -39,6 +41,25 @@ body{display:flex;justify-content:center}
 .hero-copy{position:relative;z-index:2;padding:4px 4px 0}.hero-kicker{font-size:11px;font-weight:900;letter-spacing:.15em;color:#0D6DA6}.hero-title{font-size:28px;line-height:1.32;margin:8px 0 4px;font-weight:900}.hero-sub{font-size:14px;line-height:1.6;color:#467083;margin:0;max-width:290px}
 .character-stage{position:relative;z-index:2;height:175px;margin-top:4px;display:flex;align-items:flex-end;justify-content:center}.char-placeholder{position:relative;width:110px;height:128px;border-radius:48% 48% 30% 30%;background:linear-gradient(180deg,#FFFFFF,#F1F7F9);border:4px solid #D7EEF7;box-shadow:0 10px 18px rgba(22,111,146,.13);display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px}.char-placeholder:before,.char-placeholder:after{content:"";position:absolute;top:-12px;width:36px;height:36px;background:#FFFFFF;border:4px solid #D7EEF7}.char-placeholder:before{left:2px;transform:rotate(25deg);clip-path:polygon(0 0,100% 35%,40% 100%)}.char-placeholder:after{right:2px;transform:rotate(-25deg);clip-path:polygon(0 35%,100% 0,60% 100%)}.char-face{font-size:34px;font-weight:900;color:#82A4B2}.char-note{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:-28px;white-space:nowrap;font-size:9px;color:#548197;font-weight:800;background:rgba(255,255,255,.82);padding:4px 8px;border-radius:999px;border:1px dashed #A6CFDE}
 .start-btn{position:relative;z-index:5;display:flex;align-items:center;justify-content:center;gap:10px;margin:0 18px;height:58px;background:var(--yellow);color:#254455;border:0;border-radius:18px;width:calc(100% - 36px);font-weight:900;font-size:17px;box-shadow:0 8px 16px rgba(230,184,31,.27);cursor:pointer;transition:.17s}.start-btn:hover{transform:translateY(-1px);filter:brightness(1.02)}.arrow{margin-left:auto;margin-right:12px;font-size:22px}
+.home-account-prompt{position:relative;z-index:6;margin:9px 18px 0;width:calc(100% - 36px)}
+.home-room-entry{position:relative;z-index:6}
+.home-account-cta{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #A9D3E4;border-radius:15px;background:#fff;color:#155D7B;text-align:left;box-shadow:0 4px 11px rgba(31,105,131,.08);cursor:pointer}
+.home-account-cta .account-cta-icon{width:34px;height:34px;flex:none;border-radius:11px;background:#E8F6FC;display:grid;place-items:center;font-size:18px}
+.home-account-cta strong{display:block;font-size:12px;font-weight:900}
+.home-account-cta small{display:block;margin-top:3px;color:#617D8C;font-size:10px;line-height:1.45}
+.home-account-cta .account-cta-arrow{margin-left:auto;font-size:20px;color:#287D9E}
+.home-account-signedin{padding:10px 13px;border:1px solid #BBDDC7;border-radius:14px;background:#F1FAF3;color:#286441;line-height:1.45}
+.home-account-signedin strong{display:block;font-size:12px}
+.home-account-signedin small{display:block;margin-top:2px;font-size:10px;color:#527A60}
+.account-state-card{margin:0 0 12px;padding:13px 14px;border:1px solid #BBDDC7;border-radius:15px;background:#F1FAF3;color:#286441}
+.account-state-card.is-guest{border-color:#EAD69A;background:#FFF9E9;color:#765B17}
+.account-state-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.account-state-label{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:#DDF1E2;color:#286441;font-size:10px;font-weight:900}
+.account-state-card.is-guest .account-state-label{background:#F7EBC6;color:#765B17}
+.account-state-card strong{font-size:12px;line-height:1.5}
+.account-state-detail{margin-top:6px;font-size:10px;line-height:1.55;color:#527A60;overflow-wrap:anywhere}
+.account-state-card.is-guest .account-state-detail{color:#866D2C}
+.account-state-action{width:100%;margin-top:10px;padding:10px 12px;border:0;border-radius:11px;background:#176D91;color:#fff;font-size:11px;font-weight:900;cursor:pointer}
 .home-grid{position:relative;z-index:4;padding:10px 12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#EFFBFE}.menu-card{min-height:98px;background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 10px rgba(31,105,131,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#24506A;font-weight:900;cursor:pointer}.menu-icon{font-size:27px}.menu-label{font-size:12px}
 .bottom-nav{position:fixed;bottom:0;width:min(100%,460px);height:69px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:30}.nav-item{border:0;background:transparent;color:#8A9EAA;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}.nav-icon{font-size:20px;line-height:1}.nav-item.active{color:var(--blue-dark)}
 /* quest screen */
@@ -315,12 +336,8 @@ body{display:flex;justify-content:center}
         </div>
       </div>
       <button class="start-btn" onclick="startQuest()"><span>▶</span> はじめる <span class="arrow">›</span></button>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 16px 0">
-        <button class="avatar-entry" style="width:100%;margin:0" onclick="location.href='avatar.html?v=42'">
-          <div class="avatar-entry-preview" id="homeAvatarPreview"></div>
-          <div class="avatar-entry-copy"><div class="avatar-entry-title">アバター</div><div class="avatar-entry-sub">自分だけのキャラクター</div></div>
-          <div class="avatar-entry-arrow">›</div>
-        </button>
+      <div class="home-account-prompt" id="homeAccountPrompt" aria-live="polite"></div>
+      <div class="home-room-entry" style="display:grid;grid-template-columns:1fr;gap:8px;margin:10px 16px 0">
         <button class="avatar-entry" style="width:100%;margin:0" onclick="location.href='myroom.html?v=42'">
           <div class="avatar-entry-preview" id="homeRoomPreview">⌂</div>
           <div class="avatar-entry-copy"><div class="avatar-entry-title">マイルーム</div><div class="avatar-entry-sub">自分だけの拠点</div></div>
@@ -508,6 +525,7 @@ body{display:flex;justify-content:center}
     <div class="mypage-wrap">
       <div style="font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.08em">MY PAGE</div>
       <h2 style="margin:5px 0 14px;font-size:24px">あなたのクレドクエスト</h2>
+      <div class="account-state-card" id="myPageAccountState" aria-live="polite"></div>
       <div class="profile-card">
         <div class="profile-main"><div class="profile-orb">🌙</div><div><strong id="profileTitle">クレド見習い</strong><small id="profileSub">まずは気軽に1回プレイしてみよう</small></div></div>
         <div class="profile-stat"><small>累計ポイント</small><strong id="profilePoints">0 pt</strong></div>
@@ -515,13 +533,7 @@ body{display:flex;justify-content:center}
         <div class="profile-stat"><small>最高COMBO</small><strong id="profileCombo">0</strong></div>
         <div class="profile-stat"><small>登録クイズ</small><strong id="profileQuestions">30 問</strong></div>
       </div>
-      <div class="mypage-avatar-row">
-        <div class="mypage-avatar-preview" id="mypageAvatarPreview"></div>
-        <div class="mypage-avatar-copy"><strong id="mypageAvatarName">プレイヤー</strong><small>あなた専用のアバター</small></div>
-        <button class="mini-btn" style="margin-left:auto;white-space:nowrap" onclick="location.href='avatar.html?v=42'">カスタマイズ</button>
-      </div>
-      <div class="player-feature-grid">
-        <button class="feature-card" onclick="location.href='avatar.html?v=42'"><strong>✦ アバター</strong><small>髪型・髪色・服装・アクセサリー・エフェクト</small></button>
+      <div class="player-feature-grid" style="grid-template-columns:1fr">
         <button class="feature-card" onclick="location.href='myroom.html?v=42'"><strong>⌂ マイルーム</strong><small>部屋テーマや家具を少しずつ自分好みに</small></button>
       </div>
       <div class="avatar-points">
@@ -592,7 +604,8 @@ body{display:flex;justify-content:center}
         Object.keys(values).forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=(guest||loading)?values[id]:values[id]+' pt';});
         return snapshot;
       }catch(e){return {uid:'不明',total:0,spent:0,available:0,loading:true,error:String(e&&e.message?e.message:e)}}
-    }function safeSpendablePoints(){return syncSafePointDisplay().available}
+    }
+    function safeSpendablePoints(){return syncSafePointDisplay().available}
     function esc(value){return String(value==null?'':value).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
     function pointExchangeModal(title,message,mode,onConfirm){
       const m=document.getElementById('exchangeModal');
@@ -689,6 +702,7 @@ body{display:flex;justify-content:center}
         const message=String(error&&error.message?error.message:error);
         if(/insufficient_points/i.test(message))pointExchangeModal('ポイントが足りません','現在のポイント残高を確認してください。ポイントは消費されていません。','alert');
         else if(/login_required/i.test(message))pointExchangeModal('ログインが必要です','ポイント交換はログイン済みアカウントのみ利用できます。','alert');
+        else if(/monthly_redemption_limit_reached/i.test(message))pointExchangeModal('今月の交換上限に達しました','ポイント交換は毎月2回までです。<br>今月の交換回数が上限に達したため、来月またご利用ください。<br>ポイントは消費されていません。','alert');
         else pointExchangeModal('交換に失敗しました','交換処理を完了できませんでした。ポイントは消費されていません。','alert');
       }finally{safeExchangeBusy=false;}
     };
@@ -700,7 +714,7 @@ body{display:flex;justify-content:center}
       pointExchangeModal('交換しますか？','「'+esc(name)+'」と交換しますか？<br><strong>'+cost+' pt</strong>を使用します。','confirm',function(){window.__safeCompletePointExchange(id,cost,name)});
     };
 
-        document.addEventListener('DOMContentLoaded',function(){syncSafePointDisplay()});
+    document.addEventListener('DOMContentLoaded',function(){syncSafePointDisplay()});
     window.addEventListener('load',function(){syncSafePointDisplay()});
   })();
   </script>
@@ -808,7 +822,6 @@ body{display:flex;justify-content:center}
         <button class="main-menu-item" onclick="startQuest();closeMainMenu()"><span class="main-menu-icon">♣</span><span>今日のクエスト</span></button>
         <button class="main-menu-item" onclick="openQuestMap();closeMainMenu()"><span class="main-menu-icon">⚔</span><span>クエストマップ</span></button>
         <button class="main-menu-item" onclick="openMyPage();closeMainMenu()"><span class="main-menu-icon">●</span><span>マイページ</span></button>
-        <button class="main-menu-item" onclick="openAvatarCustomizer();closeMainMenu()"><span class="main-menu-icon">✦</span><span>アバター</span></button>
         <button class="main-menu-item" onclick="openMyRoom();closeMainMenu()"><span class="main-menu-icon">⌂</span><span>マイルーム</span></button>
         <button class="main-menu-item" onclick="show('ranking');closeMainMenu()"><span class="main-menu-icon">🏆</span><span>ランキング</span></button>
         <button class="main-menu-item" onclick="openLanguageSettings();closeMainMenu()"><span class="main-menu-icon">文</span><span>言語設定</span><span id="languageMenuCurrent" style="margin-left:auto;font-size:10px;color:var(--muted)">日本語</span></button>
@@ -1327,6 +1340,12 @@ let questions=[
 let current=0,correct=0,combo=0,maxCombo=0,points=0,bossDone=false,resultShown=false;
 let questQuestions=[];
 let dailyQuestKey='';
+let questSession=null;
+let questStartPromise=null;
+let questAnswerBusy=false;
+let questAdvanceBusy=false;
+let questBossBusy=false;
+let questCompleteBusy=false;
 
 
 function openMainMenu(){
@@ -1350,7 +1369,7 @@ document.getElementById('navHome').classList.toggle('active',id==='home');
 document.getElementById('navQuiz').classList.toggle('active',id==='quiz'||id==='boss');
 document.getElementById('navMy').classList.toggle('active',id==='mypage'||id==='avatarCustomizer'||id==='myroom'||id==='pointExchange'||id==='pointHistory');
 document.getElementById('navRank').classList.toggle('active',id==='ranking');window.scrollTo(0,0);
-if(id==='home'){renderHomeAvatar();renderPointsInNewUI();if(isAuthenticatedPlayer())refreshServerPointBalance().catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='mypage'){updateProfile();loadCustomization();if(isAuthenticatedPlayer())refreshServerPointBalance().catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='avatarCustomizer'){loadCustomization();if(isAuthenticatedPlayer())refreshServerPointBalance().catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='myroom'){loadCustomization()}if(id==='ranking')renderRanking();if(id==='pointHistory'){renderPointHistory();if(isAuthenticatedPlayer())refreshServerPointBalance().then(()=>renderPointHistory()).catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='pointExchange'){renderPointExchange();refreshPointExchangeBalance()}if(id==='account')syncAccountUI()
+if(id==='home'){renderHomeAvatar();renderAccountIndicators();renderPointsInNewUI();if(isAuthenticatedPlayer())refreshServerPointBalance().catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='mypage'){updateProfile();renderAccountIndicators();loadCustomization();if(isAuthenticatedPlayer())refreshServerPointBalance().catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='avatarCustomizer'){loadCustomization();if(isAuthenticatedPlayer())refreshServerPointBalance().catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='myroom'){loadCustomization()}if(id==='ranking')renderRanking();if(id==='pointHistory'){renderPointHistory();if(isAuthenticatedPlayer())refreshServerPointBalance().then(()=>renderPointHistory()).catch(e=>console.warn('Point balance refresh skipped',e))}if(id==='pointExchange'){renderPointExchange();refreshPointExchangeBalance()}if(id==='account')syncAccountUI()
 }
 function openRanking(){show('ranking');}
 function syncAccountUI(){const local=getLocalAccount();const name=currentUser?.user_metadata?.display_name||local?.displayName||'';if(document.getElementById('authDisplayName')&&name)document.getElementById('authDisplayName').value=name;const loggedIn=Boolean(currentUser);const resetBtn=document.getElementById('resetPasswordBtn');const logoutBtn=document.getElementById('logoutBtn');if(resetBtn)resetBtn.style.display=(supabaseClient&&(!loggedIn||authMode==='login'))?'block':'none';if(logoutBtn)logoutBtn.style.display=loggedIn?'block':'none';}
@@ -1362,49 +1381,205 @@ function goHome(){show('home')}
 function dateSeed(dateString){let h=2166136261;for(let i=0;i<dateString.length;i++){h^=dateString.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function seededRandom(seed){return function(){seed+=0x6D2B79F5;let t=seed;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
 function seededShuffle(arr,seed){const copy=arr.slice();const rand=seededRandom(seed);for(let i=copy.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
+// 日替わりクエスト：同じ日は全員共通。11/17以降はテーマ分散＋前日問題の再出題を防止。
+// 既に保存済みのクエスト進捗は kredo_start_or_resume_quest / localStorage 側で維持される。
+const QUEST_DIVERSITY_START_DATE='2026-11-17';
+const QUEST_THEME_GROUPS=[
+  {key:'foundation',label:'基礎理解・経営品質',indices:[0,4,7,8]},
+  {key:'customer',label:'顧客本位',indices:[1,14,19]},
+  {key:'support',label:'仲間の支援・引継ぎ',indices:[2,12,15,20,23,24]},
+  {key:'improvement',label:'改善・挑戦',indices:[3,5,6,9,10,21]},
+  {key:'sharing',label:'知識・経験の共有',indices:[11,13,16,22,25,26,27]},
+  {key:'integrated',label:'複合的な判断',indices:[17,18]}
+];
+function shiftQuestDateKey(dateKey,offset){
+  const [y,m,d]=dateKey.split('-').map(Number);
+  const date=new Date(y,m-1,d+offset);
+  return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+}
+function getLegacyQuestIndices(dateKey){
+  const pool=questions.map((_,i)=>i);
+  const seed=dateSeed(dateKey);
+  let shuffled=seededShuffle(pool,seed);
+  const previousSet=seededShuffle(pool,dateSeed(shiftQuestDateKey(dateKey,-1))).slice(0,5).slice().sort((a,b)=>a-b).join('|');
+  const todaySet=shuffled.slice(0,5).slice().sort((a,b)=>a-b).join('|');
+  if(todaySet===previousSet)shuffled=seededShuffle(pool,seed+1);
+  return shuffled.slice(0,5);
+}
+function getBalancedQuestIndices(dateKey,previousIndices){
+  const seed=dateSeed(dateKey);
+  const eligibleGroups=QUEST_THEME_GROUPS
+    .map((group,groupIndex)=>({groupIndex,indices:group.indices.filter(index=>index<questions.length&&!previousIndices.includes(index))}))
+    .filter(group=>group.indices.length>0);
+  if(eligibleGroups.length<5)throw new Error('出題テーマの候補が不足しています。');
+  const selectedGroups=seededShuffle(eligibleGroups,(seed^0x5f3759df)>>>0).slice(0,5);
+  const selected=selectedGroups.map(group=>
+    seededShuffle(group.indices,(seed+0x27182818+group.groupIndex*104729)>>>0)[0]
+  );
+  return seededShuffle(selected,(seed+0x16180339)>>>0);
+}
+function getQuestIndicesForDate(dateKey){
+  if(dateKey<QUEST_DIVERSITY_START_DATE)return getLegacyQuestIndices(dateKey);
+  let cursor=QUEST_DIVERSITY_START_DATE;
+  let previous=getLegacyQuestIndices(shiftQuestDateKey(QUEST_DIVERSITY_START_DATE,-1));
+  let selected=[];
+  let safety=0;
+  while(cursor<=dateKey){
+    selected=getBalancedQuestIndices(cursor,previous);
+    previous=selected;
+    cursor=shiftQuestDateKey(cursor,1);
+    if(++safety>5000)throw new Error('出題日の計算範囲を超えました。');
+  }
+  return selected;
+}
 function buildDailyQuest(){
   const today=new Date();
   const key=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
-  const seed=dateSeed(key);
-  const pool=questions.slice();
-  if(!pool.length)return [];
-
-  // 日付ごとに別の並びを作る。同じ日は同じセット、翌日は自動的に別セット。
-  let shuffled=seededShuffle(pool,seed);
-  const normalCount=Math.min(pool.length,5); // 通常5問固定＋BOSS
-
-  // 問題数に余裕がある場合は、前日と同じセットにならないようにする。
-  if(pool.length>normalCount){
-    const prevKey=new Date(today.getFullYear(),today.getMonth(),today.getDate()-1);
-    const prevDate=prevKey.getFullYear()+'-'+String(prevKey.getMonth()+1).padStart(2,'0')+'-'+String(prevKey.getDate()).padStart(2,'0');
-    const prevSeed=dateSeed(prevDate);
-    const prevCount=Math.min(pool.length,5);
-    const prevSet=seededShuffle(pool,prevSeed).slice(0,prevCount).map(q=>q.question).sort().join('|');
-    let todaySet=shuffled.slice(0,normalCount).map(q=>q.question).sort().join('|');
-
-    if(todaySet===prevSet){
-      shuffled=seededShuffle(pool,seed+1);
-      todaySet=shuffled.slice(0,normalCount).map(q=>q.question).sort().join('|');
-    }
-  }
-
-  questQuestions=shuffled.slice(0,normalCount);
+  const selectedIndices=getQuestIndicesForDate(key);
+  questQuestions=selectedIndices.map(index=>questions[index]).filter(Boolean);
   dailyQuestKey=key;
-  const total=questQuestions.length+1;
+  const normalCount=questQuestions.length;
+  const total=normalCount+1;
   const meta=document.getElementById('dailyQuestMeta');
   if(meta)meta.textContent=`TODAY'S QUEST｜全${total}問（通常${normalCount}問＋BOSS）｜${key}`;
   return questQuestions;
 }
 
-function startQuest(){
-  current=0;correct=0;combo=0;maxCombo=0;points=0;bossDone=false;resultShown=false;
-  buildDailyQuest();
-  saveState();
-  showToast(`🎮 今日のクエスト：${questQuestions.length}問＋BOSS`);
-  show('quiz');renderQuestion();
+function questSessionStorageKey(){return 'kredoQuestSession:guest:'+dailyQuestKey;}
+function saveGuestQuestSession(){
+  if(!questSession||isAuthenticatedPlayer())return;
+  try{localStorage.setItem(questSessionStorageKey(),JSON.stringify(questSession));}catch(e){console.warn('Guest quest save skipped',e);}
 }
+function normalizeQuestSession(payload){
+  if(!payload||!Array.isArray(payload.question_indices)||payload.question_indices.length!==5)throw new Error('クエスト進捗データが不正です');
+  const indices=payload.question_indices.map(Number);
+  const selected=indices.map(i=>questions[i]);
+  if(selected.some(q=>!q)||selected.length!==5)throw new Error('保存済みの問題セットを復元できません');
+  questQuestions=selected;
+  questSession={
+    status:String(payload.status||'in_progress'),
+    question_indices:indices,
+    current_question:Math.max(0,Math.min(5,Number(payload.current_question)||0)),
+    answers:payload.answers&&typeof payload.answers==='object'?payload.answers:{},
+    correct_count:Math.max(0,Number(payload.correct_count)||0),
+    combo:Math.max(0,Number(payload.combo)||0),
+    max_combo:Math.max(0,Number(payload.max_combo)||0),
+    boss_done:Boolean(payload.boss_done),
+    boss_attempts:Math.max(0,Number(payload.boss_attempts)||0),
+    last_boss_option:payload.last_boss_option===null||payload.last_boss_option===undefined?null:Number(payload.last_boss_option),
+    points_awarded:Math.max(0,Number(payload.points_awarded)||0)
+  };
+  current=questSession.current_question;
+  correct=questSession.correct_count;
+  combo=questSession.combo;
+  maxCombo=questSession.max_combo;
+  bossDone=questSession.boss_done;
+  resultShown=questSession.status==='completed';
+  return questSession;
+}
+function createGuestQuestSession(indices){
+  const key=questSessionStorageKey();
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
+  if(saved&&Array.isArray(saved.question_indices)&&saved.question_indices.length===5)return saved;
+  return {status:'in_progress',question_indices:indices,current_question:0,answers:{},correct_count:0,combo:0,max_combo:0,boss_done:false,boss_attempts:0,last_boss_option:null,points_awarded:0};
+}
+function renderCompletedQuestResult(payload){
+  const score=Math.max(0,Number(payload.correct_count)||0)+(payload.boss_done?1:0);
+  document.getElementById('resultPointsTop').textContent=Math.max(0,Number(payload.points_awarded)||0)+' pt';
+  document.getElementById('resultCorrect').textContent=score+' / 6';
+  document.getElementById('resultCombo').textContent=Math.max(0,Number(payload.max_combo)||0);
+  document.getElementById('resultBreakdown').textContent='本日のクエストは完了済みです。再挑戦による回答のやり直しやポイントの重複獲得はできません。';
+  show('result');
+}
+async function startQuestSession(){
+  if(questStartPromise)return questStartPromise;
+  questStartPromise=(async()=>{
+    buildDailyQuest();
+    const candidateIndices=questQuestions.map(q=>questions.indexOf(q));
+    let payload;
+    if(isAuthenticatedPlayer()){
+      if(!supabaseClient)throw new Error('サーバーに接続できません。進捗を安全に確認できないため、クイズを開始できません。');
+      const {data,error}=await supabaseClient.rpc('kredo_start_or_resume_quest',{p_quest_date:dailyQuestKey,p_question_indices:candidateIndices});
+      if(error)throw error;
+      payload=data;
+    }else{
+      payload=createGuestQuestSession(candidateIndices);
+    }
+    normalizeQuestSession(payload);
+    if(!isAuthenticatedPlayer())saveGuestQuestSession();
+    showToast(questSession.status==='completed'?'本日のクエストは完了済みです':'🎮 保存済みの進捗からクエストを開きます');
+    if(questSession.status==='completed'){
+      renderCompletedQuestResult(questSession);
+      return;
+    }
+    if(current>=questQuestions.length){
+      show('boss');
+      restoreBossSession();
+      return;
+    }
+    show('quiz');
+    renderQuestion();
+  })().catch(error=>{
+    console.error('Quest session start/resume failed:',error);
+    showToast('クエストの保存状態を読み込めませんでした。通信を確認して再度お試しください。');
+  }).finally(()=>{questStartPromise=null;});
+  return questStartPromise;
+}
+function renderSavedQuestionAnswer(answerRecord){
+  if(!answerRecord)return;
+  const q=questQuestions[current],btns=[...document.querySelectorAll('.choice')];
+  const selected=Number(answerRecord.selected),good=Boolean(answerRecord.correct);
+  btns.forEach((b,j)=>{
+    b.classList.add('disabled');b.disabled=true;b.onclick=null;
+    if(j===q.answer)b.classList.add('correct');
+    if(j===selected&&!good)b.classList.add('wrong');
+  });
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(good?'good':'bad');
+  document.getElementById('feedbackTitle').textContent=good?'✅ 正解！':'🤔 ここがポイント';
+  document.getElementById('feedbackText').textContent=q.explain;
+  document.getElementById('credoText').textContent=q.credo;
+  const next=document.getElementById('nextBtn');
+  next.style.display='block';
+  next.textContent=current===questQuestions.length-1?'BOSSへ進む':'次へ　›';
+}
+function restoreBossSession(){
+  const options=[...document.querySelectorAll('.boss-option')];
+  const result=document.getElementById('bossResult');
+  const clear=document.getElementById('bossClear');
+  options.forEach(b=>{b.classList.remove('selected','boss-correct','boss-wrong','disabled');b.disabled=false});
+  result.style.display='none';
+  clear.style.display='none';
+  if(questSession&&questSession.boss_done){
+    const selected=Number(questSession.last_boss_option===null?1:questSession.last_boss_option);
+    const btn=options[selected];
+    if(btn){btn.classList.add('selected','boss-correct','disabled');btn.disabled=true;}
+    options.forEach(b=>{b.classList.add('disabled');b.disabled=true});
+    document.getElementById('bossMeter').style.width='0%';
+    document.getElementById('bossHpText').textContent='0%';
+    result.style.display='block';
+    result.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理し、関係者と確認して次の判断につなげる。';
+    clear.style.display='block';
+    return;
+  }
+  if(questSession&&questSession.boss_attempts>0&&questSession.last_boss_option!==null){
+    const selected=Number(questSession.last_boss_option),btn=options[selected];
+    if(btn)btn.classList.add('selected','boss-wrong');
+    document.getElementById('bossMeter').style.width='65%';
+    document.getElementById('bossHpText').textContent='65%';
+    result.style.display='block';
+    result.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';
+    return;
+  }
+  document.getElementById('bossMeter').style.width='100%';
+  document.getElementById('bossHpText').textContent='100%';
+}
+
+function startQuest(){return startQuestSession();}
 function renderQuestion(){
   const q=questQuestions[current];
+  if(!q){showToast('問題を復元できませんでした');return;}
   const total=questQuestions.length+1;
   document.getElementById('qCount').textContent=`${current+1} / ${total}`;
   document.getElementById('levelTag').textContent=q.level;
@@ -1417,82 +1592,164 @@ function renderQuestion(){
   q.choices.forEach((t,i)=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span>${t}</span>`;b.onclick=()=>answer(i);box.appendChild(b)});
   document.getElementById('feedback').className='feedback';
   document.getElementById('nextBtn').style.display='none';
+  const saved=questSession&&questSession.answers?questSession.answers[String(current)]:null;
+  if(saved)renderSavedQuestionAnswer(saved);
 }
-function answer(i){
-  const q=questQuestions[current],btns=[...document.querySelectorAll('.choice')];
-  btns.forEach((b,j)=>{b.classList.add('disabled');b.onclick=null;if(j===q.answer)b.classList.add('correct');if(j===i&&j!==q.answer)b.classList.add('wrong')});
-  const good=i===q.answer;const fb=document.getElementById('feedback');
-  if(good){correct++;combo++;maxCombo=Math.max(maxCombo,combo);fb.className='feedback show good';document.getElementById('feedbackTitle').textContent=combo>=3?'🔥 COMBO! 正解！':'✅ 正解！'}
-  else{combo=0;fb.className='feedback show bad';document.getElementById('feedbackTitle').textContent='🤔 ここがポイント'}
-  document.getElementById('feedbackText').textContent=q.explain;document.getElementById('credoText').textContent=q.credo;
-  document.getElementById('nextBtn').style.display='block';document.getElementById('nextBtn').textContent=current===questQuestions.length-1?'BOSSへ進む':'次へ　›';
-  document.getElementById('progress').style.width=((current+1)/(questQuestions.length+1)*100)+'%';
-  if(good&&combo>=2)showToast(`🔥 ${combo} COMBO`)
-}
-function nextQuestion(){if(current<questQuestions.length-1){current++;renderQuestion()}else{show('boss');document.getElementById('bossMeter').style.width='100%';document.getElementById('bossHpText').textContent='100%'}}
-function bossAnswer(btn,good){if(bossDone)return;document.querySelectorAll('.boss-option').forEach(b=>b.classList.remove('selected','boss-correct','boss-wrong'));btn.classList.add('selected');const r=document.getElementById('bossResult');r.style.display='block';if(good){bossDone=true;btn.classList.add('boss-correct');document.querySelectorAll('.boss-option').forEach(b=>{b.classList.add('disabled');b.disabled=true});document.getElementById('bossMeter').style.width='0%';document.getElementById('bossHpText').textContent='0%';r.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理して次の判断につなげる。複数のクレドを組み合わせた判断です。';document.getElementById('bossClear').style.display='block';showToast('👑 BOSS CLEAR!')}else{bossDone=false;btn.classList.add('boss-wrong');document.getElementById('bossMeter').style.width='65%';document.getElementById('bossHpText').textContent='65%';r.innerHTML='<strong>もう一度考えてみよう。</strong><br>「自分だけで抱えず、次の判断につなぐ」視点がポイントです。';document.getElementById('bossClear').style.display='none'}}
-async function showResult(){
-  if(resultShown)return;
-  resultShown=true;
-  const total=questQuestions.length+1,score=correct+(bossDone?1:0);
-  const participationPoints=10,correctPoints=correct*2,bossPoints=bossDone?5:0;
-  let earned=0,participationRecorded=false,awardMessage='';
-  if(isAuthenticatedPlayer()&&supabaseClient){
-    const before=window.__serverPointBalance||{};
-    try{
-      let rpcData=null,rpcError=null;
-      for(let attempt=0;attempt<2;attempt++){
-        const response=await supabaseClient.rpc('record_quest_attempt',{p_quest_date:dailyQuestKey,p_correct_count:correct,p_total_questions:total,p_boss_cleared:bossDone});
-        rpcData=response.data;rpcError=response.error;if(!rpcError)break;
-      }
-      if(rpcError)throw rpcError;
-      const row=Array.isArray(rpcData)?rpcData[0]:rpcData;
-      participationRecorded=Boolean(row?.recorded);
-      earned=participationRecorded?Math.max(0,Number(row?.points)||0):0;
-      awardMessage=participationRecorded
-        ?'今回：参加 '+participationPoints+'pt ＋ 正解 '+correctPoints+'pt ＋ BOSS '+bossPoints+'pt'
-        :'本日のクエストポイントはすでに保存されています。追加付与はありません。';
-      if(participationRecorded)state.lastBonus=dailyQuestKey;
-      try{await refreshServerPointBalance()}
-      catch(refreshError){
-        if(before.userId===currentUser.id&&before.loaded){
-          window.__serverPointBalance={userId:currentUser.id,total:Math.max(0,Number(before.total)||0)+earned,spent:Math.max(0,Number(before.spent)||0),loaded:true};
-          state.totalPoints=window.__serverPointBalance.total;
-        }
-        console.warn('Balance refresh after quest save skipped:',refreshError);
-      }
-    }catch(error){
-      console.error('Quest attempt save error:',error);
-      earned=0;participationRecorded=false;
-      awardMessage='サーバーへの保存に失敗しました。ポイントは付与されていません。';
-      try{await refreshServerPointBalance()}catch(e){}
+
+async function answer(i){
+  if(questAnswerBusy||!questSession||questSession.status==='completed')return;
+  if(questSession.answers&&questSession.answers[String(current)])return;
+  if(!Number.isInteger(i)||i<0||i>3)return;
+  questAnswerBusy=true;
+  document.querySelectorAll('.choice').forEach(b=>{b.disabled=true;b.classList.add('disabled')});
+  try{
+    let payload;
+    if(isAuthenticatedPlayer()){
+      const {data,error}=await supabaseClient.rpc('kredo_submit_quest_answer',{p_quest_date:dailyQuestKey,p_question_number:current,p_selected_option:i});
+      if(error)throw error;
+      payload=data;
+    }else{
+      const q=questQuestions[current],good=i===Number(q.answer);
+      const answers={...(questSession.answers||{})};
+      answers[String(current)]={selected:i,correct:good};
+      const nextCombo=good?questSession.combo+1:0;
+      payload={...questSession,answers,correct_count:questSession.correct_count+(good?1:0),combo:nextCombo,max_combo:Math.max(questSession.max_combo,nextCombo)};
     }
-  }else{
-    earned=0;participationRecorded=false;state.totalPoints=0;
-    awardMessage='ゲストはポイント獲得の対象外です。';
-  }
-  points=earned;state.bestCombo=Math.max(state.bestCombo,maxCombo);
-  if(participationRecorded)state.plays+=1;
-  if(bossDone){const wasFirstClear=Number(state.clearStage||0)<1;state.clearStage=Math.max(Number(state.clearStage||0),1);if(wasFirstClear)showToast('🗺️ STAGE 01 CLEAR！次のエリアが開放されました');}
-  saveState();
-  document.getElementById('resultPointsTop').textContent=isAuthenticatedPlayer()?earned+' pt':'対象外';
-  document.getElementById('resultCorrect').textContent=score+' / '+total;
-  document.getElementById('resultCombo').textContent=maxCombo;
-  document.getElementById('resultBreakdown').textContent=awardMessage;
-  show('result');
+    normalizeQuestSession(payload);
+    if(!isAuthenticatedPlayer())saveGuestQuestSession();
+    renderQuestion();
+    const saved=questSession.answers[String(current)];
+    if(saved&&saved.correct&&questSession.combo>=2)showToast(`🔥 ${questSession.combo} COMBO`);
+  }catch(error){
+    console.error('Quest answer save failed:',error);
+    document.querySelectorAll('.choice').forEach(b=>{b.disabled=false;b.classList.remove('disabled')});
+    showToast('回答を保存できませんでした。通信を確認して、同じ問題でもう一度お試しください。');
+  }finally{questAnswerBusy=false;}
+}
+
+async function nextQuestion(){
+  if(questAdvanceBusy||!questSession||questSession.status==='completed')return;
+  const answerRecord=questSession.answers&&questSession.answers[String(current)];
+  if(!answerRecord){showToast('先にこの問題へ回答してください');return;}
+  questAdvanceBusy=true;
+  try{
+    let payload;
+    if(isAuthenticatedPlayer()){
+      const {data,error}=await supabaseClient.rpc('kredo_advance_quest_session',{p_quest_date:dailyQuestKey,p_question_number:current});
+      if(error)throw error;
+      payload=data;
+    }else{
+      payload={...questSession,current_question:Math.min(5,current+1)};
+    }
+    normalizeQuestSession(payload);
+    if(!isAuthenticatedPlayer())saveGuestQuestSession();
+    if(current>=questQuestions.length){show('boss');restoreBossSession();}
+    else{show('quiz');renderQuestion();}
+  }catch(error){
+    console.error('Quest advance failed:',error);
+    showToast('進捗を保存できませんでした。前の問題はそのまま保持しています。');
+  }finally{questAdvanceBusy=false;}
+}
+
+async function bossAnswer(btn,good){
+  if(questBossBusy||bossDone||!questSession||questSession.status==='completed')return;
+  const options=[...document.querySelectorAll('.boss-option')];
+  const selected=options.indexOf(btn);
+  if(selected<0)return;
+  questBossBusy=true;
+  options.forEach(b=>b.disabled=true);
+  try{
+    let payload;
+    if(isAuthenticatedPlayer()){
+      const {data,error}=await supabaseClient.rpc('kredo_submit_quest_boss_answer',{p_quest_date:dailyQuestKey,p_selected_option:selected});
+      if(error)throw error;
+      payload=data;
+    }else{
+      const isCorrect=selected===1;
+      payload={...questSession,boss_done:isCorrect,last_boss_option:selected,boss_attempts:(questSession.boss_attempts||0)+1};
+    }
+    normalizeQuestSession(payload);
+    if(!isAuthenticatedPlayer())saveGuestQuestSession();
+    restoreBossSession();
+    if(bossDone)showToast('👑 BOSS CLEAR!');
+    else options.forEach(b=>{b.disabled=false;});
+  }catch(error){
+    console.error('Boss answer save failed:',error);
+    options.forEach(b=>{b.disabled=false;});
+    showToast('BOSSの回答を保存できませんでした。もう一度お試しください。');
+  }finally{questBossBusy=false;}
+}
+
+async function showResult(){
+  if(resultShown||questCompleteBusy||!questSession||!bossDone||questSession.status==='completed')return;
+  questCompleteBusy=true;
+  try{
+    let result;
+    if(isAuthenticatedPlayer()){
+      const {data,error}=await supabaseClient.rpc('kredo_complete_quest_session',{p_quest_date:dailyQuestKey});
+      if(error)throw error;
+      if(!data||data.status!=='completed')throw new Error('完了結果を確認できませんでした');
+      result=data;
+      questSession.status='completed';
+      questSession.points_awarded=Math.max(0,Number(result.points)||0);
+      questSession.correct_count=Math.max(0,Number(result.correct_count)||0);
+      questSession.boss_done=Boolean(result.boss_cleared);
+      questSession.max_combo=maxCombo;
+      state.lastBonus=dailyQuestKey;
+      const balance=window.__serverPointBalance||{};
+      if(result.total_points!==undefined&&result.total_points!==null){
+        window.__serverPointBalance={userId:currentUser.id,total:Math.max(0,Number(result.total_points)||0),spent:Math.max(0,Number(balance.spent)||0),loaded:true};
+        state.totalPoints=window.__serverPointBalance.total;
+      }
+      try{await refreshServerPointBalance();}
+      catch(refreshError){console.warn('Confirmed server balance refresh skipped:',refreshError);}
+      await syncAttemptCount();
+    }else{
+      questSession.status='completed';
+      questSession.points_awarded=0;
+      saveGuestQuestSession();
+      result={recorded:false,already_completed:false,points:0,total_points:0,correct_count:correct,total_questions:6,boss_cleared:true,status:'completed'};
+      state.totalPoints=0;
+    }
+    const earned=Math.max(0,Number(result.points)||0);
+    const correctCount=Math.max(0,Number(result.correct_count)||0);
+    const bossCleared=Boolean(result.boss_cleared);
+    points=earned;
+    state.bestCombo=Math.max(state.bestCombo,maxCombo);
+    if(result.recorded)state.plays+=1;
+    if(bossCleared){
+      const wasFirstClear=Number(state.clearStage||0)<1;
+      state.clearStage=Math.max(Number(state.clearStage||0),1);
+      if(wasFirstClear)showToast('🗺️ STAGE 01 CLEAR！次のエリアが開放されました');
+    }
+    saveState();
+    resultShown=true;
+    document.getElementById('resultPointsTop').textContent=isAuthenticatedPlayer()?earned+' pt':'対象外';
+    document.getElementById('resultCorrect').textContent=(correctCount+(bossCleared?1:0))+' / 6';
+    document.getElementById('resultCombo').textContent=maxCombo;
+    document.getElementById('resultBreakdown').textContent=!isAuthenticatedPlayer()
+      ?'ゲストはポイント獲得の対象外です。'
+      :(result.recorded
+        ?('今回：参加 10pt ＋ 正解 '+(correctCount*2)+'pt ＋ BOSS 5pt')
+        :'本日のクエストポイントはすでに保存されています。追加付与はありません。');
+    show('result');
+  }catch(error){
+    console.error('Quest completion failed:',error);
+    showToast('クエスト結果をサーバーに保存できませんでした。進捗は保持されています。');
+  }finally{questCompleteBusy=false;}
 }
 
 const DEMO_QUESTIONS = JSON.parse(JSON.stringify(questions));
-function readInitialStateValue(field,legacyKey){try{const scoped=localStorage.getItem(stateStoragePrefix()+field);if(scoped!==null)return Math.max(0,Number(scoped)||0);return Math.max(0,Number(localStorage.getItem(legacyKey)||0));}catch(e){return 0}}
-let state={totalPoints:0,plays:readInitialStateValue('plays','kredoPlays'),bestCombo:readInitialStateValue('bestCombo','kredoBestCombo'),lastBonus:(()=>{try{return localStorage.getItem(stateStoragePrefix()+'lastBonus')||''}catch(e){return ''}})(),clearStage:readInitialStateValue('clearStage','kredoClearStage')};
-window.__serverPointBalance=window.__serverPointBalance||{userId:null,total:0,spent:0,loaded:false};
+function readInitialStateValue(field,legacyKey){try{const scoped=localStorage.getItem(stateStoragePrefix()+field);if(scoped!==null)return Math.max(0,Number(scoped)||0);return field==='totalPoints'?0:Math.max(0,Number(localStorage.getItem(legacyKey)||0));}catch(e){return 0}}
+let state={totalPoints:0,plays:readInitialStateValue('plays','kredoPlays'),bestCombo:readInitialStateValue('bestCombo','kredoBestCombo'),lastBonus:(()=>{try{return localStorage.getItem(stateStoragePrefix()+'lastBonus')||localStorage.getItem('kredoLastBonus')||''}catch(e){return ''}})(),clearStage:readInitialStateValue('clearStage','kredoClearStage')};
+window.__serverPointBalance={userId:null,total:0,spent:0,loaded:false};
 function isAuthenticatedPlayer(){return Boolean(currentUser?.id&&!currentUser.demo)}
 function stateStoragePrefix(){const id=currentUser?.id||getLocalAccount()?.id||'guest';return 'kredoState:'+id+':';}
 let stateOwnerKey=stateStoragePrefix();
 function loadState(){const p=stateStoragePrefix();state={totalPoints:0,plays:Number(localStorage.getItem(p+'plays')||0),bestCombo:Number(localStorage.getItem(p+'bestCombo')||0),lastBonus:localStorage.getItem(p+'lastBonus')||'',clearStage:Number(localStorage.getItem(p+'clearStage')||0)};stateOwnerKey=p;}
 function saveState(){const p=stateStoragePrefix();const server=window.__serverPointBalance||{};if(isAuthenticatedPlayer()&&server.loaded&&server.userId===currentUser.id)state.totalPoints=Math.max(0,Number(server.total)||0);else state.totalPoints=0;localStorage.setItem(p+'totalPoints',String(state.totalPoints));localStorage.setItem(p+'plays',String(state.plays));localStorage.setItem(p+'bestCombo',String(state.bestCombo));localStorage.setItem(p+'lastBonus',state.lastBonus||'');localStorage.setItem(p+'clearStage',String(state.clearStage||0));stateOwnerKey=p;}
 async function syncAttemptCount(){if(!supabaseClient||!currentUser)return;try{const {count,error}=await supabaseClient.from('quiz_attempts').select('id',{count:'exact',head:true}).eq('user_id',currentUser.id);if(!error&&typeof count==='number'){state.plays=count;saveState();updateProfile()}}catch(e){console.error('Attempt count sync error:',e)}}
-function updateProfile(){const snapshot=typeof window.__syncPointBalanceSafe==='function'?window.__syncPointBalanceSafe():null;const totalPoints=snapshot&&Number.isFinite(Number(snapshot.total))?Math.max(0,Number(snapshot.total)||0):0;document.getElementById('profilePoints').textContent=!isAuthenticatedPlayer()?'対象外':(snapshot?.loading?'確認中':totalPoints+' pt');document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';}
+function updateProfile(){const snapshot=typeof window.__syncPointBalanceSafe==='function'?window.__syncPointBalanceSafe():null;const totalPoints=snapshot&&Number.isFinite(Number(snapshot.total))?Math.max(0,Number(snapshot.total)||0):0;document.getElementById('profilePoints').textContent=!isAuthenticatedPlayer()?'対象外':(snapshot?.loading?'確認中':totalPoints+' pt');document.getElementById('profilePlays').textContent=state.plays+' 回';document.getElementById('profileCombo').textContent=state.bestCombo;document.getElementById('profileQuestions').textContent=questions.length+' 問';let title='クレド見習い';if(state.plays>=10)title='クレド探検家';else if(state.plays>=5)title='クレドハンター';document.getElementById('profileTitle').textContent=title;document.getElementById('profileSub').textContent=state.plays?`これまで ${state.plays} 回クエストに参加`:'まずは気軽に1回プレイしてみよう';renderAccountIndicators();}
 
 let editingIndex=-1;
 function renderLibrary(){
@@ -1548,9 +1805,51 @@ function monthlyKey(){const d=new Date();return `${d.getFullYear()}-${String(d.g
 function getLocalAccount(){try{return JSON.parse(localStorage.getItem('kredoAccount')||'null')}catch(e){return null}}
 function setLocalAccount(a){localStorage.setItem('kredoAccount',JSON.stringify(a||null))}
 function openAccount(){show('account')}
+function openAccountSignup(){authMode='signup';show('account');switchAuth('signup')}
+function renderAccountIndicators(){
+  const loggedIn=isAuthenticatedPlayer();
+  const local=getLocalAccount();
+  const displayName=currentUser?.user_metadata?.display_name||local?.displayName||currentUser?.email||'登録済みアカウント';
+  const home=document.getElementById('homeAccountPrompt');
+  if(home){
+    home.replaceChildren();
+    if(loggedIn){
+      const panel=document.createElement('div');panel.className='home-account-signedin';
+      const strong=document.createElement('strong');strong.textContent='✓ ログイン中｜ポイント獲得対象です';
+      const small=document.createElement('small');small.textContent=displayName+' として利用中';
+      panel.append(strong,small);home.append(panel);
+    }else{
+      const button=document.createElement('button');button.type='button';button.className='home-account-cta';button.addEventListener('click',openAccountSignup);
+      const icon=document.createElement('span');icon.className='account-cta-icon';icon.textContent='👤';
+      const copy=document.createElement('span');
+      const strong=document.createElement('strong');strong.textContent='アカウント登録・ログイン';
+      const small=document.createElement('small');small.textContent='ポイントを獲得するには登録・ログインが必要です';
+      copy.append(strong,small);
+      const arrow=document.createElement('span');arrow.className='account-cta-arrow';arrow.textContent='›';
+      button.append(icon,copy,arrow);home.append(button);
+    }
+  }
+  const mypage=document.getElementById('myPageAccountState');
+  if(mypage){
+    mypage.replaceChildren();
+    mypage.className='account-state-card'+(loggedIn?'':' is-guest');
+    const head=document.createElement('div');head.className='account-state-head';
+    const label=document.createElement('span');label.className='account-state-label';
+    label.textContent=loggedIn?'✓ ログイン中':'! ゲストモード利用中';
+    const title=document.createElement('strong');
+    title.textContent=loggedIn?'このアカウントはポイント獲得・交換の対象です':'このままではポイントを獲得・交換できません';
+    head.append(label,title);mypage.append(head);
+    const detail=document.createElement('div');detail.className='account-state-detail';
+    detail.textContent=loggedIn?('利用アカウント：'+displayName):'クイズを始める前に、アカウント登録またはログインをしてください。';
+    mypage.append(detail);
+    if(!loggedIn){
+      const button=document.createElement('button');button.type='button';button.className='account-state-action';button.textContent='アカウント登録・ログインする';button.addEventListener('click',openAccountSignup);mypage.append(button);
+    }
+  }
+}
 function switchAuth(mode){authMode=mode;document.getElementById('tabSignup').classList.toggle('active',mode==='signup');document.getElementById('tabLogin').classList.toggle('active',mode==='login');document.getElementById('accountTitle').textContent=mode==='signup'?'アカウントをつくる':'ログイン';document.getElementById('accountSub').textContent=mode==='signup'?'ランキングに参加するにはアカウント登録が必要です。ゲーム内の表示名だけをランキングに表示します。':'登録したメールアドレスとパスワードでログインします。';document.getElementById('displayNameField').style.display=mode==='signup'?'block':'none';document.getElementById('authPassword').setAttribute('autocomplete',mode==='signup'?'new-password':'current-password');document.getElementById('authSubmit').textContent=mode==='signup'?'アカウントを登録する':'ログイン';showAccountStatus('')}
 function showAccountStatus(msg,error=false){const el=document.getElementById('accountStatus');el.textContent=msg;el.className='account-status'+(msg?' show':'');if(msg)el.style.background=error?'#FFF3F0':'#F4FBFD';if(msg)el.style.color=error?'#A64D44':'#5A6E7C'}
-function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;loadState();saveState();updateProfile();showAccountStatus('デモモードではクイズ体験のみ利用できます。ポイントの獲得・交換はできません。');showToast('👤 デモモードを開始しました')}
+function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;loadState();saveState();updateProfile();renderAccountIndicators();showAccountStatus('デモモードではクイズ体験のみ利用できます。ポイントの獲得・交換はできません。');showToast('👤 デモモードを開始しました')}
 async function sendPasswordReset(){const email=document.getElementById('authEmail').value.trim();if(!supabaseClient){showAccountStatus('デモモードではパスワード再設定は利用できません。',true);return}if(!email){showAccountStatus('先にメールアドレスを入力してください。',true);return}try{const redirectTo=location.href.split('#')[0];const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showAccountStatus('パスワード再設定メールを送信しました。メールの案内に沿って変更してください。')}catch(err){console.error('Password reset error:',err);showAccountStatus('再設定メールの送信に失敗しました：'+(err?.message||'不明なエラー'),true)}}
 async function updateRecoveryPassword(){
   const password=document.getElementById('recoveryPassword').value;
@@ -1570,11 +1869,11 @@ async function updateRecoveryPassword(){
 }
 function showRecoveryPanel(){const panel=document.getElementById('recoveryPanel');if(panel)panel.style.display='block';}
 
-async function logoutAccount(){try{if(supabaseClient)await supabaseClient.auth.signOut()}catch(err){console.error('Logout error:',err)}currentUser=null;setLocalAccount(null);loadState();syncAccountUI();showAccountStatus('ログアウトしました。');showToast('👋 またね！')}
+async function logoutAccount(){try{if(supabaseClient)await supabaseClient.auth.signOut()}catch(err){console.error('Logout error:',err)}currentUser=null;setLocalAccount(null);loadState();syncAccountUI();renderAccountIndicators();updateProfile();showAccountStatus('ログアウトしました。');showToast('👋 またね！')}
 
 async function submitAuth(){const displayName=document.getElementById('authDisplayName').value.trim();const email=document.getElementById('authEmail').value.trim();const password=document.getElementById('authPassword').value;if(!email||!password||(authMode==='signup'&&!displayName)){showAccountStatus('入力内容を確認してください。',true);return}
   if(!supabaseClient){
-    const account={id:'local-'+Date.now(),displayName:authMode==='signup'?displayName:(getLocalAccount()?.displayName||displayName||'プレイヤー'),email,demo:true};setLocalAccount(account);currentUser=account;loadState();saveState();updateProfile();showAccountStatus('現在はデモモードです。実運用のアカウント登録はSupabase接続後に有効になります。');showToast('👤 アカウント情報を保存しました');return;
+    const account={id:'local-'+Date.now(),displayName:authMode==='signup'?displayName:(getLocalAccount()?.displayName||displayName||'プレイヤー'),email,demo:true};setLocalAccount(account);currentUser=account;loadState();saveState();updateProfile();renderAccountIndicators();showAccountStatus('現在はデモモードです。実運用のアカウント登録はSupabase接続後に有効になります。');showToast('👤 アカウント情報を保存しました');return;
   }
   try{
     if(authMode==='signup'){
@@ -1583,6 +1882,7 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
       if(data.session){
         currentUser=data.user;
         await ensureProfileAfterLogin();
+        renderAccountIndicators();updateProfile();
         showAccountStatus('アカウントを登録しました。');
         show('ranking');
       }else{
@@ -1591,7 +1891,7 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
         showAccountStatus('登録しました。確認メールをご確認のうえ、メール確認後にログインしてください。');
       }
     }else{
-      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');show('ranking');
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;await ensureProfileAfterLogin();renderAccountIndicators();updateProfile();showAccountStatus('ログインしました。');showToast('👋 おかえりなさい！');show('ranking');
     }
   }catch(err){
     console.error('Supabase Auth error:', err);
@@ -1615,20 +1915,7 @@ async function getRankingData(){
       });
     }catch(e){showToast('ランキング取得に失敗しました');return [];}
   }
-  if(!isAuthenticatedPlayer())return [];
-  const local=getLocalAccount();
-  const demo=JSON.parse(localStorage.getItem('kredoDemoRanking')||'[]');
-  if(local && !demo.some(x=>x.id===local.id)) demo.push({id:local.id,name:local.displayName||'デモプレイヤー',points:state.totalPoints||0});
-  else if(local){const me=demo.find(x=>x.id===local.id);if(me)me.points=state.totalPoints||0;}
-  demo.sort((a,b)=>b.points-a.points);
-  localStorage.setItem('kredoDemoRanking',JSON.stringify(demo));
-  const rows=demo.slice(0,50);
-  let previousPoints=null,previousRank=0;
-  return rows.map((x,i)=>{
-    const points=Number(x.points||0);
-    if(i===0||points!==previousPoints){previousRank=i+1;previousPoints=points;}
-    return {rank:previousRank,name:x.name||'プレイヤー',points,me:local?.id===x.id};
-  });
+  return [];
 }
 async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name">${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</div><div class="rank-meta">累計ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -1654,7 +1941,6 @@ async function refreshServerPointBalance(){
   return window.__serverPointBalance;
 }
 window.__refreshServerPointBalance=refreshServerPointBalance;
-
 async function ensureProfileAfterLogin(){
   if(!supabaseClient||!currentUser||currentUser.demo)return null;
   const display=currentUser.user_metadata?.display_name||'プレイヤー';
@@ -1681,6 +1967,7 @@ async function ensureProfileAfterLogin(){
     return null;
   }
 }
+renderAccountIndicators();
 (async function restoreAuth(){
   if(supabaseClient){
     try{
@@ -1694,11 +1981,15 @@ async function ensureProfileAfterLogin(){
         if(event==='SIGNED_OUT')currentUser=null;
         if(event==='PASSWORD_RECOVERY'){currentUser=session?.user||currentUser;show('account');showRecoveryPanel();}
         syncAccountUI();
+        renderAccountIndicators();
+        if(document.getElementById('mypage')?.classList.contains('active'))updateProfile();
       });
-    }catch(e){}
+      renderAccountIndicators();
+    }catch(e){renderAccountIndicators()}
   }else{
     currentUser=getLocalAccount();
     if(currentUser){loadState();updateProfile()}
+    renderAccountIndicators();
   }
 })();
 const QUESTION_BANK_VERSION='2026-10-09-koutei-v1';
@@ -1726,7 +2017,6 @@ const QUESTION_BANK_VERSION='2026-10-09-koutei-v1';
 buildDailyQuest();
 saveState();
 renderLibrary();
-updateLanguageButtons();
 const AVATAR_OPTIONS={hairStyle:[{id:'short',name:'ショート',icon:'💇'},{id:'medium',name:'ミディアム',icon:'🧑'},{id:'long',name:'ロング',icon:'👩'},{id:'pony',name:'ポニー',icon:'👱'},{id:'spiky',name:'ワイルド',icon:'✦'}],hairColor:[{id:'black',name:'ブラック',color:'#24313B'},{id:'brown',name:'ブラウン',color:'#76513E'},{id:'ash',name:'アッシュ',color:'#8A8496'},{id:'blue',name:'ネイビー',color:'#395A88'},{id:'rose',name:'ローズ',color:'#B86F83'}],outfit:[{id:'work',name:'ワーク',color:'#4A90A9',icon:'🧢'},{id:'casual',name:'カジュアル',color:'#7DA6C4',icon:'👕'},{id:'neat',name:'きれいめ',color:'#6B7AA7',icon:'🧥'},{id:'sporty',name:'スポーティ',color:'#5DBA91',icon:'🏃'},{id:'pop',name:'ポップ',color:'#D784A4',icon:'⭐'}],accessory:[{id:'none',name:'なし',icon:'—'},{id:'glasses',name:'メガネ',icon:'👓'},{id:'cap',name:'キャップ',icon:'🧢'},{id:'headphone',name:'ヘッドホン',icon:'🎧'},{id:'badge',name:'バッジ',icon:'🎖'}],effect:[{id:'none',name:'なし',icon:'○'},{id:'sparkle',name:'キラキラ',icon:'✦'},{id:'leaf',name:'リーフ',icon:'🍃'},{id:'star',name:'スター',icon:'★'},{id:'shield',name:'シールド',icon:'🛡'}]};
 const AVATAR_CATEGORY_NAMES={hairStyle:'髪型',hairColor:'髪色',outfit:'服装',accessory:'アクセサリー',effect:'エフェクト'};
 const ROOM_THEMES=[{id:'basic',name:'ベーシック',desc:'明るく落ち着いた部屋',bg:'#EAF5F9',floor:'#B78660'},{id:'nature',name:'森・自然',desc:'グリーンを感じる部屋',bg:'#E6F4E6',floor:'#9B7B5D'},{id:'workshop',name:'工房',desc:'道具が並ぶ作業空間',bg:'#ECE6DA',floor:'#8C694F'},{id:'tech',name:'未来・テック',desc:'すっきり近未来',bg:'#E8EEFA',floor:'#687A99'},{id:'credo',name:'クレドスペシャル',desc:'クレドの世界観',bg:'#FFF4C9',floor:'#B28659'}];
@@ -1818,8 +2108,15 @@ async function diagnosePointBalance(){
     window.alert('ポイント診断でエラーが発生しました。\n'+String(e?.message||e));
   }
 }
-function openPointExchange(){show('pointExchange')}let exchangeBusy=false;function closeExchangeModal(){const m=document.getElementById('exchangeModal');if(!m)return;m.hidden=true;m.style.display='none';m.setAttribute('aria-hidden','true')}function showExchangeModal(title,message,mode,onConfirm){const m=document.getElementById('exchangeModal');if(!m){window.alert(String(title)+'\n\n'+String(message).replace(/<[^>]*>/g,''));return}if(m.parentElement!==document.body)document.body.appendChild(m);const titleEl=document.getElementById('exchangeModalTitle'),msgEl=document.getElementById('exchangeModalMessage'),ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');if(titleEl)titleEl.textContent=title;if(msgEl)msgEl.innerHTML=message;if(ok){ok.style.display=mode==='confirm'?'inline-flex':'none';ok.onclick=()=>{closeExchangeModal();if(onConfirm)onConfirm()}}if(cancel){cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.onclick=closeExchangeModal}m.hidden=false;m.removeAttribute('hidden');m.style.display='flex';m.setAttribute('aria-hidden','false')}function exchangeReward(id,cost,name){if(typeof window.__pointExchangeClick==='function')return window.__pointExchangeClick(id,cost,name);}
-async function doExchangeReward(id,cost,name){if(typeof window.__safeCompletePointExchange==='function')return window.__safeCompletePointExchange(id,cost,name);}
+function openPointExchange(){show('pointExchange')}let exchangeBusy=false;function closeExchangeModal(){const m=document.getElementById('exchangeModal');if(!m)return;m.hidden=true;m.style.display='none';m.setAttribute('aria-hidden','true')}function showExchangeModal(title,message,mode,onConfirm){const m=document.getElementById('exchangeModal');if(!m){window.alert(String(title)+'\n\n'+String(message).replace(/<[^>]*>/g,''));return}if(m.parentElement!==document.body)document.body.appendChild(m);const titleEl=document.getElementById('exchangeModalTitle'),msgEl=document.getElementById('exchangeModalMessage'),ok=document.getElementById('exchangeModalOk'),cancel=document.getElementById('exchangeModalCancel');if(titleEl)titleEl.textContent=title;if(msgEl)msgEl.innerHTML=message;if(ok){ok.style.display=mode==='confirm'?'inline-flex':'none';ok.onclick=()=>{closeExchangeModal();if(onConfirm)onConfirm()}}if(cancel){cancel.textContent=mode==='confirm'?'いいえ':'閉じる';cancel.onclick=closeExchangeModal}m.hidden=false;m.removeAttribute('hidden');m.style.display='flex';m.setAttribute('aria-hidden','false')}function exchangeReward(id,cost,name){
+  if(typeof window.__pointExchangeClick==='function')window.__pointExchangeClick(id,cost,name);
+}
+async function doExchangeReward(id,cost,name){
+  if(typeof window.__safeCompletePointExchange==='function')return window.__safeCompletePointExchange(id,cost,name);
+  showToast('ポイント交換のサーバー機能を読み込めませんでした');
+}
+
+
 function defaultCustomization(){return{avatar:{hairStyle:'short',hairColor:'black',outfit:'work',accessory:'none',effect:'none'},roomTheme:'basic',roomWallpaper:'basic',roomFloor:'wood',roomItems:['desk','chair','plant'],ownedItems:{skins:[],furniture:['desk','chair','plant']},spentPoints:0}}
 let customization=defaultCustomization(),customizationLoadedFor='';
 function customizationKey(){return'kredoCustomization:'+(currentUser?.id||getLocalAccount()?.id||'guest')}
@@ -1851,7 +2148,7 @@ function renderAvatarOptions(cat){const box=document.getElementById('avatarOptio
 function bindAvatarCategories(){document.querySelectorAll('.avatar-category-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.avatar-category-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderAvatarOptions(b.dataset.cat)})}
 function renderHomeAvatar(){const p=document.getElementById('homeAvatarPreview');if(p)p.innerHTML=avatarSvg(customization.avatar)}
 function renderMyPageAvatar(){const p=document.getElementById('mypageAvatarPreview');if(p)p.innerHTML=avatarSvg(customization.avatar);const n=document.getElementById('mypageAvatarName');if(n)n.textContent=getLocalAccount()?.displayName||currentUser?.user_metadata?.display_name||'プレイヤー';renderPointsInNewUI()}
-function openAvatarCustomizer(){show('avatarCustomizer');loadCustomization().then(()=>{bindAvatarCategories();renderAvatarUI()})}
+function openAvatarCustomizer(){return false}
 function saveAvatarAndReturn(){saveCustomization().then(()=>{showToast('✦ アバターを保存しました');renderHomeAvatar();renderMyPageAvatar();show('mypage')})}
 function roomMiniSvg(theme){const t=ROOM_THEMES.find(x=>x.id===theme)||ROOM_THEMES[0];return'<svg viewBox="0 0 120 70" width="100%" height="100%" aria-hidden="true"><rect width="120" height="70" fill="'+t.bg+'"/><rect y="50" width="120" height="20" fill="'+t.floor+'"/><rect x="77" y="9" width="30" height="21" rx="3" fill="#CDECF6" stroke="#fff" stroke-width="3"/><rect x="10" y="38" width="43" height="8" rx="3" fill="#8B6046"/><rect x="14" y="46" width="4" height="13" fill="#8B6046"/><rect x="45" y="46" width="4" height="13" fill="#8B6046"/><rect x="53" y="39" width="16" height="10" rx="4" fill="#6BA6C2"/><text x="98" y="52" font-size="15">🪴</text></svg>'}
 function renderHomeRoomMascot(){const m=document.getElementById('roomMascot');const src=document.querySelector('.character-image')?.src;if(m&&src)m.src=src}
@@ -1864,6 +2161,7 @@ loadCustomization().catch(()=>{});
 setTimeout(()=>{bindAvatarCategories();bindRoomCategories();renderHomeAvatar();renderMyPageAvatar();renderPointsInNewUI()},80);
 
 const LANGUAGE_LABELS={ja:'日本語',en:'English',vi:'Tiếng Việt'};
+updateLanguageButtons();
 function getLanguage(){return localStorage.getItem('kredoLanguage')||'ja'}
 function openLanguageSettings(){const panel=document.getElementById('languagePanel');if(panel)panel.classList.add('open');updateLanguageButtons()}
 function closeLanguageSettings(e){if(!e||e.target.id==='languagePanel'){const panel=document.getElementById('languagePanel');if(panel)panel.classList.remove('open')}}
