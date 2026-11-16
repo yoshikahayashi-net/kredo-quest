@@ -888,9 +888,13 @@ let currentUser=null;
 // Capture all supported Supabase recovery return formats before the SDK can clean the URL.
 const __kredoRecoveryHashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
 const __kredoRecoverySearchParams = new URLSearchParams(location.search);
+// Some AuthClient versions clear a consumed URL fragment but leave the trailing
+// '#' in the address bar. Capture that callback state before createClient().
+const __kredoEmptyRecoveryFragmentAtStartup = location.href.endsWith('#') && location.hash === '';
 const recoveryLinkAtStartup = __kredoRecoveryHashParams.get('type') === 'recovery'
   || __kredoRecoverySearchParams.get('type') === 'recovery'
-  || __kredoRecoverySearchParams.has('code');
+  || __kredoRecoverySearchParams.has('code')
+  || __kredoEmptyRecoveryFragmentAtStartup;
 // A rejected/expired link is different from a valid recovery session: do not
 // show the password form without a verified session. Route the user back to
 // the login/reset form, where they can request one fresh email.
@@ -906,7 +910,7 @@ function activateKredoRecoveryScreen(){
   showRecoveryPanel();
   showAccountStatus('新しいパスワードを入力してください。');
 }
-function activateKredoExpiredRecoveryScreen(){
+function activateKredoExpiredRecoveryScreen(message){
   __kredoRecoveryModeActive = false;
   authMode='login';
   show('account');
@@ -914,9 +918,9 @@ function activateKredoExpiredRecoveryScreen(){
   syncAccountUI();
   const resetButton=document.getElementById('resetPasswordBtn');
   if(resetButton)resetButton.textContent='再設定メールを再送する';
-  showAccountStatus('この再設定リンクは期限切れ、またはすでに使用されています。メールアドレスを確認して「再設定メールを再送する」を押してください。',true);
-  // The error has been captured above. Remove only the hash; keep ?v=50 intact.
-  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
+  showAccountStatus(message || 'この再設定リンクは期限切れ、または認証情報を確認できません。メールアドレスを確認して「再設定メールを再送する」を押してください。',true);
+  // The error/callback state has been captured above. Remove only the hash; keep ?v=50 intact.
+  if(location.hash || location.href.endsWith('#'))history.replaceState(null,'',location.pathname+location.search);
 }
 if(KREDO_BACKEND.enabled && window.supabase){ supabaseClient = window.supabase.createClient(KREDO_BACKEND.SUPABASE_URL, KREDO_BACKEND.SUPABASE_ANON_KEY); }
 // Subscribe immediately; Supabase can emit PASSWORD_RECOVERY while the page is still restoring its session.
@@ -924,7 +928,7 @@ if(supabaseClient){
   supabaseClient.auth.onAuthStateChange((event,session)=>{
     if(event==='SIGNED_IN')currentUser=session?.user||currentUser;
     if(event==='SIGNED_OUT')currentUser=null;
-    if(event==='PASSWORD_RECOVERY' || (__kredoRecoveryModeActive && (event==='SIGNED_IN' || event==='INITIAL_SESSION'))){
+    if(event==='PASSWORD_RECOVERY' || (__kredoRecoveryModeActive && session?.user && (event==='SIGNED_IN' || event==='INITIAL_SESSION'))){
       currentUser=session?.user||currentUser;
       activateKredoRecoveryScreen();
     }
@@ -933,8 +937,12 @@ if(supabaseClient){
     if(document.getElementById('mypage')?.classList.contains('active'))updateProfile();
   });
 }
-// The URL marker is sufficient to open the form even if the auth event was emitted before later app setup.
-if(recoveryLinkAtStartup){ Promise.resolve().then(activateKredoRecoveryScreen); }
+// A real recovery type/code is sufficient to open the form immediately. For an
+// empty '#' callback, wait for getSession() so we do not show a form without a
+// verified recovery session.
+if(recoveryLinkAtStartup && !__kredoEmptyRecoveryFragmentAtStartup){
+  Promise.resolve().then(activateKredoRecoveryScreen);
+}
 
 let questions=[
   {
@@ -1901,7 +1909,7 @@ function renderAccountIndicators(){
 function switchAuth(mode){authMode=mode;document.getElementById('tabSignup').classList.toggle('active',mode==='signup');document.getElementById('tabLogin').classList.toggle('active',mode==='login');document.getElementById('accountTitle').textContent=mode==='signup'?'アカウントをつくる':'ログイン';document.getElementById('accountSub').textContent=mode==='signup'?'ランキングに参加するにはアカウント登録が必要です。ゲーム内の表示名だけをランキングに表示します。':'登録したメールアドレスとパスワードでログインします。';document.getElementById('displayNameField').style.display=mode==='signup'?'block':'none';document.getElementById('authPassword').setAttribute('autocomplete',mode==='signup'?'new-password':'current-password');document.getElementById('authSubmit').textContent=mode==='signup'?'アカウントを登録する':'ログイン';showAccountStatus('')}
 function showAccountStatus(msg,error=false){const el=document.getElementById('accountStatus');el.textContent=msg;el.className='account-status'+(msg?' show':'');if(msg)el.style.background=error?'#FFF3F0':'#F4FBFD';if(msg)el.style.color=error?'#A64D44':'#5A6E7C'}
 function continueDemoAccount(){const local=getLocalAccount()||{id:'demo-'+Date.now(),displayName:'デモプレイヤー',email:'',demo:true};setLocalAccount(local);currentUser=local;loadState();saveState();updateProfile();renderAccountIndicators();showAccountStatus('デモモードではクイズ体験のみ利用できます。ポイントの獲得・交換はできません。');showToast('👤 デモモードを開始しました')}
-async function sendPasswordReset(){const email=document.getElementById('authEmail').value.trim();if(!supabaseClient){showAccountStatus('デモモードではパスワード再設定は利用できません。',true);return}if(!email){showAccountStatus('先にメールアドレスを入力してください。',true);return}try{const redirectTo='https://hogetsu-kogyo.github.io/kredo-quest/index.html';const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showAccountStatus('パスワード再設定メールを送信しました。メールの案内に沿って変更してください。')}catch(err){console.error('Password reset error:',err);showAccountStatus('再設定メールの送信に失敗しました：'+(err?.message||'不明なエラー'),true)}}
+async function sendPasswordReset(){const email=document.getElementById('authEmail').value.trim();if(!supabaseClient){showAccountStatus('デモモードではパスワード再設定は利用できません。',true);return}if(!email){showAccountStatus('先にメールアドレスを入力してください。',true);return}try{const redirectTo='https://hogetsu-kogyo.github.io/kredo-quest/index.html?v=50';const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;showAccountStatus('パスワード再設定メールを送信しました。複数届いた場合は、最後に届いたメールを開いてください。')}catch(err){console.error('Password reset error:',err);showAccountStatus('再設定メールの送信に失敗しました：'+(err?.message||'不明なエラー'),true)}}
 async function updateRecoveryPassword(){
   const password=document.getElementById('recoveryPassword').value;
   if(!supabaseClient){showAccountStatus('パスワード再設定は利用できません。',true);return}
@@ -2025,14 +2033,23 @@ renderAccountIndicators();
       // Preserve the initial URL result: valid links open the password form;
       // expired links open the login/reset screen with a clear resend action.
       if(recoveryLinkExpiredAtStartup) activateKredoExpiredRecoveryScreen();
-      else if(recoveryLinkAtStartup) activateKredoRecoveryScreen();
+      else if(recoveryLinkAtStartup && !__kredoEmptyRecoveryFragmentAtStartup) activateKredoRecoveryScreen();
       const {data}=await supabaseClient.auth.getSession();
       currentUser=data.session?.user||currentUser||null;
+      if(recoveryLinkExpiredAtStartup){
+        activateKredoExpiredRecoveryScreen();
+      }else if(__kredoEmptyRecoveryFragmentAtStartup && !currentUser){
+        // The hash was already consumed/removed but no recovery session exists.
+        // Never leave the user on the home screen or offer a password form that cannot save.
+        activateKredoExpiredRecoveryScreen('再設定リンクの認証情報が確認できませんでした。メールアドレスを確認して「再設定メールを再送する」を押してください。');
+      }else if(recoveryLinkAtStartup && currentUser){
+        activateKredoRecoveryScreen();
+      }
       if(currentUser&&!recoveryLinkExpiredAtStartup)await ensureProfileAfterLogin();
       if(document.getElementById('pointExchange')?.classList.contains('active'))await refreshPointExchangeBalance();
       renderAccountIndicators();
       if(recoveryLinkExpiredAtStartup) activateKredoExpiredRecoveryScreen();
-      else if(__kredoRecoveryModeActive) activateKredoRecoveryScreen();
+      else if(__kredoRecoveryModeActive && currentUser) activateKredoRecoveryScreen();
     }catch(e){
       if(recoveryLinkExpiredAtStartup)activateKredoExpiredRecoveryScreen();
       else renderAccountIndicators();
