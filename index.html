@@ -1665,7 +1665,9 @@ function createGuestQuestSession(indices){
   const key=questSessionStorageKey();
   let saved=null;
   try{saved=JSON.parse(localStorage.getItem(key)||'null');}catch(e){}
-  if(saved&&Array.isArray(saved.question_indices)&&saved.question_indices.length===5)return saved;
+  // ゲストはポイント・サーバー記録の対象外なので、完了後は何度でも再挑戦できる。
+  // 進行中だけは中断状態を復元し、完了済みなら同じ日の問題で新しいセッションを開始する。
+  if(saved&&saved.status==='in_progress'&&Array.isArray(saved.question_indices)&&saved.question_indices.length===5)return saved;
   return {status:'in_progress',question_indices:indices,current_question:0,answers:{},correct_count:0,combo:0,max_combo:0,boss_done:false,boss_attempts:0,last_boss_option:null,points_awarded:0};
 }
 function renderCompletedQuestResult(payload){
