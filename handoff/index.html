@@ -106,6 +106,20 @@ body{display:flex;justify-content:center}
 }
 .char-note{display:none !important}
 
+/* Keep the night-sky landscape behind every interactive home control. */
+.hero:before,
+.hero:after{z-index:0;pointer-events:none}
+.hero > .moon,
+.hero > .star{pointer-events:none}
+.hero > .hero-copy,
+.hero > .character-stage,
+.hero > .start-btn,
+.hero > .home-secondary-cta,
+.hero > .home-room-entry{position:relative;z-index:5}
+.hero > .start-btn,
+.hero > .home-secondary-cta,
+.hero > .home-room-entry button{pointer-events:auto}
+
 /* Night start screen */
 .hero{
   background:
@@ -1487,6 +1501,8 @@ let questions=[
 ];
 let current=0,correct=0,combo=0,maxCombo=0,points=0,bossDone=false,resultShown=false;
 let questQuestions=[];
+// 表示上の選択肢順（表示位置 → 元データの選択肢番号）。サーバー判定用の元番号は変更しない。
+let questOptionOrders=[];
 let dailyQuestKey='';
 let questSession=null;
 let questStartPromise=null;
@@ -1601,6 +1617,29 @@ function saveGuestQuestSession(){
   if(!questSession||isAuthenticatedPlayer())return;
   try{localStorage.setItem(questSessionStorageKey(),JSON.stringify(questSession));}catch(e){console.warn('Guest quest save skipped',e);}
 }
+function buildBalancedQuestOptionOrders(indices,selectedQuestions){
+  // 5問の正解位置をA〜Dへ最低1回ずつ割り当て、残り1回は日付・プレイヤーごとに変える。
+  // 画面上の並びだけを変更し、元データの選択肢番号はサーバー判定用に維持する。
+  const playerKey=currentUser?.id||getLocalAccount()?.id||'guest';
+  const seed=dateSeed(`${dailyQuestKey}|${playerKey}|${indices.join(',')}`);
+  const extraPosition=Math.floor(seededRandom((seed^0x243f6a88)>>>0)()*4);
+  const correctDisplayPositions=seededShuffle([0,1,2,3,extraPosition],(seed^0x9e3779b9)>>>0);
+  return selectedQuestions.map((q,questionIndex)=>{
+    const correctOriginalIndex=Number(q.answer);
+    const correctDisplayIndex=correctDisplayPositions[questionIndex];
+    const wrongOriginalIndices=seededShuffle(
+      [0,1,2,3].filter(index=>index!==correctOriginalIndex),
+      (seed+Math.imul(indices[questionIndex]+1,0x45d9f3b))>>>0
+    );
+    const order=new Array(4);
+    order[correctDisplayIndex]=correctOriginalIndex;
+    let wrongIndex=0;
+    for(let displayIndex=0;displayIndex<4;displayIndex++){
+      if(order[displayIndex]===undefined)order[displayIndex]=wrongOriginalIndices[wrongIndex++];
+    }
+    return order;
+  });
+}
 function normalizeQuestSession(payload){
   if(!payload||!Array.isArray(payload.question_indices)||payload.question_indices.length!==5)throw new Error('クエスト進捗データが不正です');
   const indices=payload.question_indices.map(Number);
@@ -1620,6 +1659,7 @@ function normalizeQuestSession(payload){
     last_boss_option:payload.last_boss_option===null||payload.last_boss_option===undefined?null:Number(payload.last_boss_option),
     points_awarded:Math.max(0,Number(payload.points_awarded)||0)
   };
+  questOptionOrders=buildBalancedQuestOptionOrders(indices,selected);
   current=questSession.current_question;
   correct=questSession.correct_count;
   combo=questSession.combo;
@@ -1680,11 +1720,14 @@ async function startQuestSession(){
 function renderSavedQuestionAnswer(answerRecord){
   if(!answerRecord)return;
   const q=questQuestions[current],btns=[...document.querySelectorAll('.choice')];
-  const selected=Number(answerRecord.selected),good=Boolean(answerRecord.correct);
+  const order=questOptionOrders[current]||[0,1,2,3];
+  const selectedOriginal=Number(answerRecord.selected),good=Boolean(answerRecord.correct);
+  const correctDisplay=order.indexOf(Number(q.answer));
+  const selectedDisplay=order.indexOf(selectedOriginal);
   btns.forEach((b,j)=>{
     b.classList.add('disabled');b.disabled=true;b.onclick=null;
-    if(j===q.answer)b.classList.add('correct');
-    if(j===selected&&!good)b.classList.add('wrong');
+    if(j===correctDisplay)b.classList.add('correct');
+    if(j===selectedDisplay&&!good)b.classList.add('wrong');
   });
   const fb=document.getElementById('feedback');
   fb.className='feedback show '+(good?'good':'bad');
@@ -1748,7 +1791,12 @@ function renderQuestion(){
   document.getElementById('sceneText').textContent=q.scene;
   document.getElementById('sceneArt').textContent=q.art;
   const box=document.getElementById('choices');box.innerHTML='';
-  q.choices.forEach((t,i)=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span>${t}</span>`;b.onclick=()=>answer(i);box.appendChild(b)});
+  const order=questOptionOrders[current]||[0,1,2,3];
+  order.forEach((originalIndex,displayIndex)=>{
+    const b=document.createElement('button');b.className='choice';
+    b.innerHTML=`<span class="letter">${String.fromCharCode(65+displayIndex)}</span><span>${q.choices[originalIndex]}</span>`;
+    b.onclick=()=>answer(displayIndex);box.appendChild(b);
+  });
   document.getElementById('feedback').className='feedback';
   document.getElementById('nextBtn').style.display='none';
   const saved=questSession&&questSession.answers?questSession.answers[String(current)]:null;
@@ -1759,18 +1807,21 @@ async function answer(i){
   if(questAnswerBusy||!questSession||questSession.status==='completed')return;
   if(questSession.answers&&questSession.answers[String(current)])return;
   if(!Number.isInteger(i)||i<0||i>3)return;
+  const order=questOptionOrders[current]||[0,1,2,3];
+  const selectedOriginalIndex=order[i];
+  if(!Number.isInteger(selectedOriginalIndex)||selectedOriginalIndex<0||selectedOriginalIndex>3)return;
   questAnswerBusy=true;
   document.querySelectorAll('.choice').forEach(b=>{b.disabled=true;b.classList.add('disabled')});
   try{
     let payload;
     if(isAuthenticatedPlayer()){
-      const {data,error}=await supabaseClient.rpc('kredo_submit_quest_answer',{p_quest_date:dailyQuestKey,p_question_number:current,p_selected_option:i});
+      const {data,error}=await supabaseClient.rpc('kredo_submit_quest_answer',{p_quest_date:dailyQuestKey,p_question_number:current,p_selected_option:selectedOriginalIndex});
       if(error)throw error;
       payload=data;
     }else{
-      const q=questQuestions[current],good=i===Number(q.answer);
+      const q=questQuestions[current],good=selectedOriginalIndex===Number(q.answer);
       const answers={...(questSession.answers||{})};
-      answers[String(current)]={selected:i,correct:good};
+      answers[String(current)]={selected:selectedOriginalIndex,correct:good};
       const nextCombo=good?questSession.combo+1:0;
       payload={...questSession,answers,correct_count:questSession.correct_count+(good?1:0),combo:nextCombo,max_combo:Math.max(questSession.max_combo,nextCombo)};
     }
