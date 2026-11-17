@@ -1626,40 +1626,10 @@ function saveGuestQuestSession(){
   try{localStorage.setItem(questSessionStorageKey(),JSON.stringify(questSession));}catch(e){console.warn('Guest quest save skipped',e);}
 }
 function buildBalancedQuestOptionOrders(indices,selectedQuestions){
-  // 5問の正解位置をA〜Dへ最低1回ずつ割り当て、残り1回は日付・プレイヤーごとに変える。
-  // 画面上の並びだけを変更し、元データの選択肢番号はサーバー判定用に維持する。
-  const playerKey=currentUser?.id||getLocalAccount()?.id||'guest';
-  const seed=dateSeed(`${dailyQuestKey}|${playerKey}|${indices.join(',')}`);
-  const extraPosition=Math.floor(seededRandom((seed^0x243f6a88)>>>0)()*4);
-  const correctDisplayPositions=seededShuffle([0,1,2,3,extraPosition],(seed^0x9e3779b9)>>>0);
-  const questionOrders=selectedQuestions.map((q,questionIndex)=>{
-    const correctOriginalIndex=Number(q.answer);
-    const correctDisplayIndex=correctDisplayPositions[questionIndex];
-    const wrongOriginalIndices=seededShuffle(
-      [0,1,2,3].filter(index=>index!==correctOriginalIndex),
-      (seed+Math.imul(indices[questionIndex]+1,0x45d9f3b))>>>0
-    );
-    const order=new Array(4);
-    order[correctDisplayIndex]=correctOriginalIndex;
-    let wrongIndex=0;
-    for(let displayIndex=0;displayIndex<4;displayIndex++){
-      if(order[displayIndex]===undefined)order[displayIndex]=wrongOriginalIndices[wrongIndex++];
-    }
-    return order;
-  });
-  // BOSSも含めた全6問では、正解位置の出現数が2・2・1・1になるようにする。
-  const bossCorrectDisplayPosition=seededShuffle(
-    [0,1,2,3].filter(position=>position!==extraPosition),
-    (seed^0x85ebca6b)>>>0
-  )[0];
-  const bossWrongOriginalIndices=seededShuffle([0,2,3],(seed^0xc2b2ae35)>>>0);
-  const bossOrder=new Array(4);
-  bossOrder[bossCorrectDisplayPosition]=1;
-  let bossWrongIndex=0;
-  for(let displayIndex=0;displayIndex<4;displayIndex++){
-    if(bossOrder[displayIndex]===undefined)bossOrder[displayIndex]=bossWrongOriginalIndices[bossWrongIndex++];
-  }
-  return {questionOrders,bossOrder};
+  // 問題バンクそのものをA〜D均等に修正済みのため、表示順は固定する。
+  // 追加のシャッフルをなくし、表示・採点・正解表示が常に同じ選択肢番号を参照する。
+  const questionOrders=selectedQuestions.map(()=>[0,1,2,3]);
+  return {questionOrders,bossOrder:[0,1,2,3]};
 }
 function normalizeQuestSession(payload){
   if(!payload||!Array.isArray(payload.question_indices)||payload.question_indices.length!==5)throw new Error('クエスト進捗データが不正です');
