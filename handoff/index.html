@@ -1581,17 +1581,47 @@ function getLegacyQuestIndices(dateKey){
 }
 function getBalancedQuestIndices(dateKey,previousIndices){
   const seed=dateSeed(dateKey);
-  // 現行Supabase側の question_indices は 0〜27（28問）に制限されているため、
-  // 本番の28問を対象にテーマ分散する。問題数を増やす場合はDB制約/RPCも同時に拡張する。
+  // 5つの異なるテーマから1問ずつ選び、正解位置がA〜D各1回以上になる組み合わせを優先する。
+  // 5問なので理想分布は「1・1・1・2」。前日と同じ問題は引き続き除外する。
   const eligibleGroups=QUEST_THEME_GROUPS
     .map((group,groupIndex)=>({groupIndex,indices:group.indices.filter(index=>index<questions.length&&index<=27&&!previousIndices.includes(index))}))
     .filter(group=>group.indices.length>0);
   if(eligibleGroups.length<5)throw new Error('出題テーマの候補が不足しています。');
-  const selectedGroups=seededShuffle(eligibleGroups,(seed^0x5f3759df)>>>0).slice(0,5);
-  const selected=selectedGroups.map(group=>
-    seededShuffle(group.indices,(seed+0x27182818+group.groupIndex*104729)>>>0)[0]
-  );
-  return seededShuffle(selected,(seed+0x16180339)>>>0);
+
+  let bestScore=Infinity;
+  let bestSelections=[];
+  function scoreSelection(indices){
+    const counts=[0,0,0,0];
+    indices.forEach(index=>{counts[Number(questions[index].answer)]++;});
+    return counts.reduce((total,count)=>total+count*count,0);
+  }
+  function collectQuestions(selectedGroups,groupPosition,selectedIndices){
+    if(groupPosition===selectedGroups.length){
+      const score=scoreSelection(selectedIndices);
+      if(score<bestScore){
+        bestScore=score;
+        bestSelections=[];
+      }
+      if(score===bestScore)bestSelections.push(selectedIndices.slice());
+      return;
+    }
+    const candidates=selectedGroups[groupPosition].indices;
+    candidates.forEach(index=>collectQuestions(selectedGroups,groupPosition+1,selectedIndices.concat(index)));
+  }
+  function collectGroupSets(start,selectedGroups){
+    if(selectedGroups.length===5){
+      collectQuestions(selectedGroups,0,[]);
+      return;
+    }
+    const remaining=5-selectedGroups.length;
+    for(let i=start;i<=eligibleGroups.length-remaining;i++){
+      collectGroupSets(i+1,selectedGroups.concat(eligibleGroups[i]));
+    }
+  }
+  collectGroupSets(0,[]);
+  if(!bestSelections.length)throw new Error('バランスの取れた出題セットを作成できませんでした。');
+  // 同じ日の全員は同じセット。日付シードで同点候補から1組を決め、再現性を保つ。
+  return seededShuffle(bestSelections,(seed+0x16180339)>>>0)[0];
 }
 function getQuestIndicesForDate(dateKey){
   if(dateKey<QUEST_DIVERSITY_START_DATE)return getLegacyQuestIndices(dateKey);
