@@ -1581,17 +1581,49 @@ function getLegacyQuestIndices(dateKey){
 }
 function getBalancedQuestIndices(dateKey,previousIndices){
   const seed=dateSeed(dateKey);
-  // 現行Supabase側の question_indices は 0〜27（28問）に制限されているため、
-  // 本番の28問を対象にテーマ分散する。問題数を増やす場合はDB制約/RPCも同時に拡張する。
+  // 5問の通常クイズでA/B/C/Dをすべて1回以上正解にし、余分な1枠はA/C/Dのいずれかにする。
+  // 固定BOSSの正解位置はBなので、6問合計では必ず2・2・1・1の分布になる。
+  // その条件を満たす「異なる5テーマから各1問」の全組合せを作り、日付seedで選ぶ。
+  const previous=new Set(Array.isArray(previousIndices)?previousIndices:[]);
   const eligibleGroups=QUEST_THEME_GROUPS
-    .map((group,groupIndex)=>({groupIndex,indices:group.indices.filter(index=>index<questions.length&&index<=27&&!previousIndices.includes(index))}))
+    .map((group,groupIndex)=>({
+      groupIndex,
+      indices:group.indices.filter(index=>index<questions.length&&index<=27&&!previous.has(index))
+    }))
     .filter(group=>group.indices.length>0);
   if(eligibleGroups.length<5)throw new Error('出題テーマの候補が不足しています。');
-  const selectedGroups=seededShuffle(eligibleGroups,(seed^0x5f3759df)>>>0).slice(0,5);
-  const selected=selectedGroups.map(group=>
-    seededShuffle(group.indices,(seed+0x27182818+group.groupIndex*104729)>>>0)[0]
-  );
-  return seededShuffle(selected,(seed+0x16180339)>>>0);
+
+  const candidates=[];
+  const picked=[];
+  const counts=[0,0,0,0];
+  function collect(groupStart){
+    if(picked.length===5){
+      // 5問でA/B/C/Dがすべて出現し、Bは1回だけ（BOSS分を加えるとBは2回）。
+      if(counts.every(n=>n>=1)&&counts[1]===1){
+        candidates.push(picked.slice());
+      }
+      return;
+    }
+    const slotsLeft=5-picked.length;
+    for(let gi=groupStart;gi<=eligibleGroups.length-slotsLeft;gi++){
+      const group=eligibleGroups[gi];
+      for(const index of group.indices){
+        const answer=Number(questions[index]?.answer);
+        if(!Number.isInteger(answer)||answer<0||answer>3)continue;
+        picked.push(index);
+        counts[answer]++;
+        collect(gi+1);
+        counts[answer]--;
+        picked.pop();
+      }
+    }
+  }
+  collect(0);
+  if(!candidates.length){
+    throw new Error('正解位置を均等にできる出題セットを作れませんでした。');
+  }
+  const chosen=seededShuffle(candidates,(seed^0x5f3759df)>>>0)[0].slice();
+  return seededShuffle(chosen,(seed+0x16180339)>>>0);
 }
 function getQuestIndicesForDate(dateKey){
   if(dateKey<QUEST_DIVERSITY_START_DATE)return getLegacyQuestIndices(dateKey);
