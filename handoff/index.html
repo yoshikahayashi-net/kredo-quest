@@ -1503,6 +1503,7 @@ let current=0,correct=0,combo=0,maxCombo=0,points=0,bossDone=false,resultShown=f
 let questQuestions=[];
 // 表示上の選択肢順（表示位置 → 元データの選択肢番号）。サーバー判定用の元番号は変更しない。
 let questOptionOrders=[];
+let questBossOptionOrder=[0,1,2,3];
 let dailyQuestKey='';
 let questSession=null;
 let questStartPromise=null;
@@ -1624,7 +1625,7 @@ function buildBalancedQuestOptionOrders(indices,selectedQuestions){
   const seed=dateSeed(`${dailyQuestKey}|${playerKey}|${indices.join(',')}`);
   const extraPosition=Math.floor(seededRandom((seed^0x243f6a88)>>>0)()*4);
   const correctDisplayPositions=seededShuffle([0,1,2,3,extraPosition],(seed^0x9e3779b9)>>>0);
-  return selectedQuestions.map((q,questionIndex)=>{
+  const questionOrders=selectedQuestions.map((q,questionIndex)=>{
     const correctOriginalIndex=Number(q.answer);
     const correctDisplayIndex=correctDisplayPositions[questionIndex];
     const wrongOriginalIndices=seededShuffle(
@@ -1639,6 +1640,19 @@ function buildBalancedQuestOptionOrders(indices,selectedQuestions){
     }
     return order;
   });
+  // BOSSも含めた全6問では、正解位置の出現数が2・2・1・1になるようにする。
+  const bossCorrectDisplayPosition=seededShuffle(
+    [0,1,2,3].filter(position=>position!==extraPosition),
+    (seed^0x85ebca6b)>>>0
+  )[0];
+  const bossWrongOriginalIndices=seededShuffle([0,2,3],(seed^0xc2b2ae35)>>>0);
+  const bossOrder=new Array(4);
+  bossOrder[bossCorrectDisplayPosition]=1;
+  let bossWrongIndex=0;
+  for(let displayIndex=0;displayIndex<4;displayIndex++){
+    if(bossOrder[displayIndex]===undefined)bossOrder[displayIndex]=bossWrongOriginalIndices[bossWrongIndex++];
+  }
+  return {questionOrders,bossOrder};
 }
 function normalizeQuestSession(payload){
   if(!payload||!Array.isArray(payload.question_indices)||payload.question_indices.length!==5)throw new Error('クエスト進捗データが不正です');
@@ -1659,7 +1673,9 @@ function normalizeQuestSession(payload){
     last_boss_option:payload.last_boss_option===null||payload.last_boss_option===undefined?null:Number(payload.last_boss_option),
     points_awarded:Math.max(0,Number(payload.points_awarded)||0)
   };
-  questOptionOrders=buildBalancedQuestOptionOrders(indices,selected);
+  const optionLayout=buildBalancedQuestOptionOrders(indices,selected);
+  questOptionOrders=optionLayout.questionOrders;
+  questBossOptionOrder=optionLayout.bossOrder;
   current=questSession.current_question;
   correct=questSession.correct_count;
   combo=questSession.combo;
@@ -1738,7 +1754,28 @@ function renderSavedQuestionAnswer(answerRecord){
   next.style.display='block';
   next.textContent=current===questQuestions.length-1?'BOSSへ進む':'次へ　›';
 }
+function applyBossOptionOrder(){
+  const buttons=[...document.querySelectorAll('.boss-option')];
+  if(buttons.length!==4)return;
+  buttons.forEach((button,index)=>{
+    if(button.dataset.originalOptionIndex===undefined){
+      button.dataset.originalOptionIndex=String(index);
+      button.dataset.originalOptionText=button.textContent.replace(/^[A-D]\.\s*/, '');
+    }
+  });
+  const originalButtons=buttons.slice().sort((a,b)=>Number(a.dataset.originalOptionIndex)-Number(b.dataset.originalOptionIndex));
+  const parent=originalButtons[0].parentElement;
+  const anchor=document.getElementById('bossResult');
+  if(!parent||!anchor)return;
+  originalButtons.forEach(button=>button.remove());
+  (questBossOptionOrder||[0,1,2,3]).forEach((originalIndex,displayIndex)=>{
+    const button=originalButtons[originalIndex];
+    button.textContent=`${String.fromCharCode(65+displayIndex)}. ${button.dataset.originalOptionText}`;
+    parent.insertBefore(button,anchor);
+  });
+}
 function restoreBossSession(){
+  applyBossOptionOrder();
   const options=[...document.querySelectorAll('.boss-option')];
   const result=document.getElementById('bossResult');
   const clear=document.getElementById('bossClear');
@@ -1746,7 +1783,8 @@ function restoreBossSession(){
   result.style.display='none';
   clear.style.display='none';
   if(questSession&&questSession.boss_done){
-    const selected=Number(questSession.last_boss_option===null?1:questSession.last_boss_option);
+    const selectedOriginal=Number(questSession.last_boss_option===null?1:questSession.last_boss_option);
+    const selected=questBossOptionOrder.indexOf(selectedOriginal);
     const btn=options[selected];
     if(btn){btn.classList.add('selected','boss-correct','disabled');btn.disabled=true;}
     options.forEach(b=>{b.classList.add('disabled');b.disabled=true});
@@ -1758,7 +1796,7 @@ function restoreBossSession(){
     return;
   }
   if(questSession&&questSession.boss_attempts>0&&questSession.last_boss_option!==null){
-    const selected=Number(questSession.last_boss_option),btn=options[selected];
+    const selected=questBossOptionOrder.indexOf(Number(questSession.last_boss_option)),btn=options[selected];
     if(btn)btn.classList.add('selected','boss-wrong');
     document.getElementById('bossMeter').style.width='65%';
     document.getElementById('bossHpText').textContent='65%';
@@ -1864,8 +1902,9 @@ async function nextQuestion(){
 async function bossAnswer(btn,good){
   if(questBossBusy||bossDone||!questSession||questSession.status==='completed')return;
   const options=[...document.querySelectorAll('.boss-option')];
-  const selected=options.indexOf(btn);
-  if(selected<0)return;
+  const selectedDisplay=options.indexOf(btn);
+  const selected=questBossOptionOrder[selectedDisplay];
+  if(selectedDisplay<0||!Number.isInteger(selected)||selected<0||selected>3)return;
   questBossBusy=true;
   options.forEach(b=>b.disabled=true);
   try{
