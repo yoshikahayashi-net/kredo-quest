@@ -1581,46 +1581,51 @@ function getLegacyQuestIndices(dateKey){
 }
 function getBalancedQuestIndices(dateKey,previousIndices){
   const seed=dateSeed(dateKey);
-  // 5問の通常クイズでA/B/C/Dをすべて1回以上正解にし、余分な1枠はA/C/Dのいずれかにする。
-  // 固定BOSSの正解位置はBなので、6問合計では必ず2・2・1・1の分布になる。
-  // その条件を満たす「異なる5テーマから各1問」の全組合せを作り、日付seedで選ぶ。
-  const previous=new Set(Array.isArray(previousIndices)?previousIndices:[]);
-  const eligibleGroups=QUEST_THEME_GROUPS
-    .map((group,groupIndex)=>({
-      groupIndex,
-      indices:group.indices.filter(index=>index<questions.length&&index<=27&&!previous.has(index))
-    }))
-    .filter(group=>group.indices.length>0);
-  if(eligibleGroups.length<5)throw new Error('出題テーマの候補が不足しています。');
+  // 通常5問でA/B/C/Dをすべて出し、Bは1回にする（BOSSの正解Bを加えて6問合計2・2・1・1）。
+  // まず前日と異なる5テーマ・5問から候補を作る。
+  function collectCandidates(excludedIndices){
+    const excluded=new Set(excludedIndices||[]);
+    const eligibleGroups=QUEST_THEME_GROUPS
+      .map((group,groupIndex)=>({
+        groupIndex,
+        indices:group.indices.filter(index=>index<questions.length&&index<=27&&!excluded.has(index))
+      }))
+      .filter(group=>group.indices.length>0);
+    if(eligibleGroups.length<5)return [];
 
-  const candidates=[];
-  const picked=[];
-  const counts=[0,0,0,0];
-  function collect(groupStart){
-    if(picked.length===5){
-      // 5問でA/B/C/Dがすべて出現し、Bは1回だけ（BOSS分を加えるとBは2回）。
-      if(counts.every(n=>n>=1)&&counts[1]===1){
-        candidates.push(picked.slice());
+    const candidates=[];
+    const picked=[];
+    const counts=[0,0,0,0];
+    function collect(groupStart){
+      if(picked.length===5){
+        if(counts.every(n=>n>=1)&&counts[1]===1)candidates.push(picked.slice());
+        return;
       }
-      return;
-    }
-    const slotsLeft=5-picked.length;
-    for(let gi=groupStart;gi<=eligibleGroups.length-slotsLeft;gi++){
-      const group=eligibleGroups[gi];
-      for(const index of group.indices){
-        const answer=Number(questions[index]?.answer);
-        if(!Number.isInteger(answer)||answer<0||answer>3)continue;
-        picked.push(index);
-        counts[answer]++;
-        collect(gi+1);
-        counts[answer]--;
-        picked.pop();
+      const slotsLeft=5-picked.length;
+      for(let gi=groupStart;gi<=eligibleGroups.length-slotsLeft;gi++){
+        const group=eligibleGroups[gi];
+        for(const index of group.indices){
+          const answer=Number(questions[index]?.answer);
+          if(!Number.isInteger(answer)||answer<0||answer>3)continue;
+          picked.push(index);counts[answer]++;
+          collect(gi+1);
+          counts[answer]--;picked.pop();
+        }
       }
     }
+    collect(0);
+    return candidates;
   }
-  collect(0);
+
+  let candidates=collectCandidates(Array.isArray(previousIndices)?previousIndices:[]);
   if(!candidates.length){
-    throw new Error('正解位置を均等にできる出題セットを作れませんでした。');
+    // 古い端末データなどで希少な正解位置の問題が前日に選ばれていても、
+    // 1日だけ同じ問題の再出題を許可してクエスト開始そのものは止めない。
+    console.warn('前日と重複しない均等出題セットがないため、重複を許可して再計算します。');
+    candidates=collectCandidates([]);
+  }
+  if(!candidates.length){
+    throw new Error('問題データを更新できませんでした。ページを再読み込みしてください。');
   }
   const chosen=seededShuffle(candidates,(seed^0x5f3759df)>>>0)[0].slice();
   return seededShuffle(chosen,(seed+0x16180339)>>>0);
@@ -1740,7 +1745,14 @@ async function startQuestSession(){
     renderQuestion();
   })().catch(error=>{
     console.error('Quest session start/resume failed:',error);
-    showToast('クエストの保存状態を読み込めませんでした。通信を確認して再度お試しください。');
+    const detail=String(error?.message||'');
+    if(/fetch|network|timeout|通信|接続/i.test(detail)){
+      showToast('サーバーとの通信に失敗しました。通信状態を確認して再度お試しください。');
+    }else if(detail){
+      showToast(detail.length>54?detail.slice(0,51)+'…':detail);
+    }else{
+      showToast('クエストを開始できませんでした。ページを再読み込みしてください。');
+    }
   }).finally(()=>{questStartPromise=null;});
   return questStartPromise;
 }
@@ -2359,24 +2371,33 @@ renderAccountIndicators();
     renderAccountIndicators();
   }
 })();
-const QUESTION_BANK_VERSION='2026-10-09-koutei-v1';
+const QUESTION_BANK_VERSION='2026-11-18-balanced-answer-positions-v2';
 (function restoreQuizData(){
   try{
     const appliedVersion=localStorage.getItem('kredoQuestionBankVersion');
+    const saved=localStorage.getItem('kredoQuestions');
     if(appliedVersion!==QUESTION_BANK_VERSION){
+      // 公式28問は必ず最新の均等化済みデータに更新する。
+      // 29問目以降に追加された独自問題があれば、その分だけ引き継ぐ。
+      let extraQuestions=[];
+      if(saved){
+        try{
+          const parsed=JSON.parse(saved);
+          if(Array.isArray(parsed)&&parsed.length>questions.length)extraQuestions=parsed.slice(questions.length);
+        }catch(parseError){console.warn('旧クイズデータの追加分を読み込めませんでした。',parseError)}
+      }
+      questions=questions.concat(extraQuestions);
       localStorage.setItem('kredoQuestions',JSON.stringify(questions));
       localStorage.setItem('kredoQuestionBankVersion',QUESTION_BANK_VERSION);
+    }else if(saved){
+      const parsed=JSON.parse(saved);
+      if(Array.isArray(parsed)&&parsed.length>=questions.length)questions=parsed;
+      else localStorage.setItem('kredoQuestions',JSON.stringify(questions));
     }else{
-      const saved=localStorage.getItem('kredoQuestions');
-      if(saved){
-        const parsed=JSON.parse(saved);
-        if(Array.isArray(parsed)&&parsed.length>=questions.length)questions=parsed;
-        else localStorage.setItem('kredoQuestions',JSON.stringify(questions));
-      }else{
-        localStorage.setItem('kredoQuestions',JSON.stringify(questions));
-      }
+      localStorage.setItem('kredoQuestions',JSON.stringify(questions));
     }
   }catch(e){
+    // 保存データが破損している場合も、公式問題バンクから起動できるように復旧する。
     localStorage.setItem('kredoQuestions',JSON.stringify(questions));
     localStorage.setItem('kredoQuestionBankVersion',QUESTION_BANK_VERSION);
   }
