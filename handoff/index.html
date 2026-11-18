@@ -352,25 +352,26 @@ body{display:flex;justify-content:center}
 
 /* One-shot boss victory effect: decorative only; never blocks the quiz controls. */
 .boss-defeat-overlay{
-  position:fixed;inset:0;z-index:260;display:grid;place-items:center;overflow:hidden;
+  position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;
+  width:100vw;min-height:100vh;isolation:isolate;
   pointer-events:none;visibility:hidden;opacity:0;
   background:radial-gradient(circle at 50% 48%,rgba(255,249,199,.97) 0%,rgba(255,217,89,.76) 22%,rgba(24,92,151,.48) 58%,rgba(4,24,65,.78) 100%);
 }
 .boss-defeat-overlay.is-active{visibility:visible;animation:bossDefeatFlash 2.45s ease-out both}
+.boss-defeat-overlay.is-active .boss-defeat-rays{animation:bossDefeatSpin 2.4s cubic-bezier(.2,.7,.2,1) both}
+.boss-defeat-overlay.is-active .boss-defeat-ring{animation:bossDefeatRing 1.35s cubic-bezier(.12,.72,.22,1) both}
+.boss-defeat-overlay.is-active .boss-defeat-content{animation:bossDefeatText 2.4s cubic-bezier(.15,.8,.2,1) both}
 .boss-defeat-rays{
   position:absolute;width:150vmax;aspect-ratio:1;border-radius:50%;
   background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.0) 0deg 7deg,rgba(255,248,190,.48) 7deg 10deg,rgba(255,255,255,0) 10deg 18deg);
-  animation:bossDefeatSpin 2.4s cubic-bezier(.2,.7,.2,1) both;
 }
 .boss-defeat-ring{
   position:absolute;width:min(76vw,330px);aspect-ratio:1;border:7px solid rgba(255,250,201,.92);
   border-radius:50%;box-shadow:0 0 0 12px rgba(255,255,255,.2),0 0 45px 18px rgba(255,225,105,.9);
-  animation:bossDefeatRing 1.35s cubic-bezier(.12,.72,.22,1) both;
 }
 .boss-defeat-content{
   position:relative;z-index:1;width:min(88%,390px);padding:24px 14px 20px;text-align:center;
   color:#fff;text-shadow:0 3px 12px rgba(5,35,83,.6);
-  animation:bossDefeatText 2.4s cubic-bezier(.15,.8,.2,1) both;
 }
 .boss-defeat-emblem{
   width:88px;height:88px;margin:0 auto 12px;border-radius:26px;display:grid;place-items:center;
@@ -399,7 +400,7 @@ body{display:flex;justify-content:center}
   100%{transform:translateY(-8px) scale(1.02);opacity:0}
 }
 @media(prefers-reduced-motion:reduce){
-  .boss-defeat-overlay.is-active,.boss-defeat-rays,.boss-defeat-ring,.boss-defeat-content{animation-duration:.55s!important}
+  .boss-defeat-overlay.is-active,.boss-defeat-overlay.is-active .boss-defeat-rays,.boss-defeat-overlay.is-active .boss-defeat-ring,.boss-defeat-overlay.is-active .boss-defeat-content{animation-duration:.8s!important}
 }
 </style>
 </head>
@@ -2006,9 +2007,11 @@ async function nextQuestion(){
   }finally{questAdvanceBusy=false;}
 }
 
-async function playBossDefeatEffect(){
+function playBossDefeatEffect(){
   const overlay=document.getElementById('bossDefeatOverlay');
   if(!overlay)return;
+  // Move out of the app shell so its overflow clipping and stacking contexts cannot hide it.
+  if(overlay.parentElement!==document.body)document.body.appendChild(overlay);
   overlay.classList.remove('is-active');
   overlay.setAttribute('aria-hidden','false');
   // Restart the one-shot CSS animation when a new clear is recorded.
