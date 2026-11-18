@@ -2259,7 +2259,7 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
         currentUser=data.user;guestModeActive=false;
         await ensureProfileAfterLogin();
         renderAccountIndicators();updateProfile();
-        showToast('アカウント登録が完了しました。今日のクエストに参加できます。');
+        showDailyLoginBonusToast('アカウント登録が完了しました。今日のクエストに参加できます。');
         show('home');
       }else{
         currentUser=null;
@@ -2270,7 +2270,7 @@ async function submitAuth(){const displayName=document.getElementById('authDispl
       // A deliberate manual password login cancels any unsent/abandoned reset intent.
       clearKredoRecoveryPending();
       __kredoRecoveryPendingAtStartup=false;
-      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;guestModeActive=false;await ensureProfileAfterLogin();renderAccountIndicators();updateProfile();showToast('ログインできました。今日のクエストに参加できます。');show('home');
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;currentUser=data.user;guestModeActive=false;await ensureProfileAfterLogin();renderAccountIndicators();updateProfile();showDailyLoginBonusToast('ログインできました。今日のクエストに参加できます。');show('home');
     }
   }catch(err){
     console.error('Supabase Auth error:', err);
@@ -2320,6 +2320,12 @@ async function refreshServerPointBalance(){
   return window.__serverPointBalance;
 }
 window.__refreshServerPointBalance=refreshServerPointBalance;
+function showDailyLoginBonusToast(fallback=''){
+  const awarded=Boolean(window.__kredoDailyLoginBonusAwarded);
+  window.__kredoDailyLoginBonusAwarded=false;
+  if(awarded)showToast('🎁 ログインボーナス +2 pt！');
+  else if(fallback)showToast(fallback);
+}
 async function ensureProfileAfterLogin(){
   if(!supabaseClient||!currentUser||currentUser.demo)return null;
   const display=currentUser.user_metadata?.display_name||'プレイヤー';
@@ -2333,6 +2339,14 @@ async function ensureProfileAfterLogin(){
     }else if(existing.display_name!==display){
       const {data:updated,error:updateError}=await supabaseClient.from('profiles').update({display_name:display}).eq('id',currentUser.id).select('id,display_name,total_points,updated_at').single();
       if(updateError)throw updateError;profile=updated;
+    }
+    try{
+      const {data:bonusData,error:bonusError}=await supabaseClient.rpc('kredo_claim_daily_login_bonus');
+      if(bonusError)throw bonusError;
+      const bonusResult=Array.isArray(bonusData)?bonusData[0]:bonusData;
+      if(bonusResult?.awarded)window.__kredoDailyLoginBonusAwarded=true;
+    }catch(bonusError){
+      console.error('Daily login bonus claim failed:',bonusError);
     }
     await refreshServerPointBalance();
     await loadCustomization(true);
@@ -2370,6 +2384,7 @@ renderAccountIndicators();
 
       if(currentUser && !__kredoRecoveryScreenShown && !__kredoRecoveryRejectedAtStartup && !hasKredoRecoveryPending()){
         await ensureProfileAfterLogin();
+        showDailyLoginBonusToast();
       }
       if(document.getElementById('pointExchange')?.classList.contains('active'))await refreshPointExchangeBalance();
       renderAccountIndicators();
