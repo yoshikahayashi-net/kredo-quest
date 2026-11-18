@@ -2021,7 +2021,7 @@ async function playBossDefeatEffect(){
   },2500);
 }
 
-function bossAnswer(btn,good){
+async function bossAnswer(btn,good){
   if(questBossBusy||bossDone||!questSession||questSession.status==='completed')return;
   const options=[...document.querySelectorAll('.boss-option')];
   const selectedDisplay=options.indexOf(btn);
