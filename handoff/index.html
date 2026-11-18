@@ -2680,7 +2680,7 @@ async function loadProfileIcon(){
   return currentProfileAvatarUrl;
 }
 async function makeProfileIconBlob(file){
-  if(!file||!/^image\\/(png|jpeg|webp)$/i.test(file.type))throw new Error('PNG・JPG・WebP形式の画像を選んでください。');
+  if(!file||!/^image\/(png|jpeg|webp)$/i.test(file.type))throw new Error('PNG・JPG・WebP形式の画像を選んでください。');
   if(file.size>8*1024*1024)throw new Error('元画像は8MB以下にしてください。');
   const objectUrl=URL.createObjectURL(file);
   try{
