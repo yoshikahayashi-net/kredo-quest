@@ -349,11 +349,73 @@ body{display:flex;justify-content:center}
 
 .point-history-wrap{padding:16px 16px 110px}.point-history-balance{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}.point-history-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.point-history-balance strong{display:block;font-size:25px;color:var(--blue-dark);margin-top:2px}.point-history-list{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:4px 14px;box-shadow:0 5px 14px rgba(31,105,131,.07)}.point-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid #E1EDF1}.point-history-row:last-child{border-bottom:0}.point-history-main strong{display:block;font-size:12px}.point-history-main span{display:block;margin-top:3px;color:#78909A;font-size:9px}.point-history-amount{font-size:13px;font-weight:900}.point-history-amount.plus{color:#368F4C}.point-history-amount.minus{color:#C6534A}.point-history-empty{padding:28px 10px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 .exchange-screen{position:relative;z-index:200;padding-bottom:90px;background:linear-gradient(180deg,#EAF8FD 0%,#F7FCFE 100%)}.exchange-head{padding:20px 16px 16px;background:linear-gradient(180deg,#1489C9,#0B72AE);color:#fff}.exchange-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82}.exchange-title{font-size:25px;font-weight:900;margin-top:5px}.exchange-sub{font-size:11px;line-height:1.55;opacity:.9;margin-top:5px}.exchange-balance{margin:14px 16px 0;background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}.exchange-balance small{display:block;color:var(--muted);font-size:10px;font-weight:800}.exchange-balance strong{display:block;font-size:24px;color:var(--blue-dark);margin-top:2px}.exchange-balance .coin{width:45px;height:45px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-weight:900;color:#8A6900}.exchange-body{padding:15px 16px}.exchange-section-title{font-size:14px;font-weight:900;margin:4px 0 9px}.exchange-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 5px 14px rgba(31,105,131,.07);margin-bottom:10px}.exchange-card-top{display:flex;gap:12px;align-items:center}.exchange-icon{width:62px;height:62px;border-radius:16px;background:#FFF5C8;border:1px solid #F0D96D;display:grid;place-items:center;font-size:31px;flex:0 0 62px}.exchange-card h3{font-size:15px;margin:0 0 4px}.exchange-card p{font-size:10px;line-height:1.5;color:var(--muted);margin:0}.exchange-price{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:12px;border-top:1px dashed #C9DFE8}.exchange-price strong{font-size:18px;color:#9A7800}.exchange-btn{position:relative;z-index:2;height:42px;padding:0 16px;border:0;border-radius:12px;background:var(--yellow);color:#304858;font-weight:900;cursor:pointer;touch-action:manipulation}.exchange-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#EDF8FC;color:#5A7481;font-size:10px;line-height:1.55}.exchange-history{margin-top:18px}.exchange-history-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #E1EDF1;font-size:10px}.exchange-history-row strong{font-size:11px}.exchange-history-row span{color:#6F8792}.exchange-empty{padding:15px;border:1px dashed #BFD9E3;border-radius:13px;color:#718792;text-align:center;font-size:10px;background:#FAFDFE}.exchange-modal[hidden]{display:none!important}.exchange-modal{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;padding:20px}.exchange-modal-backdrop{position:absolute;inset:0;background:rgba(23,52,64,.48);backdrop-filter:blur(3px)}.exchange-modal-card{position:relative;z-index:1;width:min(92vw,420px);background:#fff;border-radius:22px;padding:24px 20px 20px;box-shadow:0 18px 50px rgba(23,52,64,.24);text-align:center;border:1px solid #D9EDF4}.exchange-modal-icon{font-size:30px;margin-bottom:6px}.exchange-modal-card h3{margin:0 0 10px;font-size:20px;color:#234B5B}.exchange-modal-card p{margin:0;color:#506875;font-size:13px;line-height:1.8}.exchange-modal-actions{display:flex;gap:10px;justify-content:center;margin-top:20px}.exchange-modal-btn{min-width:110px;border:0;border-radius:12px;padding:11px 16px;font-weight:900;cursor:pointer}.exchange-modal-btn.primary{background:#3E8EAA;color:#fff}.exchange-modal-btn.secondary{background:#EEF4F6;color:#48616D}
+
+/* One-shot boss victory effect: decorative only; never blocks the quiz controls. */
+.boss-defeat-overlay{
+  position:fixed;inset:0;z-index:260;display:grid;place-items:center;overflow:hidden;
+  pointer-events:none;visibility:hidden;opacity:0;
+  background:radial-gradient(circle at 50% 48%,rgba(255,249,199,.97) 0%,rgba(255,217,89,.76) 22%,rgba(24,92,151,.48) 58%,rgba(4,24,65,.78) 100%);
+}
+.boss-defeat-overlay.is-active{visibility:visible;animation:bossDefeatFlash 2.45s ease-out both}
+.boss-defeat-rays{
+  position:absolute;width:150vmax;aspect-ratio:1;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.0) 0deg 7deg,rgba(255,248,190,.48) 7deg 10deg,rgba(255,255,255,0) 10deg 18deg);
+  animation:bossDefeatSpin 2.4s cubic-bezier(.2,.7,.2,1) both;
+}
+.boss-defeat-ring{
+  position:absolute;width:min(76vw,330px);aspect-ratio:1;border:7px solid rgba(255,250,201,.92);
+  border-radius:50%;box-shadow:0 0 0 12px rgba(255,255,255,.2),0 0 45px 18px rgba(255,225,105,.9);
+  animation:bossDefeatRing 1.35s cubic-bezier(.12,.72,.22,1) both;
+}
+.boss-defeat-content{
+  position:relative;z-index:1;width:min(88%,390px);padding:24px 14px 20px;text-align:center;
+  color:#fff;text-shadow:0 3px 12px rgba(5,35,83,.6);
+  animation:bossDefeatText 2.4s cubic-bezier(.15,.8,.2,1) both;
+}
+.boss-defeat-emblem{
+  width:88px;height:88px;margin:0 auto 12px;border-radius:26px;display:grid;place-items:center;
+  color:#8A5A00;font-size:49px;font-weight:900;
+  background:linear-gradient(145deg,#FFFBE0 0%,#FFD84F 52%,#F5A623 100%);
+  border:4px solid rgba(255,255,255,.95);box-shadow:0 12px 34px rgba(17,52,90,.3),inset 0 2px 0 rgba(255,255,255,.9);
+}
+.boss-defeat-kicker{font-size:11px;font-weight:1000;letter-spacing:.32em;color:#FFF4B4}
+.boss-defeat-title{margin:5px 0 2px;font-size:clamp(27px,8vw,39px);line-height:1;font-weight:1000;letter-spacing:.035em}
+.boss-defeat-sub{margin-top:10px;font-size:14px;font-weight:900;letter-spacing:.08em}
+@keyframes bossDefeatFlash{
+  0%{opacity:0}10%{opacity:1}24%{opacity:1}100%{opacity:0}
+}
+@keyframes bossDefeatSpin{
+  0%{transform:rotate(-28deg) scale(.28);opacity:0}
+  16%{opacity:.95}100%{transform:rotate(72deg) scale(1.12);opacity:0}
+}
+@keyframes bossDefeatRing{
+  0%{transform:scale(.18);opacity:0}
+  18%{opacity:1}100%{transform:scale(1.65);opacity:0}
+}
+@keyframes bossDefeatText{
+  0%{transform:translateY(24px) scale(.72);opacity:0}
+  16%{transform:translateY(0) scale(1.06);opacity:1}
+  28%{transform:translateY(0) scale(1);opacity:1}
+  100%{transform:translateY(-8px) scale(1.02);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .boss-defeat-overlay.is-active,.boss-defeat-rays,.boss-defeat-ring,.boss-defeat-content{animation-duration:.55s!important}
+}
 </style>
 </head>
 <body>
 <div class="app">
   <div id="toast" class="toast"></div>
+  <div id="bossDefeatOverlay" class="boss-defeat-overlay" aria-hidden="true">
+    <div class="boss-defeat-rays" aria-hidden="true"></div>
+    <div class="boss-defeat-ring" aria-hidden="true"></div>
+    <div class="boss-defeat-content">
+      <div class="boss-defeat-emblem" aria-hidden="true">⚔</div>
+      <div class="boss-defeat-kicker">QUEST CLEAR</div>
+      <div class="boss-defeat-title">BOSS DEFEATED!</div>
+      <div class="boss-defeat-sub">ボス撃破！ おめでとう！</div>
+    </div>
+  </div>
 
   <!-- HOME: the uploaded mascot artwork is embedded byte-for-byte and is not edited. -->
   <section id="home" class="screen active">
@@ -1944,7 +2006,22 @@ async function nextQuestion(){
   }finally{questAdvanceBusy=false;}
 }
 
-async function bossAnswer(btn,good){
+async function playBossDefeatEffect(){
+  const overlay=document.getElementById('bossDefeatOverlay');
+  if(!overlay)return;
+  overlay.classList.remove('is-active');
+  overlay.setAttribute('aria-hidden','false');
+  // Restart the one-shot CSS animation when a new clear is recorded.
+  void overlay.offsetWidth;
+  overlay.classList.add('is-active');
+  clearTimeout(window.__bossDefeatEffectTimer);
+  window.__bossDefeatEffectTimer=setTimeout(()=>{
+    overlay.classList.remove('is-active');
+    overlay.setAttribute('aria-hidden','true');
+  },2500);
+}
+
+function bossAnswer(btn,good){
   if(questBossBusy||bossDone||!questSession||questSession.status==='completed')return;
   const options=[...document.querySelectorAll('.boss-option')];
   const selectedDisplay=options.indexOf(btn);
@@ -1965,7 +2042,7 @@ async function bossAnswer(btn,good){
     normalizeQuestSession(payload);
     if(!isAuthenticatedPlayer())saveGuestQuestSession();
     restoreBossSession();
-    if(bossDone)showToast('👑 BOSS CLEAR!');
+    if(bossDone){playBossDefeatEffect();showToast('👑 BOSS CLEAR!');}
     else options.forEach(b=>{b.disabled=false;});
   }catch(error){
     console.error('Boss answer save failed:',error);
