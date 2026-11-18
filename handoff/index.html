@@ -235,9 +235,11 @@ body{display:flex;justify-content:center}
 .profile-orb{overflow:hidden;flex:none}
 .profile-orb img{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}
 .profile-icon-card{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.profile-icon-preview{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#d9f4ff,#fff4ba);display:grid;place-items:center;overflow:hidden;flex:none;font-size:24px;border:2px solid #D8EAF2}
+.profile-icon-preview img{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}
 .profile-icon-copy{min-width:0;flex:1}.profile-icon-copy strong{display:block;font-size:13px}.profile-icon-copy small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:4px}
 .profile-icon-controls{display:flex;flex-direction:column;gap:7px;flex:none}.profile-icon-btn{border:1px solid #CFE3ED;border-radius:10px;padding:8px 10px;background:#F4FBFD;color:#176D9F;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap}.profile-icon-btn.primary{background:#168BCB;color:#fff;border-color:#168BCB}.profile-icon-btn:disabled{opacity:.45;cursor:not-allowed}.profile-icon-status{font-size:10px;color:#567484;line-height:1.5;margin:7px 3px 0;min-height:15px}.profile-icon-status.error{color:#B64B43}
-.rank-name{display:flex;align-items:center;gap:8px}.rank-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#d9f4ff,#fff4ba);display:grid;place-items:center;overflow:hidden;flex:none;font-size:17px}.rank-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.rank-name{display:flex;align-items:center;gap:8px}.rank-avatar{position:relative;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#d9f4ff,#fff4ba);display:grid;place-items:center;overflow:hidden;flex:none;font-size:17px}.rank-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.rank-avatar-fallback{position:relative;z-index:0}
 .profile-main strong{font-size:16px}.profile-main small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
 .profile-stat{border:1px solid #dbeaf1;border-radius:12px;padding:10px}.profile-stat small{display:block;color:var(--muted);font-size:10px}.profile-stat strong{font-size:20px;display:block;margin-top:4px}
 .import-help{margin-top:12px;padding:12px 13px;border-radius:12px;background:#f2fbff;border:1px dashed #a7d5e7;color:#496879;font-size:11px;line-height:1.6}
@@ -568,6 +570,7 @@ body{display:flex;justify-content:center}
         <div class="profile-stat"><small>登録クイズ</small><strong id="profileQuestions">30 問</strong></div>
       </div>
       <div class="profile-icon-card">
+        <div class="profile-icon-preview" id="profileIconPreview" aria-label="アイコンプレビュー">🌙</div>
         <div class="profile-icon-copy"><strong>プロフィールアイコン</strong><small id="profileIconHint">好きな画像を自分のアイコンに設定できます。ランキングにも表示されます。</small></div>
         <div class="profile-icon-controls" id="profileIconControls">
           <button type="button" class="profile-icon-btn primary" id="profileIconChooseBtn" onclick="document.getElementById('profileIconFile').click()">画像を選ぶ</button>
@@ -2293,7 +2296,7 @@ async function getRankingData(){
   }
   return [];
 }
-async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name"><span class="rank-avatar">${r.avatarUrl?`<img src="${escapeHtml(r.avatarUrl)}" alt="">`:'🌙'}</span><span>${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</span></div><div class="rank-meta">累計ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
+async function renderRanking(){document.getElementById('rankingMonth').textContent='参加・継続で貯めた累計ポイントを表示';const list=document.getElementById('rankingList');list.innerHTML='<div class="ranking-empty">ランキングを読み込み中…</div>';const rows=await getRankingData();if(!rows.length){list.innerHTML='<div class="ranking-empty">まだランキングデータがありません。まずはクエストに参加してみよう。</div>';return;}list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><div class="rank-no">${r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank}</div><div><div class="rank-name"><span class="rank-avatar"><span class="rank-avatar-fallback">🌙</span>${r.avatarUrl?`<img src="${escapeHtml(r.avatarUrl)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span><span>${escapeHtml(r.name)}${r.me?' <span style="color:#D29A00">（あなた）</span>':''}</span></div><div class="rank-meta">累計ポイント</div></div><div class="rank-points">${r.points} pt</div></div>`).join('')}
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 async function refreshServerPointBalance(){
   if(!supabaseClient||!isAuthenticatedPlayer()){
@@ -2633,24 +2636,51 @@ function showToast(t){const x=document.getElementById('toast');x.textContent=t;x
 <script src="redemption-tracker.js?v=20261009"></script>
 
 <script>
-// PROFILE ICON: users upload a personal image; public avatar reads are used in the ranking.
+// PROFILE ICON: verify the stored image is actually loadable before reporting success.
 let currentProfileAvatarUrl='';
 function setProfileIconStatus(message,isError=false){const el=document.getElementById('profileIconStatus');if(!el)return;el.textContent=message||'';el.classList.toggle('error',Boolean(isError));}
+function waitForProfileImage(url){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    let settled=false;
+    const finish=(ok)=>{if(settled)return;settled=true;clearTimeout(timer);ok?resolve(true):reject(new Error('画像ファイルは保存されていますが、表示用の画像を読み込めませんでした。ページを再読み込みして再確認してください。'));};
+    const timer=setTimeout(()=>finish(false),12000);
+    img.onload=()=>finish(true);
+    img.onerror=()=>finish(false);
+    img.src=url;
+    if(img.complete&&img.naturalWidth>0)finish(true);
+  });
+}
+function fillAvatarElement(element,url){
+  if(!element)return;
+  element.replaceChildren();
+  if(!url){element.textContent='🌙';return;}
+  const img=document.createElement('img');
+  img.src=url;img.alt='プロフィールアイコン';img.loading='eager';
+  img.onerror=()=>{element.replaceChildren();element.textContent='🌙';setProfileIconStatus('画像は保存されていますが、表示できません。画像URLまたは通信状態を確認してください。',true);};
+  element.appendChild(img);
+}
 function renderProfileIcon(){
-  const orb=document.getElementById('profileOrb');
-  if(orb){orb.replaceChildren();if(currentProfileAvatarUrl){const img=document.createElement('img');img.src=currentProfileAvatarUrl;img.alt='プロフィールアイコン';img.onerror=()=>{orb.textContent='🌙'};orb.appendChild(img);}else{orb.textContent='🌙';}}
+  fillAvatarElement(document.getElementById('profileOrb'),currentProfileAvatarUrl);
+  fillAvatarElement(document.getElementById('profileIconPreview'),currentProfileAvatarUrl);
   const logged=typeof isAuthenticatedPlayer==='function'&&isAuthenticatedPlayer();
-  const hint=document.getElementById('profileIconHint');if(hint)hint.textContent=logged?'好きな画像を設定できます。ランキングにも表示されます。':'ログインすると、自分の画像をアイコンに設定できます。';
+  const hint=document.getElementById('profileIconHint');
+  if(hint)hint.textContent=logged?'好きな画像を設定できます。ランキングにも表示されます。':'ログインすると、自分の画像をアイコンに設定できます。';
   ['profileIconChooseBtn','profileIconResetBtn'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=!logged;});
 }
 async function loadProfileIcon(){
   if(!supabaseClient||!isAuthenticatedPlayer()){currentProfileAvatarUrl='';renderProfileIcon();return '';}
   const {data,error}=await supabaseClient.from('profiles').select('avatar_url').eq('id',currentUser.id).maybeSingle();
   if(error)throw error;
-  currentProfileAvatarUrl=data?.avatar_url||'';renderProfileIcon();return currentProfileAvatarUrl;
+  currentProfileAvatarUrl=data?.avatar_url||'';
+  if(currentProfileAvatarUrl){
+    try{await waitForProfileImage(currentProfileAvatarUrl);renderProfileIcon();setProfileIconStatus('登録済みのプロフィールアイコンを表示しています。');}
+    catch(error){renderProfileIcon();setProfileIconStatus(error.message,true);}
+  }else{renderProfileIcon();setProfileIconStatus('初期アイコンを使用中です。');}
+  return currentProfileAvatarUrl;
 }
 async function makeProfileIconBlob(file){
-  if(!file||!/^image\/(png|jpeg|webp)$/i.test(file.type))throw new Error('PNG・JPG・WebP形式の画像を選んでください。');
+  if(!file||!/^image\\/(png|jpeg|webp)$/i.test(file.type))throw new Error('PNG・JPG・WebP形式の画像を選んでください。');
   if(file.size>8*1024*1024)throw new Error('元画像は8MB以下にしてください。');
   const objectUrl=URL.createObjectURL(file);
   try{
@@ -2673,16 +2703,23 @@ async function handleProfileIconChange(event){
   if(input)input.value='';
   if(!isAuthenticatedPlayer()||!supabaseClient){setProfileIconStatus('アイコン設定にはログインが必要です。',true);return;}
   const choose=document.getElementById('profileIconChooseBtn'),reset=document.getElementById('profileIconResetBtn');
-  if(choose)choose.disabled=true;if(reset)reset.disabled=true;setProfileIconStatus('画像を準備しています…');
+  if(choose)choose.disabled=true;if(reset)reset.disabled=true;setProfileIconStatus('画像をアップロードしています…');
   try{
     const blob=await makeProfileIconBlob(file);const path=currentUser.id+'/profile.webp';
     const {error:uploadError}=await supabaseClient.storage.from('avatars').upload(path,blob,{contentType:'image/webp',cacheControl:'3600',upsert:true});
     if(uploadError)throw uploadError;
     const publicUrl=supabaseClient.storage.from('avatars').getPublicUrl(path).data.publicUrl+'?v='+Date.now();
+    setProfileIconStatus('保存した画像を確認しています…');
+    await waitForProfileImage(publicUrl);
     const {error:profileError}=await supabaseClient.from('profiles').update({avatar_url:publicUrl,updated_at:new Date().toISOString()}).eq('id',currentUser.id);
     if(profileError)throw profileError;
-    currentProfileAvatarUrl=publicUrl;renderProfileIcon();setProfileIconStatus('プロフィールアイコンを更新しました。');if(typeof showToast==='function')showToast('プロフィールアイコンを設定しました');
-  }catch(error){console.error('Profile icon upload failed:',error);setProfileIconStatus('画像を設定できませんでした：'+(error?.message||'通信エラー'),true);}
+    const {data:confirmed,error:confirmError}=await supabaseClient.from('profiles').select('avatar_url').eq('id',currentUser.id).maybeSingle();
+    if(confirmError)throw confirmError;
+    if(!confirmed?.avatar_url||confirmed.avatar_url!==publicUrl)throw new Error('画像URLの保存を確認できませんでした。ページを再読み込みして確認してください。');
+    currentProfileAvatarUrl=confirmed.avatar_url;renderProfileIcon();
+    setProfileIconStatus('画像を読み込み、プロフィールへの反映まで確認できました。');
+    if(typeof showToast==='function')showToast('プロフィールアイコンを設定しました');
+  }catch(error){console.error('Profile icon upload failed:',error);setProfileIconStatus(error?.message||'通信エラー',true);}
   finally{if(choose)choose.disabled=!isAuthenticatedPlayer();if(reset)reset.disabled=!isAuthenticatedPlayer();}
 }
 async function resetProfileIcon(){
@@ -2690,12 +2727,13 @@ async function resetProfileIcon(){
   const reset=document.getElementById('profileIconResetBtn'),choose=document.getElementById('profileIconChooseBtn');if(reset)reset.disabled=true;if(choose)choose.disabled=true;setProfileIconStatus('初期アイコンに戻しています…');
   try{
     const {error}=await supabaseClient.from('profiles').update({avatar_url:null,updated_at:new Date().toISOString()}).eq('id',currentUser.id);if(error)throw error;
-    try{await supabaseClient.storage.from('avatars').remove([currentUser.id+'/profile.webp']);}catch(cleanupError){console.warn('Old profile icon cleanup skipped:',cleanupError);}
+    const {data:confirmed,error:confirmError}=await supabaseClient.from('profiles').select('avatar_url').eq('id',currentUser.id).maybeSingle();
+    if(confirmError)throw confirmError;if(confirmed?.avatar_url)throw new Error('初期アイコンへの変更を確認できませんでした。');
     currentProfileAvatarUrl='';renderProfileIcon();setProfileIconStatus('初期アイコンに戻しました。');if(typeof showToast==='function')showToast('初期アイコンに戻しました');
-  }catch(error){console.error('Profile icon reset failed:',error);setProfileIconStatus('初期アイコンに戻せませんでした：'+(error?.message||'通信エラー'),true);}
+    try{await supabaseClient.storage.from('avatars').remove([currentUser.id+'/profile.webp']);}catch(cleanupError){console.warn('Old profile icon cleanup skipped:',cleanupError);}
+  }catch(error){console.error('Profile icon reset failed:',error);setProfileIconStatus(error?.message||'通信エラー',true);}
   finally{if(reset)reset.disabled=!isAuthenticatedPlayer();if(choose)choose.disabled=!isAuthenticatedPlayer();}
 }
-renderProfileIcon();
-</script>
+renderProfileIcon();</script>
 </body>
 </html>
