@@ -352,15 +352,20 @@ body{display:flex;justify-content:center}
 
 /* One-shot boss victory effect: decorative only; never blocks the quiz controls. */
 .boss-defeat-overlay{
-  position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;
-  width:100vw;min-height:100vh;isolation:isolate;
-  pointer-events:none;visibility:hidden;opacity:0;
+  position:fixed!important;inset:0!important;z-index:2147483647!important;
+  display:grid;place-items:center;overflow:hidden;
+  width:100vw!important;height:100vh!important;min-height:100vh!important;
+  margin:0!important;isolation:isolate;pointer-events:none;visibility:hidden;opacity:0;
   background:radial-gradient(circle at 50% 48%,rgba(255,249,199,.97) 0%,rgba(255,217,89,.76) 22%,rgba(24,92,151,.48) 58%,rgba(4,24,65,.78) 100%);
 }
-.boss-defeat-overlay.is-active{visibility:visible;animation:bossDefeatFlash 2.45s ease-out both}
-.boss-defeat-overlay.is-active .boss-defeat-rays{animation:bossDefeatSpin 2.4s cubic-bezier(.2,.7,.2,1) both}
-.boss-defeat-overlay.is-active .boss-defeat-ring{animation:bossDefeatRing 1.35s cubic-bezier(.12,.72,.22,1) both}
-.boss-defeat-overlay.is-active .boss-defeat-content{animation:bossDefeatText 2.4s cubic-bezier(.15,.8,.2,1) both}
+.boss-defeat-overlay.is-active{visibility:visible!important;animation:bossDefeatFlash 3.25s ease-out both}
+.boss-defeat-overlay.is-active .boss-defeat-rays{animation:bossDefeatSpin 3.1s cubic-bezier(.2,.7,.2,1) both}
+.boss-defeat-overlay.is-active .boss-defeat-ring{animation:bossDefeatRing 1.65s cubic-bezier(.12,.72,.22,1) both}
+.boss-defeat-overlay.is-active .boss-defeat-content{animation:bossDefeatText 3.15s cubic-bezier(.15,.8,.2,1) both}
+.boss-defeat-slash{position:absolute;left:-20%;top:49%;width:140%;height:9px;border-radius:99px;opacity:0;transform:rotate(-24deg) scaleX(.1);background:linear-gradient(90deg,transparent,#fff 18%,#FFF6B5 45%,#fff 62%,transparent);box-shadow:0 0 18px 7px rgba(255,238,145,.92),0 0 48px 16px rgba(255,255,255,.42)}
+.boss-defeat-slash-b{transform:rotate(24deg) scaleX(.1);height:5px;box-shadow:0 0 14px 5px rgba(255,255,255,.85),0 0 36px 12px rgba(255,220,110,.75)}
+.boss-defeat-overlay.is-active .boss-defeat-slash-a{animation:bossDefeatSlashA .72s cubic-bezier(.15,.85,.2,1) .08s both}
+.boss-defeat-overlay.is-active .boss-defeat-slash-b{animation:bossDefeatSlashB .72s cubic-bezier(.15,.85,.2,1) .2s both}
 .boss-defeat-rays{
   position:absolute;width:150vmax;aspect-ratio:1;border-radius:50%;
   background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.0) 0deg 7deg,rgba(255,248,190,.48) 7deg 10deg,rgba(255,255,255,0) 10deg 18deg);
@@ -396,11 +401,13 @@ body{display:flex;justify-content:center}
 @keyframes bossDefeatText{
   0%{transform:translateY(24px) scale(.72);opacity:0}
   16%{transform:translateY(0) scale(1.06);opacity:1}
-  28%{transform:translateY(0) scale(1);opacity:1}
+  48%{transform:translateY(0) scale(1);opacity:1}
   100%{transform:translateY(-8px) scale(1.02);opacity:0}
 }
+@keyframes bossDefeatSlashA{0%{opacity:0;transform:rotate(-24deg) scaleX(.05)}20%{opacity:1}100%{opacity:0;transform:rotate(-24deg) scaleX(1.2)}}
+@keyframes bossDefeatSlashB{0%{opacity:0;transform:rotate(24deg) scaleX(.05)}20%{opacity:.9}100%{opacity:0;transform:rotate(24deg) scaleX(1.1)}}
 @media(prefers-reduced-motion:reduce){
-  .boss-defeat-overlay.is-active,.boss-defeat-overlay.is-active .boss-defeat-rays,.boss-defeat-overlay.is-active .boss-defeat-ring,.boss-defeat-overlay.is-active .boss-defeat-content{animation-duration:.8s!important}
+  .boss-defeat-overlay.is-active,.boss-defeat-overlay.is-active .boss-defeat-rays,.boss-defeat-overlay.is-active .boss-defeat-ring,.boss-defeat-overlay.is-active .boss-defeat-content,.boss-defeat-overlay.is-active .boss-defeat-slash{animation-duration:1.2s!important}
 }
 </style>
 </head>
@@ -409,6 +416,8 @@ body{display:flex;justify-content:center}
   <div id="toast" class="toast"></div>
   <div id="bossDefeatOverlay" class="boss-defeat-overlay" aria-hidden="true">
     <div class="boss-defeat-rays" aria-hidden="true"></div>
+    <div class="boss-defeat-slash boss-defeat-slash-a" aria-hidden="true"></div>
+    <div class="boss-defeat-slash boss-defeat-slash-b" aria-hidden="true"></div>
     <div class="boss-defeat-ring" aria-hidden="true"></div>
     <div class="boss-defeat-content">
       <div class="boss-defeat-emblem" aria-hidden="true">⚔</div>
@@ -1599,6 +1608,7 @@ let questAnswerBusy=false;
 let questAdvanceBusy=false;
 let questBossBusy=false;
 let questCompleteBusy=false;
+let bossDefeatEffectShownKey='';
 
 
 function openMainMenu(){
@@ -1899,6 +1909,7 @@ function restoreBossSession(){
     result.style.display='block';
     result.innerHTML='<strong>⚔ PERFECT!</strong><br>状況・影響・関係者を整理し、関係者と確認して次の判断につなげる。';
     clear.style.display='block';
+    maybePlayBossDefeatEffect();
     return;
   }
   if(questSession&&questSession.boss_attempts>0&&questSession.last_boss_option!==null){
@@ -2009,19 +2020,41 @@ async function nextQuestion(){
 
 function playBossDefeatEffect(){
   const overlay=document.getElementById('bossDefeatOverlay');
-  if(!overlay)return;
-  // Move out of the app shell so its overflow clipping and stacking contexts cannot hide it.
+  if(!overlay){console.warn('Boss defeat overlay element is missing');return false;}
+  // Place the layer directly under body and force it above every app stacking context.
   if(overlay.parentElement!==document.body)document.body.appendChild(overlay);
+  overlay.style.position='fixed';
+  overlay.style.inset='0';
+  overlay.style.zIndex='2147483647';
+  overlay.style.width='100vw';
+  overlay.style.height='100vh';
   overlay.classList.remove('is-active');
   overlay.setAttribute('aria-hidden','false');
-  // Restart the one-shot CSS animation when a new clear is recorded.
-  void overlay.offsetWidth;
-  overlay.classList.add('is-active');
+  // Force a layout, then start on the next paint so the first animation frame is not skipped.
+  void overlay.getBoundingClientRect().width;
+  requestAnimationFrame(()=>overlay.classList.add('is-active'));
   clearTimeout(window.__bossDefeatEffectTimer);
   window.__bossDefeatEffectTimer=setTimeout(()=>{
     overlay.classList.remove('is-active');
     overlay.setAttribute('aria-hidden','true');
-  },2500);
+  },3350);
+  return true;
+}
+function maybePlayBossDefeatEffect(){
+  const playerKey=currentUser&&currentUser.id?currentUser.id:'guest';
+  const questKey=dailyQuestKey||new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+  const storageKey='kredoBossDefeatEffectSeen:v1:'+playerKey+':'+questKey;
+  if(bossDefeatEffectShownKey===storageKey)return false;
+  try{
+    if(localStorage.getItem(storageKey)==='1'){
+      bossDefeatEffectShownKey=storageKey;
+      return false;
+    }
+  }catch(e){console.warn('Boss effect view state could not be read',e);}
+  if(!playBossDefeatEffect())return false;
+  bossDefeatEffectShownKey=storageKey;
+  try{localStorage.setItem(storageKey,'1');}catch(e){console.warn('Boss effect view state could not be saved',e);}
+  return true;
 }
 
 async function bossAnswer(btn,good){
@@ -2045,7 +2078,7 @@ async function bossAnswer(btn,good){
     normalizeQuestSession(payload);
     if(!isAuthenticatedPlayer())saveGuestQuestSession();
     restoreBossSession();
-    if(bossDone){playBossDefeatEffect();showToast('👑 BOSS CLEAR!');}
+    if(bossDone){showToast('👑 BOSS CLEAR!');}
     else options.forEach(b=>{b.disabled=false;});
   }catch(error){
     console.error('Boss answer save failed:',error);
@@ -2830,5 +2863,11 @@ async function resetProfileIcon(){
   finally{if(reset)reset.disabled=!isAuthenticatedPlayer();if(choose)choose.disabled=!isAuthenticatedPlayer();}
 }
 renderProfileIcon();</script>
+<script>
+// Developer preview: append ?bossEffectPreview=1 to replay the visual without touching quest data.
+if(new URLSearchParams(location.search).get('bossEffectPreview')==='1'){
+  setTimeout(()=>playBossDefeatEffect(),350);
+}
+</script>
 </body>
 </html>
